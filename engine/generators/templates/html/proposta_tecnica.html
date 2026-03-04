@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Proposta Tecnica — {{ bando.titolo }}</title>
+    <link rel="stylesheet" href="base.css">
+</head>
+<body>
+
+{% if is_draft %}
+<div class="draft-watermark">BOZZA</div>
+{% endif %}
+
+<!-- INTESTAZIONE -->
+<div class="doc-header">
+    <div class="ente-logo">{{ bando.ente_erogatore | upper }}</div>
+    <h1>Proposta Tecnica</h1>
+    <div class="doc-subtitle">{{ bando.titolo }}</div>
+    <div class="doc-meta">
+        Data di generazione: {{ generated_at }}<br>
+        Versione: {{ version }}<br>
+        {% if bando.data_scadenza %}Scadenza bando: <strong>{{ bando.data_scadenza }}</strong>{% endif %}
+    </div>
+</div>
+
+<!-- SEZIONE 1 — SOGGETTO PROPONENTE -->
+<h2>1. Soggetto Proponente</h2>
+
+<table>
+    <tr>
+        <td class="field-label" style="width:35%">Denominazione</td>
+        <td>{{ company.denominazione }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Forma giuridica</td>
+        <td>{{ company.forma_giuridica }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Partita IVA</td>
+        <td>{{ company.partita_iva }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Codice Fiscale</td>
+        <td>{{ company.codice_fiscale }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Codice ATECO</td>
+        <td>{{ company.ateco_primario }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Sede legale</td>
+        <td>{{ company.sede.indirizzo }}, {{ company.sede.cap }} {{ company.sede.comune }} ({{ company.sede.provincia }})</td>
+    </tr>
+    <tr>
+        <td class="field-label">Rappresentante legale</td>
+        <td>{{ company.rappresentante_legale.nome }} {{ company.rappresentante_legale.cognome }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">PEC</td>
+        <td>{{ company.pec }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Dipendenti (ultimo esercizio)</td>
+        <td>{{ company.dipendenti_ultimo_esercizio }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Fatturato (ultimo esercizio)</td>
+        <td>€ {{ company.fatturato_ultimo_esercizio | number_format }}</td>
+    </tr>
+</table>
+
+<!-- SEZIONE 2 — DESCRIZIONE DEL PROGETTO -->
+<h2>2. Descrizione del Progetto Proposto</h2>
+
+{{ content.descrizione_progetto | safe }}
+
+<!-- SEZIONE 3 — COMPETENZE E REFERENZE -->
+<h2>3. Competenze e Referenze</h2>
+
+<h3>3.1 Competenze Tecniche</h3>
+{{ content.competenze_tecniche | safe }}
+
+<h3>3.2 Referenze Progettuali</h3>
+{% if references %}
+<table>
+    <thead>
+        <tr>
+            <th>Progetto</th>
+            <th>Cliente/Settore</th>
+            <th>Anno</th>
+            <th>Descrizione</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for ref in references %}
+        <tr>
+            <td><strong>{{ ref.nome }}</strong></td>
+            <td>{{ ref.cliente_settore | default('N/D') }}</td>
+            <td>{{ ref.anno | default('N/D') }}</td>
+            <td>{{ ref.descrizione }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Nessuna referenza verificata disponibile per questo bando.</em></p>
+{% endif %}
+
+<!-- SEZIONE 4 — METODOLOGIA -->
+<h2>4. Metodologia e Piano di Lavoro</h2>
+
+{{ content.metodologia | safe }}
+
+<!-- SEZIONE 5 — RISULTATI ATTESI -->
+<h2>5. Risultati Attesi e Indicatori</h2>
+
+{{ content.risultati_attesi | safe }}
+
+<!-- SEZIONE 6 — BUDGET -->
+<h2>6. Budget Dettagliato</h2>
+
+{% if content.budget_note %}
+<div class="placeholder-warning">{{ content.budget_note }}</div>
+{% else %}
+<div class="placeholder-warning">Inserire il budget dettagliato secondo il piano finanziario richiesto dal bando (voci di spesa, importi, % cofinanziamento).</div>
+{% endif %}
+
+{% if budget_items %}
+<table>
+    <thead>
+        <tr>
+            <th>Voce di spesa</th>
+            <th style="width:20%">Importo (€)</th>
+            <th style="width:20%">% sul totale</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in budget_items %}
+        <tr>
+            <td>{{ item.voce }}</td>
+            <td>{{ item.importo }}</td>
+            <td>{{ item.percentuale }}</td>
+        </tr>
+    {% endfor %}
+        <tr style="font-weight:bold; background:#e8e8e8">
+            <td>TOTALE</td>
+            <td><span class="placeholder-warning" style="display:inline">⚠ DA COMPILARE</span></td>
+            <td>100%</td>
+        </tr>
+    </tbody>
+</table>
+{% endif %}
+
+<!-- SEZIONE 7 — DICHIARAZIONI -->
+<h2>7. Dichiarazioni del Rappresentante Legale</h2>
+
+<p>Il/La sottoscritto/a <strong>{{ company.rappresentante_legale.nome }} {{ company.rappresentante_legale.cognome }}</strong>,
+in qualità di rappresentante legale della ditta <strong>{{ company.denominazione }}</strong>, consapevole delle
+sanzioni penali previste dall'art. 76 del D.P.R. 445/2000, dichiara sotto la propria responsabilità che:</p>
+
+<ol>
+    <li>le informazioni contenute nella presente proposta tecnica sono veritiere e complete;</li>
+    <li>l'impresa è in regola con gli obblighi relativi al pagamento delle imposte e tasse e dei contributi previdenziali e assistenziali;</li>
+    <li>l'impresa non si trova in stato di fallimento, liquidazione, scioglimento, concordato preventivo;</li>
+    <li>il rappresentante legale non ha riportato condanne penali passate in giudicato per reati che escludono la partecipazione a procedure pubbliche;</li>
+    <li>i dati riportati corrispondono a quelli risultanti dalla Visura Camerale allegata.</li>
+</ol>
+
+<!-- FIRMA -->
+<div class="signature-block no-break">
+    <p>{{ bando.sede_presentazione | default('Palermo') }}, {{ generated_at }}</p>
+    <br>
+    <p>Il Rappresentante Legale</p>
+    <span class="signature-line"></span>
+    <p>{{ company.rappresentante_legale.nome }} {{ company.rappresentante_legale.cognome }}</p>
+</div>
+
+<!-- TRACCIA FONTI -->
+{% if show_sources and claim_sources %}
+<div class="page-break"></div>
+<h2>Appendice — Traccia delle Fonti (uso interno)</h2>
+<p style="font-size:9pt; color:#666;">Le seguenti affermazioni sono state verificate contro i dati aziendali. Questo documento è ad uso interno e non va allegato alla domanda.</p>
+<table style="font-size:9pt">
+    <thead>
+        <tr>
+            <th>Affermazione</th>
+            <th>Fonte</th>
+            <th>Verificata</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for claim in claim_sources %}
+        <tr>
+            <td>{{ claim.claim[:120] }}{% if claim.claim|length > 120 %}…{% endif %}</td>
+            <td class="source-ref">{{ claim.source }}</td>
+            <td style="color: {% if claim.verified %}green{% else %}red{% endif %}">
+                {% if claim.verified %}✓{% else %}✗ NON VERIFICATA{% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<div class="legal-footer">
+    Documento generato automaticamente il {{ generated_at }} — Versione {{ version }} — Bando: {{ bando.id }}.
+    Verificare tutti i contenuti prima dell'invio. Le dichiarazioni sostitutive hanno valore legale ai sensi del D.P.R. 445/2000.
+</div>
+
+</body>
+</html>

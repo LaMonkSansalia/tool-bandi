@@ -1,0 +1,168 @@
+{
+  "_meta": {
+    "version": "2.0.0",
+    "created": "2026-03-02",
+    "updated": "2026-03-03",
+    "note": "Tipologie di bandi compatibili. Sezione 'lamonica' per ICT/freelancer, sezione 'pds' per turismo/cultura. Aggiornare periodicamente."
+  },
+
+  "progetto": "lamonica",
+
+  "categorie_priorita_alta": [
+    {
+      "categoria": "Voucher Digitalizzazione PMI",
+      "enti_erogatori": ["Ministero MIMIT", "Camere di Commercio", "Regioni"],
+      "motivo_compatibilita": "ATECO 62.20 perfetto come fornitore di servizi digitali",
+      "fatturato_richiesto": "non applicabile (sei il fornitore, non il beneficiario)",
+      "note": "Come consulente IT puoi essere sia beneficiario (per la tua impresa) che fornitore accreditato",
+      "esempi": ["Voucher 4.0", "Voucher Innovation Manager", "Digital Europe Programme vouchers"],
+      "portali": ["mise.gov.it", "camere.it", "regione.sicilia.it"]
+    },
+    {
+      "categoria": "Bandi PNRR Digitalizzazione (come fornitore/partner)",
+      "enti_erogatori": ["PA Centrale", "Regioni", "Comuni", "Enti pubblici"],
+      "motivo_compatibilita": "ATECO 62.20 e' codice prioritario PNRR. Affidamenti diretti < 140k senza gara.",
+      "soglia_affidamento_diretto": 140000,
+      "note": "Molti enti PA cercano consulenti IT per PNRR. Contratti diretti o sotto soglia.",
+      "misure_rilevanti": ["Misura 1.2 Abilitazione cloud", "Misura 1.4 Infrastrutture digitali", "Misura 2.1 Digitalizzazione PA"],
+      "portali": ["italiadomani.gov.it", "pa.digitale.gov.it"]
+    },
+    {
+      "categoria": "Bandi Regione Sicilia - Giovani Imprenditori",
+      "enti_erogatori": ["Regione Siciliana", "IRFIS", "Sicilia Digitale"],
+      "motivo_compatibilita": "Under 35, residente Palermo, impresa attiva dal 2023",
+      "note": "FESR Sicilia 2021-2027 prevede priorita' per under 35 e nuove imprese",
+      "portali": ["regione.sicilia.it", "irfis.it", "euroinfosicilia.it"],
+      "programmi": ["FESR Sicilia 2021-2027", "PO FESR Sicilia"]
+    },
+    {
+      "categoria": "ZES Unica Mezzogiorno",
+      "enti_erogatori": ["Agenzia per la Coesione", "Ministero Sud"],
+      "motivo_compatibilita": "Palermo e' in zona ZES. Credito d'imposta 40-50% per investimenti.",
+      "note": "Non bandi classici ma agevolazioni fiscali automatiche per investimenti in beni strumentali",
+      "portali": ["agenziacoesione.gov.it", "invitalia.it"],
+      "tipo": "credito_d_imposta"
+    },
+    {
+      "categoria": "Smart&Start Italia",
+      "ente_erogatore": "Invitalia",
+      "motivo_compatibilita": "Startup/nuova impresa under 36, settore ICT, Sud Italia",
+      "finanziamento": "Fino a 1.500.000 euro (70% fondo perduto + 30% prestito)",
+      "requisiti_chiave": ["progetto innovativo", "piano aziendale", "residenza Sud"],
+      "portale": "invitalia.it/smartstart",
+      "note": "IMPORTANTE: verifica se impresa individuale e' ammessa o solo societa'"
+    },
+    {
+      "categoria": "Bandi ICT Settore Pubblico Locale (Palermo, Regione)",
+      "enti_erogatori": ["Comune di Palermo", "Citta' Metropolitana", "ASP", "Regione"],
+      "motivo_compatibilita": "Affidamenti diretti sotto soglia, ATECO perfetto, localizzazione Palermo",
+      "soglie": {
+        "affidamento_diretto": 140000,
+        "procedura_negoziata": 750000
+      },
+      "note": "Monitorare bandi e avvisi pubblici locali. Alta probabilita' di assegnazione per competenze AI.",
+      "portali": ["comune.palermo.it", "regione.sicilia.it", "trasparenzapa.it"]
+    }
+  ],
+
+  "categorie_priorita_media": [
+    {
+      "categoria": "Bandi Horizon Europe (come partner)",
+      "enti_erogatori": ["Commissione Europea"],
+      "motivo_compatibilita": "Settore ICT/AI in priorita' Horizon. Possibile come partner tecnico di un consorzio.",
+      "note": "Da solo difficile, in consorzio con universita' o altre aziende piu' strutturate e' fattibile",
+      "portali": ["ec.europa.eu/research/participants", "cordis.europa.eu"]
+    },
+    {
+      "categoria": "Bandi Creativita' e Cultura Digitale",
+      "enti_erogatori": ["MiC", "Regioni", "Fondazioni"],
+      "motivo_compatibilita": "Connessione con Sicily Coding - evento ICT + cultura digitale",
+      "portali": ["cultura.gov.it", "fondazioneconilsud.it"]
+    },
+    {
+      "categoria": "Bandi per Formazione e Competenze Digitali",
+      "enti_erogatori": ["ANPAL", "Regioni", "Fondi Interprofessionali"],
+      "motivo_compatibilita": "Consulente IT con esperienza: potenziale come erogatore di formazione",
+      "note": "Richiede accreditamento come ente formativo - da valutare"
+    }
+  ],
+
+  "categorie_escluse": [
+    {
+      "categoria": "Gare d'appalto > 140.000 euro (appalti pubblici classici)",
+      "motivo": "Forma giuridica e dimensione non compatibili. Fatturato forfettario cap."
+    },
+    {
+      "categoria": "Lavori pubblici",
+      "motivo": "Nessuna attestazione SOA"
+    },
+    {
+      "categoria": "Bandi con fatturato minimo > 85.000 euro",
+      "motivo": "Regime forfettario - impossibile dimostrare fatturato superiore"
+    },
+    {
+      "categoria": "Bandi con almeno N dipendenti",
+      "motivo": "0 dipendenti"
+    }
+  ],
+
+  "portali_da_monitorare": [
+    {"nome": "Invitalia", "url": "invitalia.it", "priorita": "alta", "frequenza": "settimanale"},
+    {"nome": "Regione Siciliana - Bandi", "url": "regione.sicilia.it/presidenza/programmazione", "priorita": "alta", "frequenza": "settimanale"},
+    {"nome": "MIMIT - Bandi e incentivi", "url": "mimit.gov.it", "priorita": "alta", "frequenza": "settimanale"},
+    {"nome": "Camera di Commercio PA", "url": "pa.camcom.it", "priorita": "media", "frequenza": "bisettimanale"},
+    {"nome": "PA Digitale", "url": "padigitale2026.gov.it", "priorita": "alta", "frequenza": "settimanale"},
+    {"nome": "Euroinfosicilia", "url": "euroinfosicilia.it", "priorita": "media", "frequenza": "bisettimanale"},
+    {"nome": "Comune di Palermo - Albo Pretorio", "url": "comune.palermo.it", "priorita": "media", "frequenza": "settimanale"},
+    {"nome": "InPA (Portale Incarichi PA)", "url": "inpa.gov.it", "priorita": "alta", "frequenza": "settimanale"},
+    {"nome": "MePA - Mercato Elettronico PA", "url": "acquistinretepa.it", "priorita": "alta", "frequenza": "settimanale"},
+    {"nome": "ANAC - Bandi gare", "url": "anticorruzione.it", "priorita": "bassa", "frequenza": "mensile"},
+    {"nome": "Fondazione Con il Sud", "url": "fondazioneconilsud.it", "priorita": "bassa", "frequenza": "mensile"}
+  ],
+
+  "pds_categorie_priorita_alta": [
+    {
+      "categoria": "Bandi Turismo Esperienziale / Sostenibile",
+      "enti_erogatori": ["Regione Siciliana", "Ministero Turismo", "Invitalia"],
+      "motivo_compatibilita": "Astroturismo + borgo Roccapalumba = fit perfetto per turismo esperienziale",
+      "esempi": ["PR FESR Azione 4.6.2 Turismo esperienziale", "Bandi borghi", "Turismo sostenibile"],
+      "portali": ["regione.sicilia.it", "euroinfosicilia.it", "invitalia.it"]
+    },
+    {
+      "categoria": "Valorizzazione Patrimonio Culturale / Borghi",
+      "enti_erogatori": ["MiC", "Regione Siciliana", "GAL"],
+      "motivo_compatibilita": "Osservatorio astronomico + planetario + borgo delle stelle",
+      "esempi": ["Rivitalizzazione luoghi della cultura", "Investimenti borghi", "Fondi aree interne"],
+      "portali": ["cultura.gov.it", "regione.sicilia.it", "euroinfosicilia.it"]
+    },
+    {
+      "categoria": "Divulgazione Scientifica / STEM",
+      "enti_erogatori": ["MIUR", "Regioni", "Fondazioni"],
+      "motivo_compatibilita": "Planetario e osservatorio astronomico = divulgazione scientifica",
+      "esempi": ["Bandi STEM", "Divulgazione scientifica", "Educazione non formale"],
+      "portali": ["miur.gov.it", "regione.sicilia.it"]
+    },
+    {
+      "categoria": "Sviluppo Locale / Aree Interne",
+      "enti_erogatori": ["Agenzia Coesione", "Regione Siciliana", "GAL"],
+      "motivo_compatibilita": "Roccapalumba = area interna siciliana, borgo < 5000 abitanti",
+      "esempi": ["SNAI Strategia Aree Interne", "PSR LEADER", "Sviluppo rurale"],
+      "portali": ["agenziacoesione.gov.it", "euroinfosicilia.it"]
+    }
+  ],
+
+  "pds_categorie_priorita_media": [
+    {
+      "categoria": "Commercio Locale / Artigianato / Prodotti Tipici",
+      "enti_erogatori": ["CCIAA", "Regione Siciliana"],
+      "motivo_compatibilita": "Promozione prodotti locali attraverso eventi astronomici",
+      "portali": ["pa.camcom.it", "regione.sicilia.it"]
+    },
+    {
+      "categoria": "Eventi Culturali / Festival",
+      "enti_erogatori": ["MiC", "Regione Siciliana", "Fondazioni"],
+      "motivo_compatibilita": "Festival astronomia, notti delle stelle, eventi culturali",
+      "portali": ["cultura.gov.it", "fondazioneconilsud.it"]
+    }
+  ]
+}

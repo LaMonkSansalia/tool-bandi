@@ -1,0 +1,36 @@
+# Scraping
+scrapy>=2.11
+scrapy-playwright
+
+# Document AI
+docling
+
+# LLM
+anthropic
+dspy-ai
+
+# Database
+psycopg2-binary
+pgvector
+
+# Cache
+redis
+
+# Pipeline
+prefect>=3.0
+
+# UI
+streamlit
+pandas
+
+# Notifications
+python-telegram-bot
+
+# Document generation
+weasyprint
+jinja2
+python-docx
+
+# Utils
+python-dotenv
+pydantic

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Allegato A — {{ bando.titolo }}</title>
+    <link rel="stylesheet" href="base.css">
+</head>
+<body>
+
+{% if is_draft %}
+<div class="draft-watermark">BOZZA</div>
+{% endif %}
+
+<div class="doc-header">
+    <div class="ente-logo">{{ bando.ente_erogatore | upper }}</div>
+    <h1>{{ allegato_titolo | default('Allegato A — Domanda di Partecipazione') }}</h1>
+    <div class="doc-subtitle">{{ bando.titolo }}</div>
+    <div class="doc-meta">
+        Data: {{ generated_at }} — Versione: {{ version }}
+    </div>
+</div>
+
+<p>Il/La sottoscritto/a <strong>{{ company.rappresentante_legale.nome }} {{ company.rappresentante_legale.cognome }}</strong>,
+in qualità di rappresentante legale della ditta <strong>{{ company.denominazione }}</strong>,
+P.IVA {{ company.partita_iva }},</p>
+
+<h2>CHIEDE</h2>
+
+<p>di partecipare al bando <em>"{{ bando.titolo }}"</em> indetto da <strong>{{ bando.ente_erogatore }}</strong>
+{% if bando.data_scadenza %}con scadenza {{ bando.data_scadenza }}{% endif %},
+ai fini dell'ottenimento del contributo previsto.</p>
+
+{% if content.oggetto_domanda %}
+<h2>Oggetto della domanda</h2>
+<p>{{ content.oggetto_domanda }}</p>
+{% else %}
+<h2>Oggetto della domanda</h2>
+<div class="placeholder-warning">Descrivere l'oggetto specifico della domanda (progetto, acquisto, intervento).</div>
+{% endif %}
+
+<!-- DATI RICHIEDENTE -->
+<h2>Dati del richiedente</h2>
+<table>
+    <tr><td class="field-label" style="width:35%">Denominazione</td><td>{{ company.denominazione }}</td></tr>
+    <tr><td class="field-label">P.IVA</td><td>{{ company.partita_iva }}</td></tr>
+    <tr><td class="field-label">Sede legale</td><td>{{ company.sede.indirizzo }}, {{ company.sede.cap }} {{ company.sede.comune }} ({{ company.sede.provincia }})</td></tr>
+    <tr><td class="field-label">PEC</td><td>{{ company.pec }}</td></tr>
+    <tr><td class="field-label">Rappresentante legale</td><td>{{ company.rappresentante_legale.nome }} {{ company.rappresentante_legale.cognome }}</td></tr>
+</table>
+
+<!-- IMPORTO RICHIESTO -->
+<h2>Importo richiesto</h2>
+<div class="placeholder-warning">
+    Inserire l'importo del contributo richiesto secondo il piano finanziario allegato.
+    Importo massimo previsto dal bando: {{ bando.importo_max | default('⚠ verificare bando') }}.
+</div>
+
+<!-- ALLEGATI -->
+<h2>Documentazione allegata</h2>
+{% if allegati_lista %}
+<ol>
+{% for allegato in allegati_lista %}
+    <li>{{ allegato }}</li>
+{% endfor %}
+</ol>
+{% else %}
+<div class="placeholder-warning">Elencare i documenti allegati alla domanda.</div>
+{% endif %}
+
+<!-- CONSENSO DATI -->
+<h3>Consenso al trattamento dei dati personali</h3>
+<p style="font-size:9pt">
+    Il/La sottoscritto/a, ai sensi del Regolamento UE 2016/679 (GDPR), presta il consenso al trattamento
+    dei propri dati personali per le finalità connesse alla presente procedura.
+</p>
+
+<p>□ <em>Acconsento al trattamento dei dati personali</em></p>
+
+<!-- FIRMA -->
+<div class="signature-block no-break">
+    <p>{{ company.sede.comune | default('Palermo') }}, {{ generated_at }}</p>
+    <br>
+    <p>Il Rappresentante Legale</p>
+    <span class="signature-line"></span>
+    <p>{{ company.rappresentante_legale.nome }} {{ company.rappresentante_legale.cognome }}</p>
+</div>
+
+<div class="legal-footer">
+    Allegato A generato il {{ generated_at }} — Versione {{ version }} — Bando ID: {{ bando.id }}.
+</div>
+
+</body>
+</html>

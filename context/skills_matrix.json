@@ -1,0 +1,407 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "created": "2026-03-02",
+    "source": "analisi codebase /Users/lucianolamonica/CodiceCodice + dichiarazione titolare",
+    "note": "Competenze dimostrabili tramite progetti in produzione. Ogni skill ha fonte verificabile."
+  },
+
+  "competenze_tecniche": {
+
+    "backend": {
+      "php": {
+        "livello": "senior",
+        "versioni": ["8.2", "8.3", "8.4"],
+        "evidenza": ["sansalia", "drgn", "villa-olevano", "pdstelle", "dashboard"]
+      },
+      "laravel": {
+        "livello": "senior",
+        "versioni": ["11", "12"],
+        "evidenza": ["sansalia (Laravel 12)", "drgn (Laravel 11)", "villa-olevano (Laravel 11)", "pdstelle (Laravel 11)", "dashboard (Laravel 11)", "namamandorle_laravel_filament (Laravel 11)"]
+      },
+      "filament": {
+        "livello": "senior",
+        "versione": "v3",
+        "evidenza": ["sansalia (doppio panel admin+portal)", "drgn", "villa-olevano", "pdstelle", "namamandorle"],
+        "note": "Utilizzo avanzato: multi-panel, resource custom, widget, plugin"
+      },
+      "wordpress": {
+        "livello": "avanzato",
+        "evidenza": ["phimostop-2026 (WooCommerce)", "bfbsanmarco (WordPress 6.7)", "namamandorle (WooCommerce)", "phimostop-mission-control (plugin custom)"],
+        "specializzazioni": ["WooCommerce", "plugin development", "WPML", "custom themes"]
+      },
+      "nodejs": {
+        "livello": "intermedio",
+        "evidenza": ["SSE/Backend (Sansalia-BO v4.15.5)", "SSE/sse-nextjs"]
+      },
+      "nextjs": {
+        "livello": "intermedio",
+        "versione": "13.5+",
+        "evidenza": ["SSE/sse-nextjs"]
+      }
+    },
+
+    "frontend": {
+      "react": {
+        "livello": "intermedio-avanzato",
+        "versione": "18.2",
+        "evidenza": ["SSE/Backend (React 18)", "SSE/sse-nextjs"]
+      },
+      "tailwind_css": {
+        "livello": "senior",
+        "versioni": ["v3.4", "v4"],
+        "evidenza": ["sansalia (Tailwind v4 OKLCH design system)", "drgn", "pdstelle", "SSE/sse-nextjs"]
+      },
+      "livewire": {
+        "livello": "avanzato",
+        "versione": "v3",
+        "evidenza": ["drgn (ContactForm, LanguageSwitcher, TestimonialSlider)", "pdstelle"]
+      },
+      "alpine_js": {
+        "livello": "avanzato",
+        "versione": "3",
+        "evidenza": ["sansalia"]
+      },
+      "blade": {
+        "livello": "senior",
+        "evidenza": ["sansalia", "drgn", "villa-olevano", "pdstelle"]
+      },
+      "vite": {
+        "livello": "avanzato",
+        "versioni": ["6.0+", "7"],
+        "evidenza": ["tutti i progetti Laravel"]
+      }
+    },
+
+    "database": {
+      "mysql": {
+        "livello": "avanzato",
+        "versione": "8.0+",
+        "evidenza": ["sansalia (38 migration, 434 transazioni)", "dashboard", "pdstelle", "bfbsanmarco"]
+      },
+      "postgresql": {
+        "livello": "avanzato",
+        "versione": "14+, 16",
+        "evidenza": ["drgn", "villa-olevano"]
+      },
+      "redis": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia", "drgn", "villa-olevano", "pdstelle", "dashboard"]
+      },
+      "eloquent_orm": {
+        "livello": "senior",
+        "evidenza": ["sansalia (20+ modelli)", "drgn", "tutti i progetti Laravel"]
+      },
+      "database_design": {
+        "livello": "senior",
+        "evidenza": ["sansalia: schema CRM + fatturazione + time tracking + banca (38 tabelle)"]
+      }
+    },
+
+    "devops_infrastruttura": {
+      "docker": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia (docker/staging)", "drgn", "villa-olevano", "pdstelle", "dashboard (Laravel Sail)"],
+        "note": "Multi-service orchestration, volume management, network configuration"
+      },
+      "docker_compose": {
+        "livello": "senior",
+        "evidenza": ["tutti i progetti - standard su ogni nuovo progetto"],
+        "note": "Pattern ricorrente: app + nginx + mysql/postgres + redis + mailpit"
+      },
+      "nginx": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia (staging config con basic auth)", "drgn", "pdstelle", "villa-olevano"],
+        "specializzazioni": ["PHP-FPM upstream", "basic auth", "static assets", "health checks", "noindex headers"]
+      },
+      "nginx_proxy_manager": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia (npm_default network)", "drgn (npm_public)", "villa-olevano (npm_public)"],
+        "note": "Usato come reverse proxy centrale per tutti i progetti su VPS"
+      },
+      "frankenphp": {
+        "livello": "intermedio",
+        "evidenza": ["villa-olevano (dunglas/frankenphp con HTTP/2)"]
+      },
+      "github_actions": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia (.github/workflows/tests.yml)", "namamandorle (.github/workflows/ci.yml)"],
+        "specializzazioni": ["matrix testing PHP 8.2/8.3", "composer cache", "PHPUnit", "Pint", "security audit", "npm build"]
+      },
+      "ssh_server_management": {
+        "livello": "avanzato",
+        "evidenza": ["gestione VPS multipli (DigitalOcean, Hetzner, Aruba)", "deployment via SSH", "dichiarazione titolare"],
+        "note": "Competenza dichiarata esplicitamente + evidenza indiretta da deployment pattern"
+      },
+      "dns_management": {
+        "livello": "avanzato",
+        "evidenza": ["gestione multi-dominio: sansalia.com, villa-neri.sansalia.com, holidaysicilybfb.it, ciggroup.it, namamandorle.it"],
+        "note": "Competenza dichiarata + gestione pratica di 10+ domini"
+      },
+      "vps_management": {
+        "livello": "avanzato",
+        "evidenza": ["DigitalOcean, Hetzner, Aruba - deployment documentato in ARCHITECTURE.md"],
+        "note": "Gestione completa: provisioning, hardening, deploy, monitoring"
+      },
+      "ssl_lets_encrypt": {
+        "livello": "avanzato",
+        "evidenza": ["tutti i progetti in produzione - via Nginx Proxy Manager"]
+      }
+    },
+
+    "integrazioni_e_api": {
+      "stripe": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia (pagamenti fatture)", "dashboard (Stripe Analytics)", "phimostop (WooCommerce+Stripe)"],
+        "note": "Payment processing, subscription management, webhook handling"
+      },
+      "fatturapa_sdi": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia (FatturaPAService.php, XML 1.3.2)", "namamandorle (FatturaPA WooCommerce)"],
+        "note": "Competenza rara - generazione XML FatturaPA conforme SDI"
+      },
+      "n8n_automation": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia (n8n-data/, n8n-files/, webhook-based automation)"],
+        "note": "Workflow automation, webhook integration"
+      },
+      "google_analytics_4": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia (GA4 integration)", "dashboard (custom GA4 plugin)"]
+      },
+      "woocommerce_api": {
+        "livello": "avanzato",
+        "evidenza": ["dashboard (Automattic WooCommerce API v3.1)", "phimostop"]
+      },
+      "sendgrid_postmark": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia .env.example", "drgn ARCHITECTURE.md"]
+      },
+      "google_ads": {
+        "livello": "intermedio",
+        "evidenza": ["phimostop (google-listings-and-ads plugin)"]
+      },
+      "trustpilot": {
+        "livello": "intermedio",
+        "evidenza": ["phimostop (trustpilot-reviews plugin)"]
+      }
+    },
+
+    "ai_automazioni": {
+      "claude_code": {
+        "livello": "avanzato",
+        "evidenza": ["CLAUDE.md in sansalia", ".claude/ configs in CodiceCodice", "utilizzo estensivo in tutti i progetti"]
+      },
+      "prompt_engineering": {
+        "livello": "avanzato",
+        "evidenza": ["AgentFather/Namateck (SYSTEM_PROMPT_BOTFATHER.md)", "NamaTeck/04_agents/", "BfBTeck/04_agents/"]
+      },
+      "ai_agent_frameworks": {
+        "livello": "avanzato",
+        "evidenza": ["AgentFather framework", "sistema multi-agenti per gestione progetti", "questo stesso sistema bandi"]
+      },
+      "n8n": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia - automazioni complex via N8N webhook"]
+      },
+      "llm_integration": {
+        "livello": "avanzato",
+        "evidenza": ["dichiarazione titolare", "utilizzo sistematico AI nello sviluppo"],
+        "tools": ["Claude", "Gemini", "GPT-4", "modelli locali"]
+      }
+    },
+
+    "sicurezza_compliance": {
+      "gdpr": {
+        "livello": "avanzato",
+        "evidenza": ["drgn (UK-based servers, field-level encryption, consent management)", "sansalia (data encryption, honeypot)", "phimostop (iubenda cookie solution)"]
+      },
+      "data_encryption": {
+        "livello": "avanzato",
+        "evidenza": ["drgn (Laravel Crypt, encrypted message field in leads)"]
+      },
+      "spam_protection": {
+        "livello": "avanzato",
+        "evidenza": ["drgn (Spatie Honeypot, reCAPTCHA v3, rate limiting)", "sansalia"]
+      },
+      "security_audit": {
+        "livello": "intermedio",
+        "evidenza": ["BfBTeck/03_verticals/security/AUDIT_NOTES.md", "composer audit in CI/CD"]
+      }
+    },
+
+    "testing_qualita": {
+      "phpunit": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia", "drgn", "dashboard", "pdstelle", "phimostop-mission-control"]
+      },
+      "phpstan": {
+        "livello": "avanzato",
+        "versione": "livello 7",
+        "evidenza": ["pdstelle (phpstan level 7 obbligatorio)", "sansalia"]
+      },
+      "laravel_pint": {
+        "livello": "avanzato",
+        "evidenza": ["sansalia CI/CD", "namamandorle CI/CD"]
+      },
+      "tdd": {
+        "livello": "intermedio",
+        "evidenza": ["pdstelle (TDD approach documentato)"]
+      }
+    },
+
+    "internazionalizzazione": {
+      "spatie_translatable": {
+        "livello": "senior",
+        "evidenza": ["sansalia (IT/EN)", "pdstelle", "drgn"]
+      },
+      "i18next": {
+        "livello": "avanzato",
+        "evidenza": ["SSE/sse-nextjs"]
+      },
+      "wpml": {
+        "livello": "avanzato",
+        "evidenza": ["phimostop", "bfbsanmarco"]
+      }
+    }
+  },
+
+  "settori_cliente": [
+    {
+      "settore": "Healthcare / Servizi Professionali",
+      "progetto_riferimento": "Dr. Giulia Neri (drgn)",
+      "competenze_settoriali": ["gestione dati sensibili", "GDPR compliance avanzata", "lead management criptato", "booking appointment system"]
+    },
+    {
+      "settore": "Hospitality / Turismo",
+      "progetti_riferimento": ["Villa Olevano", "BfB San Marco", "Sicily Coding (eventi)"],
+      "competenze_settoriali": ["booking engine integration", "multilingual website", "SEO locale", "KrossBooking widget"]
+    },
+    {
+      "settore": "E-commerce / Retail",
+      "progetti_riferimento": ["Phimostop 2026", "Namamandorle"],
+      "competenze_settoriali": ["WooCommerce avanzato", "Stripe integration", "inventario", "ordini", "spedizioni", "FatturaPA automatica"]
+    },
+    {
+      "settore": "B2B / Consulenza Digitale",
+      "progetto_riferimento": "Sansalia S.r.l.",
+      "competenze_settoriali": ["CRM custom", "time tracking", "fatturazione elettronica", "client portal", "analytics"]
+    },
+    {
+      "settore": "Food / Agroalimentare",
+      "progetto_riferimento": "Namamandorle (mandorle siciliane DOP)",
+      "competenze_settoriali": ["e-commerce food", "prodotti tipici siciliani", "Google Shopping"]
+    },
+    {
+      "settore": "ICT / Formazione / Cultura",
+      "progetto_riferimento": "Sicily Coding 2026",
+      "competenze_settoriali": ["event management", "ICT ecosystem building", "bandi pubblici", "sponsorship management"]
+    }
+  ],
+
+  "stack_preferenziale": {
+    "nuovo_progetto_web_app": "Laravel 12 + Filament v3 + Tailwind CSS v4 + MySQL/PostgreSQL + Redis + Docker Compose",
+    "nuovo_progetto_ecommerce": "WordPress + WooCommerce + Stripe + WPML",
+    "nuovo_progetto_ai": "Claude API / Anthropic SDK + Python o Laravel + N8N per orchestrazione",
+    "infrastruttura": "VPS (DigitalOcean / Hetzner) + Nginx Proxy Manager + Docker + GitHub Actions CI/CD"
+  },
+
+  "posizionamento_strategico": {
+    "headline": "Digitalizzazione completa d'impresa — end-to-end",
+    "descrizione": "Capacità di gestire l'intero ciclo di digitalizzazione aziendale: dall'analisi dei processi alla messa in produzione, dalla presenza web all'e-commerce, dal CRM/ERP alla fatturazione elettronica, dall'infrastruttura server all'automazione AI.",
+    "servizi_erogabili": [
+      "Sviluppo siti web e portali (Laravel, WordPress)",
+      "E-commerce completo (WooCommerce, Stripe, FatturaPA)",
+      "CRM e gestionali custom (Laravel + Filament)",
+      "Fatturazione elettronica e integrazione SDI",
+      "Server management e infrastruttura cloud (VPS, Docker, DNS)",
+      "CI/CD e DevOps (GitHub Actions, Nginx, SSL)",
+      "Automazioni di processo (N8N, webhook, cron)",
+      "Integrazione AI e agenti intelligenti (Claude API, LLM)",
+      "Consulenza SEO e digital marketing",
+      "Sistemi multilingua (IT/EN, WPML, Spatie Translatable)"
+    ],
+    "valore_differenziante": "Full-stack senior + DevOps + AI: un solo interlocutore per l'intera digitalizzazione, senza subappaltare competenze critiche."
+  },
+
+  "referenze_progetti": [
+    {
+      "progetto": "Sansalia S.r.l. — Portale Gestionale",
+      "url": null,
+      "anno": "2024-2026",
+      "descrizione": "CRM + fatturazione elettronica (FatturaPA/SDI) + time tracking + client portal + CMS multilingua IT/EN. Laravel 12 + Filament v3. 25 clienti, 142 fatture, 434 transazioni bancarie in produzione.",
+      "tecnologie": ["Laravel 12", "Filament v3", "PostgreSQL", "Redis", "Docker", "Stripe", "FatturaPA", "N8N"],
+      "settore": "B2B / Consulenza digitale"
+    },
+    {
+      "progetto": "Dr. Giulia Neri — Piattaforma Terapia Online",
+      "url": null,
+      "anno": "2024-2025",
+      "descrizione": "Sito professionale GDPR-compliant con lead management cifrato, CMS multilingua, form contatti con honeypot e reCAPTCHA. Server UK-based per compliance privacy.",
+      "tecnologie": ["Laravel 11", "Livewire v3", "Filament v3", "MySQL", "Docker"],
+      "settore": "Healthcare / Servizi Professionali"
+    },
+    {
+      "progetto": "Namamandorle.it — E-commerce Mandorle Siciliane",
+      "url": "namamandorle.it",
+      "anno": "2023-2026",
+      "descrizione": "E-commerce D2C per vendita mandorle e frutta secca siciliana. WooCommerce + Stripe + FatturaPA automatica + Google Shopping. Gestione ordini, spedizioni, recensioni.",
+      "tecnologie": ["WordPress", "WooCommerce", "Stripe", "FatturaPA", "Yoast SEO", "Google Ads"],
+      "settore": "Food / Agroalimentare / E-commerce"
+    },
+    {
+      "progetto": "Phimostop.com — E-commerce WooCommerce",
+      "url": "phimostop.com",
+      "anno": "2024-2026",
+      "descrizione": "Sito e-commerce completo con WooCommerce, sistema multilingua WPML, Google Listings & Ads, Trustpilot reviews, GDPR (Iubenda), backup automatico Akeeba.",
+      "tecnologie": ["WordPress", "WooCommerce", "WPML", "Stripe", "Google Ads", "Docker"],
+      "settore": "E-commerce"
+    },
+    {
+      "progetto": "BfB San Marco — Sito B&B Hospitality",
+      "url": "bfbsanmarco.it",
+      "anno": "2023-2026",
+      "descrizione": "Sito web per B&B a Sciacca (Sicilia) con booking engine integrato (KrossBooking), sistema multilingua IT/EN, SEO locale, hosting Aruba.",
+      "tecnologie": ["WordPress 6.7", "PHP 8.3", "KrossBooking", "WPML", "Yoast SEO"],
+      "settore": "Hospitality / Turismo"
+    },
+    {
+      "progetto": "CIG Group — Portale Aziendale",
+      "url": "ciggroup.it",
+      "anno": "2023-2026",
+      "descrizione": "Presenza web per gruppo aziendale con domini correlati (cigconsulting.it, cigengineering.it, cigtouring.it).",
+      "tecnologie": ["WordPress", "DNS management"],
+      "settore": "Corporate / B2B"
+    },
+    {
+      "progetto": "Villa Olevano — Sito Boutique Hotel",
+      "url": null,
+      "anno": "2025",
+      "descrizione": "Sito web premium per villa affittacamere con FrankenPHP (HTTP/2), PostgreSQL, Redis, SSL forzato. Architettura moderna ad alte performance.",
+      "tecnologie": ["Laravel 11", "FrankenPHP", "PostgreSQL 16", "Redis", "Docker"],
+      "settore": "Hospitality / Turismo"
+    },
+    {
+      "progetto": "Sicily Coding 2026 — Hub ICT Siciliano",
+      "url": null,
+      "anno": "2025-2026",
+      "descrizione": "Ideazione e organizzazione evento flagship ICT per ecosistema siciliano. Palermo, 29 maggio 2026. 30+ realtà ICT coinvolte, speaker nazionali (Salvatore Sanfilippo). Gestione bando pubblico, sponsorship, programma tecnico.",
+      "tecnologie": ["Event management", "Bandi pubblici", "Sponsorship"],
+      "settore": "ICT / Cultura / Formazione"
+    }
+  ],
+
+  "gap_da_colmare": {
+    "certificazioni_mancanti": [
+      {"certificazione": "ISO 9001", "impatto": "medio-alto", "note": "Richiesta in molti bandi PA"},
+      {"certificazione": "ISO 27001", "impatto": "alto per bandi sicurezza informatica"},
+      {"certificazione": "GDPR DPO", "impatto": "medio"},
+      {"certificazione": "AWS/GCP/Azure certifications", "impatto": "medio per bandi cloud PA"}
+    ],
+    "competenze_da_aggiungere": [
+      "Python (già parzialmente - da documentare meglio)",
+      "Machine Learning / AI formale (certificazioni Google/Coursera)",
+      "Cybersecurity formale"
+    ]
+  }
+}

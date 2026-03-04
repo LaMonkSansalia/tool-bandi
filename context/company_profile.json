@@ -1,0 +1,118 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "created": "2026-03-02",
+    "source": "visura_storica_LMNLCN95P22G273W-VISUSTOR-20260302.pdf + analisi codebase CodiceCodice",
+    "note": "Fonte di verita' per il sistema di ricerca e applicazione bandi. Aggiornare manualmente quando cambiano dati anagrafici, certificazioni o competenze."
+  },
+
+  "anagrafica": {
+    "denominazione": "LA MONICA LUCIANO",
+    "titolare": "La Monica Luciano",
+    "data_nascita": "22/09/1995",
+    "luogo_nascita": "Palermo (PA)",
+    "codice_fiscale": "LMNLCN95P22G273W",
+    "partita_iva": "07104590828",
+    "forma_giuridica": "impresa individuale",
+    "qualifica_registro": "piccolo imprenditore (sezione speciale)",
+    "regime_fiscale": "forfettario",
+    "numero_rea": "PA-437150",
+    "camera_commercio": "Palermo ed Enna"
+  },
+
+  "sede": {
+    "indirizzo": "Via Emerico Amari 120",
+    "cap": "90139",
+    "comune": "Palermo",
+    "provincia": "PA",
+    "regione": "Sicilia",
+    "area_geografica": "Sud Italia",
+    "zona_zes": true,
+    "zona_mezzogiorno": true
+  },
+
+  "contatti": {
+    "pec": "llamonica@legalmail.it",
+    "email_ordinaria": null,
+    "telefono": null,
+    "sito_web": null
+  },
+
+  "attivita": {
+    "data_inizio": "26/01/2023",
+    "data_iscrizione_ri": "02/02/2023",
+    "anni_attivita": 3,
+    "stato": "attiva",
+    "ateco_2025": "62.20.10",
+    "ateco_descrizione": "attivita' di consulenza informatica",
+    "atecori_2007_2022": "62.02",
+    "settore_principale": "ICT / Consulenza Informatica",
+    "macro_settore": "Servizi"
+  },
+
+  "dimensione": {
+    "addetti_totali": 1,
+    "dipendenti": 0,
+    "indipendenti": 1,
+    "unita_locali": 0,
+    "micro_impresa": true,
+    "fatturato_stimato_max": 85000,
+    "note_fatturato": "Regime forfettario - soglia massima legale 85.000 euro/anno"
+  },
+
+  "certificazioni": {
+    "soa": null,
+    "iso_9001": false,
+    "iso_27001": false,
+    "iso_14001": false,
+    "altre": []
+  },
+
+  "partecipazioni": {
+    "detiene_partecipazioni": true,
+    "societa": [],
+    "note": "Partecipazioni confermate da visura ma dettaglio da completare"
+  },
+
+  "eligibility_constraints": {
+    "HARD_STOP": [
+      {
+        "constraint": "fatturato_minimo",
+        "soglia_esclusione": 85001,
+        "motivo": "Regime forfettario cap a 85.000 euro/anno. Bandi che richiedono fatturato > 85k sono automaticamente esclusi."
+      },
+      {
+        "constraint": "dipendenti_minimi",
+        "soglia_esclusione": 1,
+        "motivo": "0 dipendenti. Bandi che richiedono almeno N dipendenti sono esclusi."
+      },
+      {
+        "constraint": "forma_giuridica",
+        "esclusioni": ["societa_di_capitali_obbligatoria", "srl_obbligatoria", "spa_obbligatoria"],
+        "motivo": "Impresa individuale. Alcuni bandi richiedono forme societarie strutturate."
+      },
+      {
+        "constraint": "soa_obbligatoria",
+        "valore": false,
+        "motivo": "Nessuna attestazione SOA. Lavori pubblici categoricamente esclusi."
+      }
+    ],
+    "YELLOW_FLAG": [
+      {
+        "constraint": "anzianita",
+        "anni": 3,
+        "nota": "Alcuni bandi richiedono 3 anni (borderline OK), altri 5 anni (escluso)"
+      },
+      {
+        "constraint": "certificazioni_qualita",
+        "nota": "Assenza ISO 9001 non sempre escludente ma spesso penalizzante nel punteggio"
+      }
+    ],
+    "VANTAGGI": [
+      "Localizzazione Sud Italia (Sicilia) - bonus FESR, PON, ZES",
+      "Under 35 (nato 1995) - bandi giovani imprenditori",
+      "ATECO 62.20.10 - prioritario per bandi digitale/PNRR",
+      "Attivo dal 2023 - eleggibile per bandi startup/nuove imprese"
+    ]
+  }
+}

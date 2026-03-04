@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>CV Impresa — {{ company.denominazione }}</title>
+    <link rel="stylesheet" href="base.css">
+</head>
+<body>
+
+{% if is_draft %}
+<div class="draft-watermark">BOZZA</div>
+{% endif %}
+
+<div class="doc-header">
+    <h1>Curriculum dell'Impresa</h1>
+    <div class="doc-subtitle">{{ company.denominazione }}</div>
+    <div class="doc-meta">
+        Bando: {{ bando.titolo }}<br>
+        Data: {{ generated_at }} — Versione: {{ version }}
+    </div>
+</div>
+
+<!-- ANAGRAFICA -->
+<h2>1. Anagrafica</h2>
+<table>
+    <tr><td class="field-label" style="width:35%">Denominazione</td><td>{{ company.denominazione }}</td></tr>
+    <tr><td class="field-label">Forma giuridica</td><td>{{ company.forma_giuridica }}</td></tr>
+    <tr><td class="field-label">P.IVA</td><td>{{ company.partita_iva }}</td></tr>
+    <tr><td class="field-label">Codice Fiscale</td><td>{{ company.codice_fiscale }}</td></tr>
+    <tr><td class="field-label">Data costituzione</td><td>{{ company.data_costituzione | default('⚠ DA COMPILARE') }}</td></tr>
+    <tr><td class="field-label">ATECO primario</td><td>{{ company.ateco_primario }}</td></tr>
+    <tr><td class="field-label">ATECO secondari</td><td>{{ company.ateco_secondari | join(', ') if company.ateco_secondari else '—' }}</td></tr>
+    <tr><td class="field-label">Sede legale</td><td>{{ company.sede.indirizzo }}, {{ company.sede.cap }} {{ company.sede.comune }} ({{ company.sede.provincia }})</td></tr>
+    <tr><td class="field-label">Email</td><td>{{ company.email | default('—') }}</td></tr>
+    <tr><td class="field-label">PEC</td><td>{{ company.pec }}</td></tr>
+    <tr><td class="field-label">Sito web</td><td>{{ company.sito_web | default('—') }}</td></tr>
+    <tr><td class="field-label">REA</td><td>{{ company.rea | default('⚠ DA COMPILARE') }}</td></tr>
+</table>
+
+<!-- DIMENSIONE E DATI ECONOMICI -->
+<h2>2. Dimensione e Dati Economici</h2>
+<table>
+    <tr><td class="field-label" style="width:50%">Dimensione impresa</td><td>{{ company.dimensione_impresa | default('Micro-impresa') }}</td></tr>
+    <tr><td class="field-label">Dipendenti (ultimo esercizio)</td><td>{{ company.dipendenti_ultimo_esercizio }}</td></tr>
+    <tr><td class="field-label">Fatturato (ultimo esercizio)</td><td>€ {{ company.fatturato_ultimo_esercizio | default('⚠ DA COMPILARE') }}</td></tr>
+    <tr><td class="field-label">Anno di riferimento bilancio</td><td>{{ company.anno_ultimo_bilancio | default('⚠ DA COMPILARE') }}</td></tr>
+</table>
+
+<!-- PROFILO ATTIVITÀ -->
+<h2>3. Profilo dell'Attività</h2>
+{% if company.descrizione_attivita %}
+<p>{{ company.descrizione_attivita }}</p>
+{% else %}
+<div class="placeholder-warning">Aggiungere descrizione attività in company_profile.json → descrizione_attivita</div>
+{% endif %}
+
+<!-- COMPETENZE TECNICHE -->
+<h2>4. Competenze Tecniche</h2>
+
+{% if skills %}
+{% for categoria, lista in skills.items() %}
+<h3>{{ categoria }}</h3>
+<ul>
+{% for skill in lista %}
+    <li>{{ skill }}</li>
+{% endfor %}
+</ul>
+{% endfor %}
+{% else %}
+<div class="placeholder-warning">Nessuna competenza verificata disponibile. Verificare skills_matrix.json.</div>
+{% endif %}
+
+<!-- REFERENZE PROGETTUALI -->
+<h2>5. Principali Referenze Progettuali</h2>
+
+{% if references %}
+<table>
+    <thead>
+        <tr>
+            <th style="width:25%">Progetto</th>
+            <th style="width:20%">Cliente/Settore</th>
+            <th style="width:10%">Anno</th>
+            <th>Descrizione</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for ref in references %}
+    <tr>
+        <td><strong>{{ ref.nome }}</strong></td>
+        <td>{{ ref.cliente_settore | default('—') }}</td>
+        <td>{{ ref.anno | default('—') }}</td>
+        <td>
+            {{ ref.descrizione }}
+            {% if ref.url %}<br><a href="{{ ref.url }}" style="font-size:9pt">{{ ref.url }}</a>{% endif %}
+            <br><span class="source-ref">Fonte: skills_matrix.json → {{ ref._source_key }}</span>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="placeholder-warning">Nessuna referenza progettuale disponibile in skills_matrix.json.</div>
+{% endif %}
+
+<!-- CERTIFICAZIONI -->
+<h2>6. Certificazioni e Abilitazioni</h2>
+
+{% if company.certificazioni %}
+<ul>
+{% for cert in company.certificazioni %}
+    <li>{{ cert }}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p><em>Nessuna certificazione formale. L'impresa opera sulla base delle proprie competenze tecniche.</em></p>
+{% endif %}
+
+<!-- FIRMA -->
+<div class="signature-block no-break">
+    <p>{{ company.sede.comune | default('Palermo') }}, {{ generated_at }}</p>
+    <br>
+    <p>Il Rappresentante Legale</p>
+    <span class="signature-line"></span>
+    <p>{{ company.rappresentante_legale.nome }} {{ company.rappresentante_legale.cognome }}</p>
+</div>
+
+<div class="legal-footer">
+    CV Impresa generato il {{ generated_at }} — Versione {{ version }}.
+    I dati riportati sono stati estratti automaticamente da company_profile.json e skills_matrix.json. Verificare la correttezza prima dell'invio.
+</div>
+
+</body>
+</html>

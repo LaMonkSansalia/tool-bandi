@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Dichiarazione Sostitutiva — {{ company.denominazione }}</title>
+    <link rel="stylesheet" href="base.css">
+</head>
+<body>
+
+{% if is_draft %}
+<div class="draft-watermark">BOZZA</div>
+{% endif %}
+
+<!-- INTESTAZIONE -->
+<div class="doc-header">
+    <div class="ente-logo">{{ bando.ente_erogatore | upper }}</div>
+    <h1>Dichiarazione Sostitutiva di Atto Notorio</h1>
+    <div class="doc-subtitle">ai sensi degli artt. 46 e 47 del D.P.R. 28 dicembre 2000 n. 445</div>
+    <div class="doc-meta">
+        Bando: {{ bando.titolo }}<br>
+        Data: {{ generated_at }} — Versione: {{ version }}
+    </div>
+</div>
+
+<!-- INTESTAZIONE DICHIARANTE -->
+<p>Il/La sottoscritto/a:</p>
+
+<table>
+    <tr>
+        <td class="field-label" style="width:35%">Cognome e nome</td>
+        <td>{{ company.rappresentante_legale.cognome }} {{ company.rappresentante_legale.nome }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Luogo e data di nascita</td>
+        <td>
+            {{ company.rappresentante_legale.luogo_nascita | default('⚠ DA COMPILARE') }}
+            del {{ company.rappresentante_legale.data_nascita | default('⚠ DA COMPILARE') }}
+        </td>
+    </tr>
+    <tr>
+        <td class="field-label">Codice Fiscale</td>
+        <td>{{ company.rappresentante_legale.codice_fiscale | default('⚠ DA COMPILARE') }}</td>
+    </tr>
+    <tr>
+        <td class="field-label">Residente a</td>
+        <td>
+            {{ company.rappresentante_legale.residenza | default('⚠ DA COMPILARE — inserire indirizzo completo di residenza') }}
+        </td>
+    </tr>
+    <tr>
+        <td class="field-label">In qualità di</td>
+        <td>Rappresentante Legale della ditta {{ company.denominazione }}</td>
+    </tr>
+</table>
+
+{% if company.rappresentante_legale.luogo_nascita is not defined or not company.rappresentante_legale.luogo_nascita %}
+<div class="placeholder-warning">
+    Dati anagrafici del rappresentante legale mancanti. Aggiungere in company_profile.json:
+    rappresentante_legale.luogo_nascita, data_nascita, codice_fiscale, residenza
+</div>
+{% endif %}
+
+<p>consapevole delle sanzioni penali previste dall'art. 76 del D.P.R. 445/2000 per le ipotesi di
+falsità in atti e dichiarazioni mendaci, sotto la propria responsabilità</p>
+
+<h2 style="text-align:center">DICHIARA</h2>
+
+<!-- DICHIARAZIONI STANDARD -->
+<h3>A. Requisiti soggettivi del rappresentante legale</h3>
+<ol>
+    <li>di non aver riportato condanne penali passate in giudicato, sentenze di applicazione della pena su
+    richiesta (art. 444 c.p.p.), decreti penali di condanna divenuti irrevocabili, ovvero di applicazione
+    della pena su richiesta;</li>
+    <li>di non essere destinatario di provvedimenti che riguardano l'applicazione di misure di prevenzione,
+    di decisioni civili e di provvedimenti amministrativi iscritti nel casellario giudiziale;</li>
+    <li>di non essere in condizioni di incapacità a contrattare con la Pubblica Amministrazione.</li>
+</ol>
+
+<h3>B. Requisiti dell'impresa</h3>
+<ol>
+    <li>che l'impresa <strong>{{ company.denominazione }}</strong>, P.IVA {{ company.partita_iva }}, è
+    regolarmente iscritta presso la CCIAA di
+    {{ company.sede.provincia | default('⚠ DA VERIFICARE') }},
+    numero REA: {{ company.rea | default('⚠ DA COMPILARE') }};</li>
+    <li>che l'impresa è in regola con gli obblighi relativi al pagamento delle imposte e tasse;</li>
+    <li>che l'impresa è in regola con gli obblighi di versamento dei contributi previdenziali e
+    assistenziali, DURC regolare;</li>
+    <li>che l'impresa non si trova in stato di fallimento, di liquidazione coatta, di concordato preventivo
+    o nei cui riguardi sia in corso un procedimento per la dichiarazione di una di tali situazioni;</li>
+    <li>che l'impresa non è stata condannata con sentenza definitiva o decreto penale di condanna
+    divenuto irrevocabile o sentenza di applicazione della pena su richiesta per reati gravi in danno
+    dello Stato o della Comunità;</li>
+    <li>che nell'anno antecedente la presente dichiarazione non vi sono state risoluzioni per inadempimento
+    da parte di soggetti pubblici.</li>
+</ol>
+
+<!-- DICHIARAZIONI SPECIFICHE DEL BANDO -->
+{% if bando_specific_declarations %}
+<h3>C. Dichiarazioni specifiche per il bando</h3>
+<ol>
+{% for decl in bando_specific_declarations %}
+    <li>{{ decl }}</li>
+{% endfor %}
+</ol>
+{% else %}
+<h3>C. Dichiarazioni specifiche per il bando</h3>
+<div class="placeholder-warning">
+    Inserire eventuali dichiarazioni specifiche richieste dal bando "{{ bando.titolo }}".
+    Verificare il bando completo per le clausole da dichiarare.
+</div>
+{% endif %}
+
+<!-- INFORMATIVA PRIVACY -->
+<h3>Informativa sul trattamento dei dati personali</h3>
+<p style="font-size:9pt; color:#555;">
+    Ai sensi del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003, si informa che i dati personali
+    conferiti saranno trattati esclusivamente per finalità connesse alla valutazione della presente istanza
+    e ai procedimenti amministrativi conseguenti, presso {{ bando.ente_erogatore }}.
+    Il conferimento dei dati è obbligatorio ai fini della partecipazione al bando.
+</p>
+
+<!-- FIRMA -->
+<div class="signature-block no-break">
+    <p>{{ company.sede.comune | default('Palermo') }}, {{ generated_at }}</p>
+    <br>
+    <p>Il dichiarante</p>
+    <span class="signature-line"></span>
+    <p>{{ company.rappresentante_legale.nome }} {{ company.rappresentante_legale.cognome }}</p>
+    <br>
+    <p style="font-size:9pt; color:#666;">
+        <em>Allegare copia di un documento di identità in corso di validità (art. 38, co. 3, D.P.R. 445/2000)</em>
+    </p>
+</div>
+
+<div class="legal-footer">
+    Dichiarazione generata il {{ generated_at }} — Versione {{ version }} — Bando ID: {{ bando.id }}.
+    Verificare la correttezza di tutti i dati prima della firma. La falsa dichiarazione costituisce reato ai sensi degli artt. 483 e 495 c.p.
+</div>
+
+</body>
+</html>

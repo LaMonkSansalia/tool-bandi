@@ -1,0 +1,221 @@
+/* base.css — Italian PA formal document style */
+/* Used by WeasyPrint for all generated documents */
+
+@page {
+    size: A4;
+    margin: 2.5cm 2.5cm 3cm 2.5cm;
+
+    @top-center {
+        content: string(doc-title);
+        font-size: 8pt;
+        color: #666;
+        border-bottom: 0.5pt solid #ccc;
+        padding-bottom: 4pt;
+    }
+
+    @bottom-left {
+        content: "Documento generato automaticamente — soggetto a revisione umana";
+        font-size: 7pt;
+        color: #999;
+    }
+
+    @bottom-right {
+        content: "Pagina " counter(page) " di " counter(pages);
+        font-size: 8pt;
+        color: #555;
+    }
+}
+
+/* Typography */
+body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #111;
+    text-align: justify;
+    hyphens: auto;
+    lang: it;
+}
+
+/* Document header */
+.doc-header {
+    text-align: center;
+    border-bottom: 2pt solid #1a1a6e;
+    padding-bottom: 12pt;
+    margin-bottom: 24pt;
+}
+
+.doc-header .ente-logo {
+    font-size: 9pt;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 2pt;
+}
+
+.doc-header h1 {
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #1a1a6e;
+    margin: 8pt 0 4pt 0;
+    string-set: doc-title content();
+}
+
+.doc-header .doc-subtitle {
+    font-size: 10pt;
+    color: #444;
+    font-style: italic;
+}
+
+.doc-header .doc-meta {
+    font-size: 9pt;
+    color: #666;
+    margin-top: 8pt;
+}
+
+/* Section headings */
+h2 {
+    font-size: 12pt;
+    font-weight: bold;
+    color: #1a1a6e;
+    border-bottom: 1pt solid #1a1a6e;
+    margin-top: 18pt;
+    margin-bottom: 8pt;
+    padding-bottom: 3pt;
+}
+
+h3 {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #333;
+    margin-top: 12pt;
+    margin-bottom: 6pt;
+}
+
+h4 {
+    font-size: 11pt;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 10pt;
+    margin-bottom: 4pt;
+}
+
+/* Paragraphs */
+p {
+    margin-bottom: 8pt;
+    orphans: 3;
+    widows: 3;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12pt 0;
+    font-size: 10pt;
+}
+
+th {
+    background-color: #1a1a6e;
+    color: white;
+    padding: 6pt 8pt;
+    text-align: left;
+    font-weight: bold;
+}
+
+td {
+    padding: 5pt 8pt;
+    border-bottom: 0.5pt solid #ddd;
+    vertical-align: top;
+}
+
+tr:nth-child(even) td {
+    background-color: #f5f5f5;
+}
+
+/* Warning boxes (TO FILL MANUALLY placeholders) */
+.placeholder-warning {
+    background-color: #fff3cd;
+    border: 1.5pt solid #ffc107;
+    border-radius: 3pt;
+    padding: 8pt 12pt;
+    margin: 10pt 0;
+    font-size: 10pt;
+    color: #856404;
+}
+
+.placeholder-warning::before {
+    content: "⚠ DA COMPILARE MANUALMENTE: ";
+    font-weight: bold;
+}
+
+/* Signature blocks */
+.signature-block {
+    margin-top: 36pt;
+    page-break-inside: avoid;
+}
+
+.signature-line {
+    border-top: 1pt solid #333;
+    width: 60%;
+    margin: 24pt 0 4pt 0;
+    display: block;
+}
+
+/* Numbered lists */
+ol {
+    padding-left: 20pt;
+    margin-bottom: 8pt;
+}
+
+ol li {
+    margin-bottom: 4pt;
+}
+
+ul {
+    padding-left: 16pt;
+    margin-bottom: 8pt;
+}
+
+ul li {
+    margin-bottom: 3pt;
+}
+
+/* Highlight verified sources */
+.source-ref {
+    font-size: 8pt;
+    color: #2d7d2d;
+    font-style: italic;
+}
+
+/* Bold field labels */
+.field-label {
+    font-weight: bold;
+    color: #1a1a6e;
+}
+
+/* Draft watermark */
+.draft-watermark {
+    position: fixed;
+    top: 40%;
+    left: 10%;
+    font-size: 72pt;
+    color: rgba(200, 0, 0, 0.08);
+    transform: rotate(-45deg);
+    z-index: -1;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Page break utilities */
+.page-break { page-break-after: always; }
+.no-break { page-break-inside: avoid; }
+
+/* Footer legal text */
+.legal-footer {
+    font-size: 8pt;
+    color: #666;
+    border-top: 0.5pt solid #ccc;
+    margin-top: 24pt;
+    padding-top: 8pt;
+}
