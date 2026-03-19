@@ -10,14 +10,50 @@ from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse
 from psycopg2.extras import RealDictCursor
 
-from web.deps import get_db, get_current_project_id, get_nav_context
+from web.deps import get_db, get_nav_context
 from web.main import templates
+from web.services.display import enrich_bando_row
 from web.services.completezza import (
     PROFILO_DEFAULT, SETTORI, COFINANZIAMENTO_FONTI, ZONE_SPECIALI_OPTIONS,
     check_completezza, normalize_profilo, parse_int_or_none,
 )
 
 router = APIRouter(prefix="/progetti")
+
+
+def _load_opportunita(conn, pk: int) -> tuple[list, dict]:
+    """Load bandi valutati per un progetto + stats rapide."""
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute("""
+            SELECT pe.id AS pe_id, pe.score, pe.stato,
+                   b.id AS bando_id, b.titolo, b.ente_erogatore, b.data_scadenza,
+                   (b.data_scadenza - CURRENT_DATE)::int AS giorni_rimasti
+            FROM project_evaluations pe
+            JOIN bandi b ON pe.bando_id = b.id
+            WHERE pe.project_id = %s
+              AND pe.stato NOT IN ('nuovo', 'archiviato')
+            ORDER BY pe.score DESC NULLS LAST, b.data_scadenza ASC
+        """, (pk,))
+        rows = [enrich_bando_row(dict(r)) for r in cur.fetchall()]
+
+        cur.execute("""
+            SELECT stato, COUNT(*) AS n
+            FROM project_evaluations
+            WHERE project_id = %s AND stato NOT IN ('nuovo', 'archiviato')
+            GROUP BY stato
+        """, (pk,))
+        stats = {r["stato"]: r["n"] for r in cur.fetchall()}
+
+        cur.execute("""
+            SELECT COUNT(*) AS n FROM project_evaluations pe
+            JOIN bandi b ON pe.bando_id = b.id
+            WHERE pe.project_id = %s
+              AND pe.stato IN ('idoneo', 'lavorazione')
+              AND b.data_scadenza BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '14 days'
+        """, (pk,))
+        stats["scadono_14gg"] = cur.fetchone()["n"]
+
+    return rows, stats
 
 
 def _load_project(conn, pk: int) -> dict | None:
@@ -37,7 +73,6 @@ def _load_project(conn, pk: int) -> dict | None:
 def progetti_list(request: Request, conn=Depends(get_db)):
     """Lista progetti raggruppata per soggetto."""
     nav = get_nav_context(request, conn)
-    pid = get_current_project_id(request)
     settori_map = {k: v for k, v in SETTORI}
 
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -72,7 +107,6 @@ def progetti_list(request: Request, conn=Depends(get_db)):
             "settore_label": settori_map.get(settore, ""),
             "n_candidature": p["n_candidature"] or 0,
             "completezza_pct": completezza_pct,
-            "is_current": p["id"] == pid,
         })
 
     # Group by soggetto
@@ -117,7 +151,6 @@ def progetto_create(
         new_id = cur.fetchone()[0]
         conn.commit()
 
-    request.session["current_project_id"] = new_id
     return RedirectResponse(url=f"/progetti/{new_id}", status_code=303)
 
 
@@ -190,7 +223,12 @@ def progetto_detail(request: Request, pk: int, conn=Depends(get_db)):
         """, (pk,))
         candidature_stats = {r["stato"]: r["n"] for r in cur.fetchall()}
 
-    active_tab = request.query_params.get("tab", "profilo")
+    # Opportunità: bandi valutati per questo progetto (tab default)
+    opportunita = []
+    opportunita_stats = {}
+    active_tab = request.query_params.get("tab", "opportunita")
+    if active_tab == "opportunita" or not request.headers.get("HX-Request"):
+        opportunita, opportunita_stats = _load_opportunita(conn, pk)
     saved = request.query_params.get("saved", "")
     error = request.query_params.get("error", "")
     rivaluta_avviato = request.query_params.get("rivaluta", "")
@@ -210,6 +248,8 @@ def progetto_detail(request: Request, pk: int, conn=Depends(get_db)):
         "scoring_json": scoring_json,
         "gap_rows": gap_rows,
         "candidature_stats": candidature_stats,
+        "opportunita": opportunita,
+        "opportunita_stats": opportunita_stats,
         "active_tab": active_tab,
         "saved": saved,
         "error": error,
@@ -222,12 +262,12 @@ def progetto_detail(request: Request, pk: int, conn=Depends(get_db)):
     # HTMX partial: return only tab content
     if request.headers.get("HX-Request") and request.query_params.get("tab"):
         tab_map = {
+            "opportunita": "partials/progetto_tab_opportunita.html",
+            "candidature": "partials/progetto_tab_candidature.html",
             "profilo": "partials/progetto_tab_profilo.html",
             "analisi": "partials/progetto_tab_analisi.html",
-            "scoring": "partials/progetto_tab_scoring.html",
-            "candidature": "partials/progetto_tab_candidature.html",
         }
-        tpl = tab_map.get(active_tab, "partials/progetto_tab_profilo.html")
+        tpl = tab_map.get(active_tab, "partials/progetto_tab_opportunita.html")
         return templates.TemplateResponse(tpl, ctx)
 
     return templates.TemplateResponse("pages/progetto_detail.html", ctx)
@@ -316,13 +356,21 @@ def progetto_tab(request: Request, pk: int, tab_name: str, conn=Depends(get_db))
         "ZONE_SPECIALI_OPTIONS": ZONE_SPECIALI_OPTIONS,
     }
 
+    # Load opportunita data if needed
+    opportunita = []
+    opportunita_stats = {}
+    if tab_name == "opportunita":
+        opportunita, opportunita_stats = _load_opportunita(conn, pk)
+    ctx["opportunita"] = opportunita
+    ctx["opportunita_stats"] = opportunita_stats
+
     tab_map = {
+        "opportunita": "partials/progetto_tab_opportunita.html",
+        "candidature": "partials/progetto_tab_candidature.html",
         "profilo": "partials/progetto_tab_profilo.html",
         "analisi": "partials/progetto_tab_analisi.html",
-        "scoring": "partials/progetto_tab_scoring.html",
-        "candidature": "partials/progetto_tab_candidature.html",
     }
-    tpl = tab_map.get(tab_name, "partials/progetto_tab_profilo.html")
+    tpl = tab_map.get(tab_name, "partials/progetto_tab_opportunita.html")
     return templates.TemplateResponse(tpl, ctx)
 
 

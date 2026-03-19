@@ -28,28 +28,18 @@ def get_current_project_id(request: Request) -> int:
 
 def get_nav_context(request: Request, conn) -> dict:
     """
-    Build navigation context shared by all pages:
-    current project, list of projects, active page.
+    Build navigation context shared by all pages.
+    No global project switcher — project context is per-page.
     """
-    project_id = get_current_project_id(request)
+    return {}
 
+
+def get_all_projects(conn) -> list[dict]:
+    """Fetch active projects for per-page selectors (bandi list, etc.)."""
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute("""
-            SELECT id, slug, nome
-            FROM projects WHERE attivo = TRUE
-            ORDER BY id
-        """)
-        all_projects = [dict(r) for r in cur.fetchall()]
-
-        cur.execute("""
             SELECT id, slug, nome, descrizione_breve
-            FROM projects WHERE id = %s
-        """, (project_id,))
-        row = cur.fetchone()
-        current_project = dict(row) if row else {"id": project_id, "slug": "?", "nome": "Progetto"}
-
-    return {
-        "current_project": current_project,
-        "all_projects": all_projects,
-        "current_project_id": project_id,
-    }
+            FROM projects WHERE attivo = TRUE
+            ORDER BY nome
+        """)
+        return [dict(r) for r in cur.fetchall()]

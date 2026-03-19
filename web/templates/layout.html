@@ -6,7 +6,11 @@
   <title>{% block title %}Tool Bandi{% endblock %}</title>
   <script src="/static/js/htmx.min.js"></script>
   <script defer src="/static/js/alpine.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['DM Sans','ui-sans-serif','system-ui','sans-serif']}}}}</script>
   <style>[x-cloak]{display:none!important}.htmx-indicator{opacity:0;transition:opacity 200ms}.htmx-request .htmx-indicator,.htmx-request.htmx-indicator{opacity:1}.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}</style>
   {% block head %}{% endblock %}
 </head>
@@ -14,36 +18,22 @@
   <div class="flex h-full" x-data="{ sidebarOpen: true }">
 
     {# ── Sidebar ─────────────────────────────────────────────────────────── #}
-    <aside class="flex flex-col w-64 bg-white border-r border-gray-200 shrink-0"
+    <aside class="flex flex-col w-56 bg-slate-900 text-white shrink-0"
            x-show="sidebarOpen" x-transition>
 
       {# Logo / Brand #}
-      <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-700">
+        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
           <span class="text-white font-bold text-sm">TB</span>
         </div>
         <div>
-          <h1 class="text-sm font-semibold text-gray-900">Tool Bandi</h1>
-          <p class="text-xs text-gray-500">Gestione bandi</p>
+          <h1 class="text-sm font-semibold text-white">Tool Bandi</h1>
+          <p class="text-xs text-slate-400">Gestione bandi</p>
         </div>
       </div>
 
-      {# Project Switcher #}
-      <div class="px-3 py-3 border-b border-gray-100">
-        <select
-          class="w-full text-sm rounded-lg border-gray-200 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          onchange="window.location.href='/switch-project?project_id=' + this.value + '&next=' + encodeURIComponent(window.location.pathname)"
-        >
-          {% for p in all_projects %}
-          <option value="{{ p.id }}" {% if p.id == current_project_id %}selected{% endif %}>
-            {{ p.nome }}
-          </option>
-          {% endfor %}
-        </select>
-      </div>
-
       {# Navigation #}
-      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {% set nav_items = [
           ("dashboard", "/", "Dashboard", "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"),
           ("soggetti", "/soggetti", "Soggetti", "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"),
@@ -55,7 +45,7 @@
         {% for key, href, label, icon_path in nav_items %}
         <a href="{{ href }}"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                  {% if active_page == key %}bg-blue-50 text-blue-700{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                  {% if active_page == key %}bg-slate-700 text-white{% else %}text-slate-300 hover:bg-slate-800 hover:text-white{% endif %}">
           <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}"/>
           </svg>
@@ -65,8 +55,8 @@
       </nav>
 
       {# Footer #}
-      <div class="px-4 py-3 border-t border-gray-100">
-        <p class="text-xs text-gray-400">{{ current_project.nome }}</p>
+      <div class="px-4 py-3 border-t border-gray-700">
+        <p class="text-xs text-slate-400">La Monica Luciano</p>
       </div>
     </aside>
 

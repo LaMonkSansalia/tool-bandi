@@ -6,37 +6,56 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-{# ── Stat Cards ──────────────────────────────────────────────────────────── #}
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+{# ── Stat Cards (7 blocchi spec) ───────────────────────────────────────── #}
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
   {{ stat_card(
-    "Idonei da valutare", count_idonei,
+    "Bandi monitorati", count_bandi,
+    "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+    "blue"
+  ) }}
+  {{ stat_card(
+    "Nuovi (7gg)", count_nuovi_7gg,
+    "M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z",
+    "purple"
+  ) }}
+  {{ stat_card(
+    "Idonei", count_idonei,
     "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
     "green"
   ) }}
   {{ stat_card(
-    "Scadono in 14gg", count_scadono_14,
-    "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
-    "red" if count_scadono_14 > 0 else "gray",
-    "idonei + in lavorazione"
-  ) }}
-  {{ stat_card(
     "In lavorazione", count_lavorazione,
     "M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75",
-    "blue"
+    "amber"
+  ) }}
+  {{ stat_card(
+    "Scadono in 14gg", count_scadono_14,
+    "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+    "red" if count_scadono_14 > 0 else "slate"
+  ) }}
+  {{ stat_card(
+    "Progetti attivi", count_progetti,
+    "M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z",
+    "indigo"
+  ) }}
+  {{ stat_card(
+    "Soggetti", count_soggetti,
+    "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z",
+    "slate"
   ) }}
   {{ stat_card(
     "Ultima scansione",
     ultima_scansione.strftime('%d/%m %H:%M') if ultima_scansione else '—',
     "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15",
-    "indigo"
+    "slate"
   ) }}
 </div>
 
-{# ── Scadenze Imminenti ──────────────────────────────────────────────────── #}
+{# ── Scadenze Imminenti (trasversale — tutti i progetti) ───────────────── #}
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
   <div class="px-5 py-4 border-b border-gray-100">
     <h3 class="text-base font-semibold text-gray-900">Scadenze imminenti</h3>
-    <p class="text-sm text-gray-500">Bandi idonei e in lavorazione con deadline entro 30 giorni</p>
+    <p class="text-sm text-gray-500">Bandi idonei e in lavorazione — tutti i progetti — deadline entro 30 giorni</p>
   </div>
 
   {% if scadenze %}
@@ -45,6 +64,7 @@
       <thead>
         <tr class="border-b border-gray-100">
           <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bando</th>
+          <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progetto</th>
           <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ente</th>
           <th class="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Score</th>
           <th class="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Stato</th>
@@ -56,9 +76,10 @@
         <tr class="hover:bg-gray-50 transition-colors {% if row.urgente %}bg-red-50/30{% endif %}">
           <td class="px-5 py-3">
             <a href="/bandi/{{ row.bando_id }}" class="text-sm font-medium text-gray-900 hover:text-blue-600">
-              {{ row.titolo[:60] }}{% if row.titolo|length > 60 %}…{% endif %}
+              {{ row.titolo[:60] }}{% if row.titolo|length > 60 %}...{% endif %}
             </a>
           </td>
+          <td class="px-5 py-3 text-sm text-gray-600">{{ row.progetto_nome or '—' }}</td>
           <td class="px-5 py-3 text-sm text-gray-500">{{ row.ente_erogatore or '—' }}</td>
           <td class="px-5 py-3 text-center">
             {{ score_badge(row.score, row.score_display, row.score_css) }}

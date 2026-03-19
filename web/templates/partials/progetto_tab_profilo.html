@@ -174,6 +174,33 @@
         </button>
       </div>
     </form>
+
+    {# Sezione 7: Scoring Rules (ex tab separato, ora sotto-sezione Profilo — D2) #}
+    <div class="bg-white rounded-xl border border-gray-200 p-5 mt-6">
+      <h3 class="text-sm font-semibold text-gray-900 mb-1">Scoring Rules</h3>
+      <p class="text-xs text-gray-500 mb-4">Regole personalizzate per la valutazione dei bandi.</p>
+
+      <form method="post" action="/progetti/{{ proj.id }}/scoring" class="space-y-4">
+        <textarea name="scoring_rules_json" rows="12"
+                  class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs focus:ring-blue-500 focus:border-blue-500"
+                  spellcheck="false">{{ scoring_json }}</textarea>
+        <p class="text-xs text-gray-400">Tipi: region_match, ateco_match, keyword_in_title, keyword_and_profile, importo_min, beneficiary_match, no_certifications_required, profile_age_check, company_age.</p>
+
+        <div class="flex items-center gap-4">
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="rivaluta" value="1"
+                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span class="text-gray-700">Ri-valuta tutti i bandi dopo il salvataggio</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-medium">
+            Salva Scoring
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   {# Right: Completezza checklist (1/3) #}

@@ -58,14 +58,14 @@
 </div>
 {% endif %}
 
-{# Tabs #}
+{# Tabs (spec §5.3.2: Opportunità DEFAULT → Candidature → Profilo → Analisi) #}
 <div class="border-b border-gray-200 mb-6">
   <nav class="flex gap-6" role="tablist">
     {% set tabs = [
-      ("profilo", "Profilo & Completezza"),
-      ("analisi", "Gap Analysis"),
-      ("scoring", "Scoring Rules"),
+      ("opportunita", "Opportunità"),
       ("candidature", "Candidature"),
+      ("profilo", "Profilo"),
+      ("analisi", "Analisi"),
     ] %}
     {% for key, label in tabs %}
     <button hx-get="/progetti/{{ proj.id }}/tab/{{ key }}" hx-target="#tab-content" hx-push-url="/progetti/{{ proj.id }}?tab={{ key }}"
@@ -80,14 +80,14 @@
 
 {# Tab content #}
 <div id="tab-content">
-  {% if active_tab == 'analisi' %}
-    {% include "partials/progetto_tab_analisi.html" %}
-  {% elif active_tab == 'scoring' %}
-    {% include "partials/progetto_tab_scoring.html" %}
-  {% elif active_tab == 'candidature' %}
+  {% if active_tab == 'candidature' %}
     {% include "partials/progetto_tab_candidature.html" %}
-  {% else %}
+  {% elif active_tab == 'profilo' %}
     {% include "partials/progetto_tab_profilo.html" %}
+  {% elif active_tab == 'analisi' %}
+    {% include "partials/progetto_tab_analisi.html" %}
+  {% else %}
+    {% include "partials/progetto_tab_opportunita.html" %}
   {% endif %}
 </div>
 {% endblock %}
