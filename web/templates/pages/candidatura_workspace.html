@@ -4,10 +4,15 @@
 {% block page_title %}Workspace{% endblock %}
 
 {% block content %}
-{# Breadcrumb #}
+{# Breadcrumb with Progetto/Soggetto context #}
 <nav class="text-sm text-gray-500 mb-4">
   <a href="/candidature" class="hover:text-gray-700">Candidature</a>
   <span class="mx-1">/</span>
+  {% if pe.progetto_nome %}
+  <span class="text-gray-600">{{ pe.progetto_nome }}</span>
+  {% if pe.soggetto_nome %}<span class="text-gray-400 text-xs ml-1">({{ pe.soggetto_nome }})</span>{% endif %}
+  <span class="mx-1">/</span>
+  {% endif %}
   <span class="text-gray-900 truncate">{{ pe.titolo[:60] }}{% if pe.titolo|length > 60 %}...{% endif %}</span>
 </nav>
 
@@ -114,14 +119,14 @@
   </div>
 </div>
 
-{# Tabs #}
+{# Tabs (D12: valutazione→documenti→checklist→note_invio) #}
 <div class="border-b border-gray-200 mb-6">
   <nav class="flex gap-6" role="tablist">
     {% set tabs = [
-      ("overview", "Overview"),
-      ("checklist", "Checklist (" ~ total_items ~ ")"),
+      ("valutazione", "Valutazione"),
       ("documenti", "Documenti"),
-      ("note", "Note (" ~ notes|length ~ ")"),
+      ("checklist", "Checklist (" ~ total_items ~ ")"),
+      ("note_invio", "Note & Invio (" ~ notes|length ~ ")"),
     ] %}
     {% for key, label in tabs %}
     <button hx-get="/candidature/{{ pe.pe_id }}/tab/{{ key }}" hx-target="#tab-content"
@@ -135,11 +140,11 @@
 </div>
 
 <div id="tab-content">
-  {% if active_tab == 'checklist' %}
-    {% include "partials/workspace_tab_checklist.html" %}
-  {% elif active_tab == 'documenti' %}
+  {% if active_tab == 'documenti' %}
     {% include "partials/workspace_tab_documenti.html" %}
-  {% elif active_tab == 'note' %}
+  {% elif active_tab == 'checklist' %}
+    {% include "partials/workspace_tab_checklist.html" %}
+  {% elif active_tab == 'note_invio' %}
     {% include "partials/workspace_tab_note.html" %}
   {% else %}
     {% include "partials/workspace_tab_overview.html" %}

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
 from psycopg2.extras import RealDictCursor
 
-from web.deps import get_db, get_current_project_id, get_nav_context
+from web.deps import get_db, get_nav_context, get_all_projects
 from web.main import templates
 from web.services.display import enrich_bando_row, as_list
 from web.services.state_machine import (
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/candidature")
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _load_workspace(conn, pe_id: int, project_id: int) -> dict | None:
+def _load_workspace(conn, pe_id: int) -> dict | None:
     """Load workspace data (project_evaluation + bando + project)."""
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute("""
@@ -33,17 +33,20 @@ def _load_workspace(conn, pe_id: int, project_id: int) -> dict | None:
                 pe.workspace_checklist, pe.workspace_notes,
                 pe.workspace_completezza, pe.motivo_scarto,
                 pe.data_invio, pe.protocollo_ricevuto,
+                pe.project_id,
                 b.id AS bando_id, b.titolo, b.ente_erogatore, b.data_scadenza,
                 b.tipo_finanziamento,
                 COALESCE(b.importo_max, b.budget_totale) AS budget_display,
                 (b.data_scadenza - CURRENT_DATE)::int AS giorni_rimasti,
                 b.url_fonte, b.portale,
-                p.nome AS progetto_nome, p.id AS progetto_id
+                p.nome AS progetto_nome,
+                s.nome AS soggetto_nome
             FROM project_evaluations pe
             JOIN bandi b ON pe.bando_id = b.id
             JOIN projects p ON pe.project_id = p.id
-            WHERE pe.id = %s AND pe.project_id = %s
-        """, (pe_id, project_id))
+            LEFT JOIN soggetti s ON p.soggetto_id = s.id
+            WHERE pe.id = %s
+        """, (pe_id,))
         row = cur.fetchone()
 
     if not row:
@@ -62,22 +65,42 @@ def _load_workspace(conn, pe_id: int, project_id: int) -> dict | None:
 
 @router.get("")
 def candidature_list(request: Request, conn=Depends(get_db)):
-    """Lista candidature attive (lavorazione/pronto/inviato)."""
-    pid = get_current_project_id(request)
+    """Lista candidature trasversale (D8) con filtri stato/progetto/soggetto."""
     nav = get_nav_context(request, conn)
+    all_projects = get_all_projects(conn)
+    qp = request.query_params
+
+    # Filters
+    stato_filter = qp.get("stato", "").strip()
+    progetto_filter = qp.get("project_id", "").strip()
+
+    conditions = ["pe.stato IN ('lavorazione', 'pronto', 'inviato')"]
+    params: list = []
+
+    if stato_filter:
+        conditions.append("pe.stato = %s")
+        params.append(stato_filter)
+    if progetto_filter and progetto_filter.isdigit():
+        conditions.append("pe.project_id = %s")
+        params.append(int(progetto_filter))
+
+    where = " AND ".join(conditions)
 
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        cur.execute("""
+        cur.execute(f"""
             SELECT pe.id AS pe_id, pe.stato, pe.score,
                    pe.workspace_completezza,
                    b.id AS bando_id, b.titolo, b.ente_erogatore, b.data_scadenza,
                    b.tipo_finanziamento,
                    COALESCE(b.importo_max, b.budget_totale) AS budget_display,
-                   (b.data_scadenza - CURRENT_DATE)::int AS giorni_rimasti
+                   (b.data_scadenza - CURRENT_DATE)::int AS giorni_rimasti,
+                   p.nome AS progetto_nome,
+                   s.nome AS soggetto_nome
             FROM project_evaluations pe
             JOIN bandi b ON pe.bando_id = b.id
-            WHERE pe.project_id = %s
-              AND pe.stato IN ('lavorazione', 'pronto', 'inviato')
+            JOIN projects p ON pe.project_id = p.id
+            LEFT JOIN soggetti s ON p.soggetto_id = s.id
+            WHERE {where}
             ORDER BY
                 CASE pe.stato
                     WHEN 'lavorazione' THEN 1
@@ -85,7 +108,7 @@ def candidature_list(request: Request, conn=Depends(get_db)):
                     WHEN 'inviato' THEN 3
                 END,
                 b.data_scadenza ASC NULLS LAST
-        """, (pid,))
+        """, params)
         rows = [enrich_bando_row(dict(r)) for r in cur.fetchall()]
 
     # Stats
@@ -101,6 +124,11 @@ def candidature_list(request: Request, conn=Depends(get_db)):
         "rows": rows,
         "stats": stats,
         "total": len(rows),
+        "all_projects": all_projects,
+        "filters": {
+            "stato": stato_filter,
+            "project_id": progetto_filter,
+        },
     })
 
 
@@ -108,10 +136,9 @@ def candidature_list(request: Request, conn=Depends(get_db)):
 
 @router.get("/{pe_id}")
 def workspace(request: Request, pe_id: int, conn=Depends(get_db)):
-    """Workspace candidatura — 4 tab HTMX."""
-    pid = get_current_project_id(request)
+    """Workspace candidatura — 4 tab HTMX (D12: valutazione→documenti→checklist→note_invio)."""
     nav = get_nav_context(request, conn)
-    data = _load_workspace(conn, pe_id, pid)
+    data = _load_workspace(conn, pe_id)
 
     if not data:
         return HTMLResponse("<h1>Workspace non trovato</h1>", status_code=404)
@@ -129,7 +156,8 @@ def workspace(request: Request, pe_id: int, conn=Depends(get_db)):
     data["can_torna_lavorazione"] = stato == "pronto"
     data["can_scartare"] = stato in ("lavorazione", "pronto")
 
-    active_tab = request.query_params.get("tab", "overview")
+    # D12: tab order valutazione→documenti→checklist→note_invio
+    active_tab = request.query_params.get("tab", "valutazione")
 
     ctx = {
         "request": request,
@@ -149,8 +177,7 @@ def workspace(request: Request, pe_id: int, conn=Depends(get_db)):
 @router.get("/{pe_id}/tab/{tab_name}")
 def workspace_tab(request: Request, pe_id: int, tab_name: str, conn=Depends(get_db)):
     """HTMX: return workspace tab partial."""
-    pid = get_current_project_id(request)
-    data = _load_workspace(conn, pe_id, pid)
+    data = _load_workspace(conn, pe_id)
 
     if not data:
         return HTMLResponse("<p>Non trovato</p>", status_code=404)
@@ -175,11 +202,12 @@ def workspace_tab(request: Request, pe_id: int, tab_name: str, conn=Depends(get_
         "notes": data["workspace_notes"],
     }
 
+    # D12: tab order valutazione→documenti→checklist→note_invio
     tab_map = {
-        "overview": "partials/workspace_tab_overview.html",
-        "checklist": "partials/workspace_tab_checklist.html",
+        "valutazione": "partials/workspace_tab_overview.html",
         "documenti": "partials/workspace_tab_documenti.html",
-        "note": "partials/workspace_tab_note.html",
+        "checklist": "partials/workspace_tab_checklist.html",
+        "note_invio": "partials/workspace_tab_note.html",
     }
     tpl = tab_map.get(tab_name, "partials/workspace_tab_overview.html")
     return templates.TemplateResponse(tpl, ctx)
@@ -198,12 +226,10 @@ def state_action(
     conn=Depends(get_db),
 ):
     """Esegui transizione di stato."""
-    pid = get_current_project_id(request)
-
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute(
-            "SELECT id, stato, bando_id, gap_analysis FROM project_evaluations WHERE id = %s AND project_id = %s",
-            (pe_id, pid),
+            "SELECT id, stato, bando_id, gap_analysis FROM project_evaluations WHERE id = %s",
+            (pe_id,),
         )
         row = cur.fetchone()
 
@@ -264,12 +290,10 @@ def checklist_update(
     conn=Depends(get_db),
 ):
     """HTMX: toggle checklist item, return updated item partial."""
-    pid = get_current_project_id(request)
-
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute(
-            "SELECT workspace_checklist FROM project_evaluations WHERE id = %s AND project_id = %s",
-            (pe_id, pid),
+            "SELECT workspace_checklist FROM project_evaluations WHERE id = %s",
+            (pe_id,),
         )
         row = cur.fetchone()
 
@@ -317,15 +341,14 @@ def checklist_add(
     conn=Depends(get_db),
 ):
     """Aggiunge item manuale alla checklist."""
-    pid = get_current_project_id(request)
     label = label.strip()
     if not label:
         return RedirectResponse(url=f"/candidature/{pe_id}?tab=checklist", status_code=303)
 
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute(
-            "SELECT workspace_checklist FROM project_evaluations WHERE id = %s AND project_id = %s",
-            (pe_id, pid),
+            "SELECT workspace_checklist FROM project_evaluations WHERE id = %s",
+            (pe_id,),
         )
         row = cur.fetchone()
 
@@ -362,15 +385,14 @@ def note_add(
     conn=Depends(get_db),
 ):
     """Aggiunge nota cronologica."""
-    pid = get_current_project_id(request)
     testo = testo.strip()
     if not testo:
-        return RedirectResponse(url=f"/candidature/{pe_id}?tab=note", status_code=303)
+        return RedirectResponse(url=f"/candidature/{pe_id}?tab=note_invio", status_code=303)
 
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute(
-            "SELECT workspace_notes FROM project_evaluations WHERE id = %s AND project_id = %s",
-            (pe_id, pid),
+            "SELECT workspace_notes FROM project_evaluations WHERE id = %s",
+            (pe_id,),
         )
         row = cur.fetchone()
 
@@ -390,4 +412,4 @@ def note_add(
         )
         conn.commit()
 
-    return RedirectResponse(url=f"/candidature/{pe_id}?tab=note", status_code=303)
+    return RedirectResponse(url=f"/candidature/{pe_id}?tab=note_invio", status_code=303)
