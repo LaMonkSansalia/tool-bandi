@@ -10,10 +10,29 @@
 {% endblock %}
 
 {% block content %}
+{# ── Project Selector (D3 — spec §5.4.1: "Valuta per:") ──────────────── #}
+<div class="mb-4 flex items-center gap-3">
+  <label class="text-sm font-medium text-gray-700">Valuta per:</label>
+  <select id="project-selector"
+          class="text-sm rounded-lg border-gray-200 px-3 py-2 min-w-[220px] focus:ring-2 focus:ring-blue-500"
+          onchange="window.location.href='/bandi?project_id=' + this.value">
+    <option value="">Tutti i bandi (senza valutazione)</option>
+    {% for p in all_projects %}
+    <option value="{{ p.id }}" {% if selected_project_id == p.id %}selected{% endif %}>{{ p.nome }}</option>
+    {% endfor %}
+  </select>
+  {% if selected_project_id %}
+  <span class="text-xs text-gray-400">Score e stato relativi al progetto selezionato</span>
+  {% endif %}
+</div>
+
 {# ── Filters ─────────────────────────────────────────────────────────────── #}
 <form id="filters-form" class="mb-6"
       hx-get="/bandi" hx-target="#bandi-table" hx-push-url="true"
       hx-trigger="change from:select, change from:input[type=checkbox]">
+  {% if selected_project_id %}
+  <input type="hidden" name="project_id" value="{{ selected_project_id }}">
+  {% endif %}
   <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
     <div class="flex flex-wrap gap-3 items-end">
       {# Search #}

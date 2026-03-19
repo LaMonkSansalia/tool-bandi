@@ -10,6 +10,18 @@
 {% endblock %}
 
 {% block content %}
+{# ── Project Selector (D4) ────────────────────────────────────────────── #}
+<div class="mb-4 flex items-center gap-3">
+  <label class="text-sm font-medium text-gray-700">Valuta per:</label>
+  <select class="text-sm rounded-lg border-gray-200 px-3 py-2 min-w-[220px]"
+          onchange="window.location.href='/bandi/{{ bando.bando_id }}?project_id=' + this.value">
+    <option value="">Seleziona progetto...</option>
+    {% for p in all_projects %}
+    <option value="{{ p.id }}" {% if selected_project_id == p.id %}selected{% endif %}>{{ p.nome }}</option>
+    {% endfor %}
+  </select>
+</div>
+
 {# ── Header Card ─────────────────────────────────────────────────────────── #}
 <div id="bando-header" class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-6">
   <div class="flex items-start justify-between gap-4">
@@ -19,8 +31,10 @@
         {% if bando.ente_erogatore %}
         <span class="text-sm text-gray-500">{{ bando.ente_erogatore }}</span>
         {% endif %}
+        {% if selected_project_id %}
         {{ stato_badge(bando.stato, bando.stato_label, bando.stato_css) }}
         {{ score_badge(bando.score, bando.score_display, bando.score_css) }}
+        {% endif %}
         {{ tipo_fp_badge(bando.tipo_fp_label, bando.tipo_fp_css) }}
         {{ giorni_badge(bando.giorni_label, bando.giorni_css) }}
         {% if bando.urgente %}{{ urgenza_badge() }}{% endif %}
@@ -34,20 +48,31 @@
       </div>
     </div>
 
-    {# Action Buttons #}
+    {# Action Buttons (solo con progetto) #}
+    {% if selected_project_id %}
     <div class="flex flex-wrap gap-2 shrink-0" id="action-buttons">
       {% include "partials/stato_action_buttons.html" %}
     </div>
+    {% endif %}
   </div>
 </div>
 
 {# ── Tabs ────────────────────────────────────────────────────────────────── #}
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+  {# D5: Tab Decisione solo con progetto selezionato #}
+  {% if selected_project_id %}
   {{ tab_bar(
     [("decisione", "Decisione 60s"), ("dettaglio", "Dettaglio"), ("testo", "Testo")],
     active_tab,
+    "/bandi/" ~ bando.bando_id ~ "?project_id=" ~ selected_project_id
+  ) }}
+  {% else %}
+  {{ tab_bar(
+    [("dettaglio", "Dettaglio"), ("testo", "Testo")],
+    active_tab if active_tab != "decisione" else "dettaglio",
     "/bandi/" ~ bando.bando_id
   ) }}
+  {% endif %}
   <div id="tab-content" class="p-5">
     {% if active_tab == "decisione" %}
       {% include "partials/bando_tab_decisione.html" %}
