@@ -1,9 +1,26 @@
 """
 State machine for project evaluations.
 Extracted from tool-bandi-ui/apps/candidature/views.py
+
+DEBITO TECNICO (D10):
+La spec prevede una tabella `candidatura` separata con stati diversi:
+  bozza → lavorazione → sospesa → pronta → inviata (+ abbandonata)
+L'implementazione attuale usa project_evaluations.stato con stati vecchi:
+  idoneo → lavorazione → pronto → inviato (+ scartato, archiviato)
+
+STATO_CANDIDATURA_META in display.py definisce i nuovi stati ma NON e' ancora usato.
+Migration 011 crea la tabella candidatura ma non e' deployata.
+
+Piano migrazione:
+1. Deploy migration 011 (tabella candidatura)
+2. Data migration da project_evaluations a candidatura
+3. Aggiornare route candidature per usare tabella candidatura
+4. Switchare state machine ai nuovi stati
+5. Mantenere project_evaluations per valutazione (non per workflow)
 """
 
 # Current state machine (project_evaluations.stato)
+# TODO(D10): Migrare a tabella candidatura con nuovi stati (vedi docstring)
 TRANSITIONS = {
     "avvia_lavorazione": ("idoneo", "lavorazione"),
     "segna_pronto": ("lavorazione", "pronto"),

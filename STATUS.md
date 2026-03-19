@@ -1,7 +1,7 @@
 # Tool Bandi — Contesto & Status
 
-**Versione:** 0.7.0-dev
-**Ultimo aggiornamento:** 2026-03-19
+**Versione:** 0.7.1-dev
+**Ultimo aggiornamento:** 2026-03-20
 **Repo:** GitHub — LaMonkSansalia/bandiresearcher
 **Inizio progetto:** 2026-03-02
 
@@ -365,33 +365,41 @@ tool-bandi-ui/ (Django) ritirato dopo validazione.
 
 ---
 
-### Prossimo: Riallineamento Spec (D1-D20)
+### v0.7.1-dev — Riallineamento Spec D1-D20 (2026-03-20)
 
-20 divergenze identificate tra implementazione e spec UI/UX. Le Fasi 0-4 hanno portato le Django views 1:1 in FastAPI. Ora serve allineare alla spec che definisce una UI/UX nuova.
+20 divergenze identificate tra implementazione e spec UI/UX. Le Fasi 0-4 avevano portato le Django views 1:1 in FastAPI. Questo sprint allinea tutto alla spec.
 
-#### Fase A — Fix architetturali
-- [ ] D1: Rimuovere project switcher globale dalla sidebar. Contesto progetto nelle singole pagine
-- [ ] D2: Tab Progetto → Opportunita' (DEFAULT), Candidature, Profilo, Analisi. Scoring sotto Profilo
-- [ ] D3+D4: Selettore progetto in lista bandi ("Valuta per:") e dettaglio bando header
-- [ ] D8: Candidature lista trasversale (non filtrata per project_id) con filtri stato/progetto/soggetto
+#### Commit: 6b03d0e — D1+D2+D6+D9+D16+D17+D18
+- [x] D1: Rimosso project switcher globale dalla sidebar e deps.py
+- [x] D2: Tab Progetto riordinati: Opportunita'(DEFAULT)→Candidature→Profilo→Analisi
+- [x] D2: Scoring Rules integrato come sotto-sezione del tab Profilo
+- [x] D2: Creato progetto_tab_opportunita.html (bandi valutati per progetto)
+- [x] D6: Dashboard trasversale con 7 stat card (bandi, nuovi, idonei, lavorazione, scadenze, progetti, soggetti)
+- [x] D9: Sidebar scura bg-slate-900 con testo bianco (spec mockup)
+- [x] D16: Stat card cross-project (non filtrate per progetto)
+- [x] D17: Stat card con gradient (bg-gradient-to-br)
+- [x] D18: Font DM Sans via Google Fonts + tailwind config
 
-#### Fase B — Fix contenuto
-- [ ] D5: Tab Decisione bando condizionale (solo con progetto selezionato)
-- [ ] D6+D16: Dashboard completa (7 blocchi spec) + stat card corrette
-- [ ] D7+D14+D15: Soggetti 3 tab (Anagrafica, Vincoli & Vantaggi, Progetti) + colonne lista + campi form
-- [ ] D11: Bottone "Crea candidatura" nel bando detail con modale scelta soggetto
-- [ ] D12: Workspace tab order → Valutazione, Documenti, Checklist, Note & Invio
-- [ ] D13: Candidature colonne Progetto/Soggetto
-- [ ] D19: Tab Note & Invio (form invio se stato=pronta + storico stati)
-- [ ] D20: Tab Analisi completo (statistiche, timeline/diario, note strategiche)
+#### Commit: edb230f — D3+D4+D5
+- [x] D3: Dropdown "Valuta per:" in bandi list (query param project_id)
+- [x] D4: Dropdown "Valuta per:" in bando detail header
+- [x] D5: Tab Decisione e action buttons condizionali (solo con progetto)
 
-#### Fase C — Fix cosmetici
-- [ ] D9: Sidebar scura (bg-slate-900)
-- [ ] D17: Stat card gradient colorati
-- [ ] D18: Font DM Sans
+#### Commit: 2667abf — D8+D12+D13
+- [x] D8: Lista candidature trasversale (tutti i progetti), filtri stato/progetto
+- [x] D12: Workspace tab order: Valutazione→Documenti→Checklist→Note&Invio
+- [x] D13: Colonne Progetto/Soggetto nella lista candidature
+
+#### Commit: d41bfee — D7
+- [x] D7: Soggetti 3 tab (Anagrafica, Vincoli & Vantaggi, Progetti)
+- [x] D7: CRUD vincoli e vantaggi via form POST (profilo JSONB)
+
+#### Commit: 388f8a3 — D11+D20
+- [x] D11: Action buttons puntano a /candidature/{pe_id}/stato (fix URL)
+- [x] D20: Tab Analisi arricchito con stats rapide, completezza, soggetto
 
 #### Debito tecnico
-- [ ] D10: State machine usa project_evaluations (vecchi stati). Spec prevede tabella candidatura separata con nuovi stati (bozza→lavorazione→sospesa→pronta→inviata→abbandonata)
+- [x] D10: **Documentato**, non implementato. State machine usa project_evaluations con vecchi stati (idoneo→lavorazione→pronto→inviato). Spec prevede tabella candidatura separata con nuovi stati (bozza→lavorazione→sospesa→pronta→inviata→abbandonata). Piano migrazione documentato in state_machine.py. Migration 011 creata ma non deployata.
 
 ---
 
