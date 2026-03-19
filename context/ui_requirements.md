@@ -1,9 +1,10 @@
-# UI Requirements — tool-bandi-ui
+# UI Requirements — Tool Bandi (storico)
 
 **Version:** 1.0.0
 **Date:** 2026-03-19
-**Scope:** Nuova interfaccia web per tool-bandi (sostituisce Streamlit)
-**Status:** Pianificazione completata — stack tecnologico da scegliere (US-001 Sprint 0)
+**Status:** STORICO — questi requisiti sono stati implementati in `web/` (FastAPI).
+La spec autorita' e' ora `context/spec/tool-bandi-spec (1).md`.
+Il repo `tool-bandi-ui` (Django) e' stato archiviato il 2026-03-20.
 
 ---
 

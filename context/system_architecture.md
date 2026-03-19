@@ -1,10 +1,11 @@
-# System Architecture — Bandi Researcher
+# System Architecture — Tool Bandi
 
-**Version:** 0.6.0 — Soggetti/Progetti split + UI Layer pianificato
-**Date:** 2026-03-19
-**Precedente:** 0.5.0 — Multi-Project + Strategic UX Layer (2026-03-04)
+**Version:** 0.7.1-dev — FastAPI rebuild + riallineamento spec
+**Date:** 2026-03-20
+**Precedente:** 0.6.0 — Soggetti/Progetti split + Django UI (ritirato)
+**Repo:** github.com/LaMonkSansalia/tool-bandi (rinominato da bandiresearcher)
 **Scope:** Multi-project (La Monica Luciano + Paese Delle Stelle + future projects)
-**Deployment:** Local (Docker Compose)
+**Deployment:** Local (Docker Compose) — 2 servizi: web (uvicorn) + db (pgvector)
 
 ---
 
@@ -15,15 +16,16 @@
 
 ---
 
-## UI Layer (v0.6.0 — pianificato)
+## UI Layer (v0.7.x — FastAPI)
 
-Lo Streamlit UI viene sostituito da una nuova applicazione web (`tool-bandi-ui/`).
-Il Python engine rimane invariato — cambia solo il layer UI.
+Django UI (tool-bandi-ui/) ritirato e archiviato (2026-03-20).
+Web layer ora in `web/` nello stesso repo — FastAPI + Jinja2 + HTMX + Alpine.js.
+Engine Python chiamato direttamente dalle route (zero serializzazione).
 
-**Nuovo progetto:** `tool-bandi-ui/` — stack da scegliere (Sprint 0 US-001)
-**Piano completo:** `/Users/lucianolamonica/.claude/plans/cheeky-mapping-gray.md`
-**Requisiti UI:** `context/ui_requirements.md`
-**Workspace + Profilo Progetto:** `context/project_workspace.md`
+**Stack:** FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind CSS (CDN)
+**Spec UI/UX:** `context/spec/tool-bandi-spec (1).md` (autorita')
+**Mockup:** `context/spec/tool-bandi-mockup.jsx` (riferimento design)
+**Requisiti UI (storico):** `context/ui_requirements.md`
 
 ### Routing nuovo
 

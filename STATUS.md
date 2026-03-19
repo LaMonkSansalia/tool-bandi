@@ -2,7 +2,7 @@
 
 **Versione:** 0.7.1-dev
 **Ultimo aggiornamento:** 2026-03-20
-**Repo:** GitHub — LaMonkSansalia/bandiresearcher
+**Repo:** GitHub — LaMonkSansalia/tool-bandi (rinominato da bandiresearcher il 2026-03-20)
 **Inizio progetto:** 2026-03-02
 
 ---
@@ -116,8 +116,8 @@ tool-bandi/
 
 | File | Ruolo |
 |------|-------|
-| `tool-bandi-ui/_local/spec/tool-bandi-spec (1).md` | Spec UI/UX — autorita' per navigazione, pagine, tab, flussi |
-| `tool-bandi-ui/_local/spec/tool-bandi-mockup.jsx` | Mockup React — autorita' per layout visuale, colori, componenti |
+| `context/spec/tool-bandi-spec (1).md` | Spec UI/UX — autorita' per navigazione, pagine, tab, flussi |
+| `context/spec/tool-bandi-mockup.jsx` | Mockup React — autorita' per layout visuale, colori, componenti |
 
 **Regola:** Quando spec e piano divergono → la spec vince (piu' recente).
 
@@ -316,7 +316,12 @@ tool-bandi/
 **Decisione:** Django sostituito con FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind CSS.
 Motivo: Django ORM non usato (tutto raw SQL), troppo overhead per il caso d'uso.
 Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
-tool-bandi-ui/ (Django) ritirato dopo validazione.
+
+**Consolidamento repo (2026-03-20):**
+- tool-bandi-ui/ (Django) ritirato — repo GitHub archiviato come `tool-bandi-ui-archived`
+- Repo GitHub `bandiresearcher` rinominato → `tool-bandi` (unico repo attivo)
+- Spec, mockup e screenshot copiati in `context/spec/` prima dell'archiviazione
+- Un solo repo, un solo processo, un solo linguaggio (Python)
 
 **Commit checkpoint:** `57f0212` — 84 file, 7954 LOC
 
