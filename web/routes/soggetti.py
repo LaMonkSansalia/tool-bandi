@@ -273,6 +273,62 @@ def soggetto_duplica(request: Request, soggetto_id: int, conn=Depends(get_db)):
     return RedirectResponse(url=f"/soggetti/{new_id}?tab=anagrafica", status_code=303)
 
 
+@router.post("/{soggetto_id}/vincolo")
+def soggetto_add_vincolo(
+    request: Request,
+    soggetto_id: int,
+    label: str = Form(""),
+    motivo: str = Form(""),
+    conn=Depends(get_db),
+):
+    """Aggiunge vincolo (hard stop) al soggetto."""
+    s = _load_soggetto(conn, soggetto_id)
+    if not s or not label.strip():
+        return RedirectResponse(url=f"/soggetti/{soggetto_id}?tab=vincoli", status_code=303)
+
+    profilo = s["profilo"]
+    hard_stops = profilo.get("hard_stops", [])
+    hard_stops.append({"label": label.strip(), "motivo": motivo.strip()})
+    profilo["hard_stops"] = hard_stops
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE soggetti SET profilo = %s WHERE id = %s",
+            (json.dumps(profilo, ensure_ascii=False), soggetto_id),
+        )
+        conn.commit()
+
+    return RedirectResponse(url=f"/soggetti/{soggetto_id}?tab=vincoli&saved=1", status_code=303)
+
+
+@router.post("/{soggetto_id}/vantaggio")
+def soggetto_add_vantaggio(
+    request: Request,
+    soggetto_id: int,
+    label: str = Form(""),
+    dettaglio: str = Form(""),
+    conn=Depends(get_db),
+):
+    """Aggiunge vantaggio competitivo al soggetto."""
+    s = _load_soggetto(conn, soggetto_id)
+    if not s or not label.strip():
+        return RedirectResponse(url=f"/soggetti/{soggetto_id}?tab=vincoli", status_code=303)
+
+    profilo = s["profilo"]
+    vantaggi = profilo.get("vantaggi", [])
+    vantaggi.append({"label": label.strip(), "dettaglio": dettaglio.strip()})
+    profilo["vantaggi"] = vantaggi
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE soggetti SET profilo = %s WHERE id = %s",
+            (json.dumps(profilo, ensure_ascii=False), soggetto_id),
+        )
+        conn.commit()
+
+    return RedirectResponse(url=f"/soggetti/{soggetto_id}?tab=vincoli&saved=1", status_code=303)
+
+
 def _safe_int(val, default=None):
     if val is None or str(val).strip() == "":
         return default
