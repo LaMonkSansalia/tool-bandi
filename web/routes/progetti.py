@@ -312,7 +312,7 @@ def progetto_tab(request: Request, pk: int, tab_name: str, conn=Depends(get_db))
             gap_rows = [dict(r) for r in cur.fetchall()]
 
     candidature_stats = {}
-    if tab_name == "candidature":
+    if tab_name in ("candidature", "analisi"):
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
                 SELECT stato, COUNT(*) AS n
