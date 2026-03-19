@@ -48,7 +48,7 @@ def dashboard(request: Request, conn=Depends(get_db)):
         count_progetti = cur.fetchone()["n"]
 
         # Card 7: Soggetti
-        cur.execute("SELECT COUNT(*) AS n FROM soggetti WHERE tipo = 'reale'")
+        cur.execute("SELECT COUNT(*) AS n FROM soggetti WHERE COALESCE(profilo->>'tipo', 'reale') = 'reale'")
         count_soggetti = cur.fetchone()["n"]
 
         # Tabella scadenze imminenti (trasversale)

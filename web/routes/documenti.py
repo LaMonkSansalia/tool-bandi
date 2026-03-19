@@ -52,7 +52,19 @@ def _check_pe_ownership(conn, pe_id: int, project_id: int) -> dict | None:
         return cur.fetchone()
 
 
+def _table_exists(conn, table_name: str) -> bool:
+    """Check if a table exists in the DB (migration may not be deployed)."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = %s)",
+            (table_name,),
+        )
+        return cur.fetchone()[0]
+
+
 def _get_documents(conn, pe_id: int) -> list[dict]:
+    if not _table_exists(conn, "documento_candidatura"):
+        return []
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute("""
             SELECT id, nome, categoria, origine, generabile_ai, stato,
