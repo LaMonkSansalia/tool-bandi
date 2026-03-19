@@ -1,0 +1,76 @@
+{# Tab Decisione 60s — Pro/Contro split view #}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {# Pro #}
+  <div>
+    <h4 class="text-sm font-semibold text-green-700 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+      </svg>
+      Pro ({{ pro_list|length }})
+    </h4>
+    {% if pro_list %}
+    <ul class="space-y-2">
+      {% for item in pro_list %}
+      <li class="flex items-start gap-2 text-sm">
+        <span class="mt-0.5 w-5 h-5 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold shrink-0">
+          +{{ item.get('punti', item.get('points', '')) }}
+        </span>
+        <div>
+          <span class="font-medium text-gray-900">{{ item.get('criterio', item.get('rule', '')) }}</span>
+          {% if item.get('description') or item.get('descrizione') %}
+          <p class="text-gray-500 text-xs mt-0.5">{{ item.get('description', item.get('descrizione', '')) }}</p>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-gray-400">Nessun criterio soddisfatto</p>
+    {% endif %}
+  </div>
+
+  {# Contro #}
+  <div>
+    <h4 class="text-sm font-semibold text-red-700 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+      Contro ({{ contro_list|length }})
+    </h4>
+    {% if contro_list %}
+    <ul class="space-y-2">
+      {% for item in contro_list %}
+      <li class="flex items-start gap-2 text-sm">
+        <span class="mt-0.5 w-5 h-5 {{ 'bg-yellow-100 text-yellow-700' if item.get('is_yellow') else 'bg-red-100 text-red-700' }} rounded-full flex items-center justify-center text-xs font-bold shrink-0">
+          {{ '!' if item.get('is_yellow') else '✗' }}
+        </span>
+        <div>
+          <span class="font-medium text-gray-900">{{ item.get('tipo', item.get('label', item.get('categoria', ''))) }}</span>
+          {% set desc = item.get('suggerimento', item.get('descrizione', item.get('description', ''))) %}
+          {% if desc %}
+          <p class="text-gray-500 text-xs mt-0.5">{{ desc }}</p>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-gray-400">Nessun gap rilevato</p>
+    {% endif %}
+  </div>
+</div>
+
+{# Hard stop banner #}
+{% if bando.hard_stop_reason %}
+<div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+  <p class="text-sm font-medium text-red-800">Hard Stop: {{ bando.hard_stop_reason }}</p>
+</div>
+{% endif %}
+
+{# Motivo scarto #}
+{% if bando.motivo_scarto %}
+<div class="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+  <p class="text-sm text-gray-600"><strong>Motivo scarto:</strong> {{ bando.motivo_scarto }}</p>
+</div>
+{% endif %}

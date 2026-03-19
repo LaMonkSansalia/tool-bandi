@@ -68,6 +68,15 @@ def get_project_scoring_rules(project_id: int) -> dict | None:
             return row["scoring_rules"] if row else None
 
 
+def get_soggetto_profile(soggetto_id: int) -> dict | None:
+    """Load profilo JSONB from soggetti table by id (post-migration 008)."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT profilo FROM soggetti WHERE id = %s AND attivo = TRUE", (soggetto_id,))
+            row = cur.fetchone()
+            return row["profilo"] if row else None
+
+
 def get_project_skills(project_id: int) -> dict | None:
     """Load skills JSONB for a project."""
     with get_connection() as conn:

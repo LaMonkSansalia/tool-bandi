@@ -1,0 +1,42 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bandi_web
+    restart: unless-stopped
+    env_file: engine/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [npm_default, internal]
+    # NPM proxy -> bandi_web:8000
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: bandi_db
+    restart: unless-stopped
+    env_file: engine/.env
+    environment:
+      POSTGRES_DB: ${DB_NAME:-bandi_db}
+      POSTGRES_USER: ${DB_USER:-bandi}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-bandi}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-bandi} -d ${DB_NAME:-bandi_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks: [internal]
+
+volumes:
+  pgdata:
+
+networks:
+  npm_default:
+    external: true
+  internal:
+    internal: true

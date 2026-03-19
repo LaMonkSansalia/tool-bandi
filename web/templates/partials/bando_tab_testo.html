@@ -1,0 +1,19 @@
+{# Tab Testo — raw text extracted from PDF #}
+
+<div class="space-y-4">
+  {% if bando.raw_text %}
+  <div class="prose prose-sm max-w-none">
+    <div class="bg-gray-50 rounded-lg p-5 border border-gray-200 max-h-[600px] overflow-y-auto">
+      <pre class="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed">{{ bando.raw_text }}</pre>
+    </div>
+  </div>
+  <p class="text-xs text-gray-400">
+    {{ bando.raw_text | length }} caratteri estratti
+    {% if bando.portale %} — Fonte: {{ bando.portale }}{% endif %}
+  </p>
+  {% else %}
+  <div class="text-center py-12">
+    <p class="text-sm text-gray-500">Testo non ancora estratto per questo bando.</p>
+  </div>
+  {% endif %}
+</div>

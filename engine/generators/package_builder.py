@@ -503,6 +503,28 @@ def build_package(bando_id: int, is_draft: bool = True) -> Path:
     return package_dir
 
 
+def build_package_for_pe(pe_id: int, is_draft: bool = True) -> Path:
+    """
+    Wrapper for the Django UI: build package given a project_evaluation id.
+    Looks up bando_id from project_evaluations and calls build_package().
+
+    Usage: from engine.generators.package_builder import build_package_for_pe
+    """
+    import psycopg2
+    from engine.config import DATABASE_URL
+
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT bando_id FROM project_evaluations WHERE id = %s", (pe_id,))
+            row = cur.fetchone()
+
+    if not row:
+        raise ValueError(f"project_evaluation {pe_id} not found")
+
+    bando_id = row[0]
+    return build_package(bando_id, is_draft=is_draft)
+
+
 def create_zip_package(bando_id: int) -> bytes:
     """
     Build package and return as ZIP bytes (for Streamlit download button).

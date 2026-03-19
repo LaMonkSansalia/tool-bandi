@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+{% from "components/badge.html" import stato_badge, score_badge, tipo_fp_badge, giorni_badge, urgenza_badge %}
+{% from "components/empty_state.html" import empty_state %}
+
+{% block title %}Bandi — Tool Bandi{% endblock %}
+{% block page_title %}Bandi{% endblock %}
+
+{% block page_actions %}
+<span class="text-sm text-gray-500">{{ total_count }} bandi</span>
+{% endblock %}
+
+{% block content %}
+{# ── Filters ─────────────────────────────────────────────────────────────── #}
+<form id="filters-form" class="mb-6"
+      hx-get="/bandi" hx-target="#bandi-table" hx-push-url="true"
+      hx-trigger="change from:select, change from:input[type=checkbox]">
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+    <div class="flex flex-wrap gap-3 items-end">
+      {# Search #}
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Cerca</label>
+        <input type="text" name="q" value="{{ filters.q }}" placeholder="Titolo o ente..."
+               class="w-full text-sm rounded-lg border-gray-200 px-3 py-2 focus:ring-2 focus:ring-blue-500"
+               hx-get="/bandi" hx-target="#bandi-table" hx-trigger="keyup changed delay:300ms" hx-push-url="true"
+               hx-include="#filters-form">
+      </div>
+
+      {# Stato #}
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Stato</label>
+        <select name="stato" class="text-sm rounded-lg border-gray-200 px-3 py-2">
+          <option value="">Tutti</option>
+          {% for key, (label, css) in stati_choices %}
+          <option value="{{ key }}" {% if key in filters.stato %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {# Tipo finanziamento #}
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
+        <select name="tipo_fp" class="text-sm rounded-lg border-gray-200 px-3 py-2">
+          <option value="">Tutti</option>
+          {% for val, label in tipi_fp_options %}
+          <option value="{{ val }}" {% if val == filters.tipo_fp %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {# Portale #}
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Portale</label>
+        <select name="portale" class="text-sm rounded-lg border-gray-200 px-3 py-2">
+          <option value="">Tutti</option>
+          {% for p in portali %}
+          <option value="{{ p }}" {% if p == filters.portale %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {# Score min #}
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Score min</label>
+        <input type="number" name="score_min" value="{{ filters.score_min }}" placeholder="0"
+               class="w-20 text-sm rounded-lg border-gray-200 px-3 py-2"
+               hx-get="/bandi" hx-target="#bandi-table" hx-trigger="keyup changed delay:500ms" hx-push-url="true"
+               hx-include="#filters-form">
+      </div>
+
+      {# Checkboxes #}
+      <div class="flex items-center gap-4">
+        <label class="flex items-center gap-2 text-sm text-gray-600">
+          <input type="checkbox" name="solo_aperti" value="1"
+                 {% if filters.solo_aperti %}checked{% endif %}
+                 class="rounded border-gray-300 text-blue-600">
+          Solo aperti
+        </label>
+        <label class="flex items-center gap-2 text-sm text-gray-600">
+          <input type="checkbox" name="nascondi_archiviati" value="1"
+                 {% if filters.nascondi_archiviati %}checked{% endif %}
+                 class="rounded border-gray-300 text-blue-600">
+          Nascondi archiviati
+        </label>
+      </div>
+    </div>
+  </div>
+
+  {# Hidden fields for unchecked checkboxes #}
+  <input type="hidden" name="solo_aperti" value="{% if not filters.solo_aperti %}0{% endif %}">
+  <input type="hidden" name="nascondi_archiviati" value="{% if not filters.nascondi_archiviati %}0{% endif %}">
+</form>
+
+{# ── Table ───────────────────────────────────────────────────────────────── #}
+<div id="bandi-table">
+  {% include "partials/bandi_table_rows.html" %}
+</div>
+{% endblock %}

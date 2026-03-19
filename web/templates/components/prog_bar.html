@@ -1,0 +1,17 @@
+{# Progress bar component #}
+
+{% macro prog_bar(value, max=100, label="", color="blue", show_pct=true) %}
+{% set pct = ((value / max * 100) | round | int) if max > 0 else 0 %}
+<div class="w-full">
+  {% if label or show_pct %}
+  <div class="flex justify-between items-center mb-1">
+    {% if label %}<span class="text-xs font-medium text-gray-600">{{ label }}</span>{% endif %}
+    {% if show_pct %}<span class="text-xs font-medium text-gray-500">{{ pct }}%</span>{% endif %}
+  </div>
+  {% endif %}
+  <div class="w-full bg-gray-100 rounded-full h-2">
+    <div class="bg-{{ color }}-500 h-2 rounded-full transition-all duration-300"
+         style="width: {{ pct }}%"></div>
+  </div>
+</div>
+{% endmacro %}

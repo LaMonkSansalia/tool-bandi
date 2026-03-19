@@ -12,12 +12,13 @@ import psycopg2
 import requests
 from engine.config import DATABASE_URL
 from engine.eligibility.hard_stops import check_hard_stops
-from engine.eligibility.gap_analyzer import analyze_gaps, GapType
+from engine.eligibility.gap_analyzer import analyze_gaps
 from engine.eligibility.configurable_scorer import score_bando_configurable
 from engine.eligibility.rules import get_profile
 from engine.projects.manager import (
     get_project_scoring_rules, update_evaluation_stato, upsert_evaluation,
 )
+from engine.ui.utils.decision_helpers import minimum_requirements, normalize_gap_items
 
 
 def _extract_importo(text: str) -> float | None:
@@ -65,17 +66,6 @@ def _extract_finanziamento(text: str) -> tuple[str | None, float | None]:
     return tipo, aliquota
 
 
-def _format_list(items, max_items: int = 0) -> str:
-    """Format a list as comma-separated string."""
-    if not items or not isinstance(items, list):
-        return "—"
-    show = items[:max_items] if max_items else items
-    text = ", ".join(str(i) for i in show)
-    if max_items and len(items) > max_items:
-        text += f" (+{len(items) - max_items})"
-    return text
-
-
 def _days_left(scad) -> int | None:
     """Calculate days until deadline."""
     if scad is None:
@@ -86,6 +76,23 @@ def _days_left(scad) -> int | None:
         return (scad - date.today()).days
     except Exception:
         return None
+
+
+def _render_gap_message(gap: dict):
+    sem = gap.get("semaforo")
+    categoria = str(gap.get("categoria", "gap")).upper()
+    descrizione = gap.get("descrizione", "")
+    suggerimento = gap.get("suggerimento", "")
+    message = f"**{categoria}** — {descrizione}"
+    if suggerimento:
+        message += f"\n\n💡 {suggerimento}"
+
+    if sem == "rosso":
+        st.error(message)
+    elif sem == "giallo":
+        st.warning(message)
+    else:
+        st.info(message)
 
 
 SEMAFORO = {"verde": "🟢", "giallo": "🟡", "rosso": "🔴", None: "⚪"}
@@ -136,6 +143,24 @@ if df.empty:
 bando = df.iloc[0].to_dict()
 evaluation = df_eval.iloc[0].to_dict() if not df_eval.empty else {}
 
+profile = get_profile(pid)
+scoring_rules = get_project_scoring_rules(pid) or {}
+
+_hs = check_hard_stops(bando, profile)
+_score_result = score_bando_configurable(bando, profile, scoring_rules) if not _hs.excluded else None
+_gap_result = analyze_gaps(bando, profile) if not _hs.excluded else None
+gap_items = normalize_gap_items(evaluation, _gap_result, _hs.excluded, _hs.reason)
+
+score = evaluation.get("score")
+score_live = _score_result.score if _score_result else None
+stato = evaluation.get("stato", bando.get("stato", "nuovo"))
+tipo_fin = bando.get("tipo_finanziamento")
+aliquota = bando.get("aliquota_fondo_perduto")
+scad = bando.get("data_scadenza")
+delta = _days_left(scad)
+requirements = minimum_requirements(bando)
+
+
 # ── Header ────────────────────────────────────────────────────────────────────
 col_back, col_title = st.columns([1, 8])
 with col_back:
@@ -144,43 +169,65 @@ with col_back:
 
 with col_title:
     st.title(bando["titolo"])
-    st.caption(f"{bando.get('ente_erogatore', '—')} — {bando.get('portale', '—')} — Scadenza: {bando.get('data_scadenza', '—')}")
+    st.caption(
+        f"{bando.get('ente_erogatore', '—')} — {bando.get('portale', '—')} — "
+        f"Scadenza: {bando.get('data_scadenza', '—')}"
+    )
 
-st.divider()
-
-# ── Metriche (5 cards) ───────────────────────────────────────────────────────
-col1, col2, col3, col4, col5 = st.columns(5)
+# ── Decision strip (above the fold) ──────────────────────────────────────────
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 with col1:
-    score = evaluation.get("score")
-    st.metric("Score", f"{score}/100" if score else "—")
+    if _hs.excluded:
+        st.metric("Idoneita'", "NO", "Hard stop")
+    elif score_live is not None:
+        st.metric("Idoneita'", "SI" if score_live >= 40 else "NO")
+    else:
+        st.metric("Idoneita'", "—")
+
 with col2:
-    importo = bando.get("importo_max")
-    st.metric("Importo max", f"{importo:,.0f}€" if importo else "—")
+    if score_live is not None:
+        delta_score = None
+        if score is not None:
+            try:
+                delta_score = int(score_live) - int(score)
+            except (TypeError, ValueError):
+                delta_score = None
+        st.metric("Score live", f"{score_live}/100", delta_score if delta_score else None)
+    else:
+        st.metric("Score live", "—")
+
 with col3:
-    stato = evaluation.get("stato", bando.get("stato", "nuovo"))
-    st.metric("Stato", stato.upper())
+    if scad:
+        st.metric("Scadenza", str(scad), f"{delta} giorni" if delta is not None else None)
+    else:
+        st.metric("Scadenza", "—")
+
 with col4:
-    tipo_fin = bando.get("tipo_finanziamento")
-    aliquota = bando.get("aliquota_fondo_perduto")
-    tipo_label = _TIPO_LABEL.get(tipo_fin, "—")
-    if aliquota is not None and tipo_fin:
-        tipo_label += f" {float(aliquota):.0f}%"
-    st.metric("Finanziamento", tipo_label if tipo_fin else "—")
+    if aliquota is not None:
+        st.metric("Intensita' aiuto", f"{float(aliquota):.0f}% FP")
+    elif tipo_fin:
+        st.metric("Intensita' aiuto", _TIPO_LABEL.get(tipo_fin, tipo_fin))
+    else:
+        st.metric("Intensita' aiuto", "—")
+
 with col5:
+    st.metric("Req. minimi", len(requirements))
+
+with col6:
     if bando.get("url_fonte"):
-        st.link_button("🔗 Vai al portale", bando["url_fonte"])
+        st.link_button("🔗 Portale", bando["url_fonte"], use_container_width=True)
+    else:
+        st.metric("Fonte", "n/d")
+
+if requirements:
+    with st.expander("✅ Requisiti minimi in 20 secondi"):
+        for req in requirements:
+            st.markdown(f"- {req}")
 
 st.divider()
 
 # ── Sintesi — Partecipo o no? ─────────────────────────────────────────────────
-st.subheader("🧭 Sintesi — Partecipo o no?")
-
-profile = get_profile(pid)
-scoring_rules = get_project_scoring_rules(pid) or {}
-
-_hs = check_hard_stops(bando, profile)
-_score_result = score_bando_configurable(bando, profile, scoring_rules) if not _hs.excluded else None
-_gap_result = analyze_gaps(bando, profile) if not _hs.excluded else None
+st.subheader("🧭 Decisione in 60 secondi")
 
 col_valut, col_info = st.columns([3, 2])
 
@@ -232,8 +279,6 @@ with col_info:
     if bando.get("ente_erogatore"):
         st.markdown(f"🏛️ {bando['ente_erogatore']}")
 
-    scad = bando.get("data_scadenza")
-    delta = _days_left(scad)
     if scad:
         urgenza = f" 🔴 **scade in {delta} giorni**" if delta is not None and 0 <= delta < 14 else ""
         st.markdown(f"📅 Scadenza: **{scad}**{urgenza}")
@@ -266,6 +311,24 @@ with col_info:
         sa = bando["settori_ateco"]
         if isinstance(sa, list):
             st.markdown(f"🏭 ATECO: {', '.join(sa)}")
+
+st.divider()
+
+# ── Gap suggestions first-class ──────────────────────────────────────────────
+st.subheader("🛠️ Cosa ti manca per vincere?")
+
+actionable_gaps = [g for g in gap_items if g.get("semaforo") in {"rosso", "giallo"}]
+if actionable_gaps:
+    for gap in actionable_gaps[:6]:
+        _render_gap_message(gap)
+else:
+    st.success("Nessun gap critico: il profilo risulta allineato ai requisiti principali.")
+
+informative_gaps = [g for g in gap_items if g.get("semaforo") == "verde"]
+if informative_gaps:
+    with st.expander("Note informative"):
+        for gap in informative_gaps:
+            _render_gap_message(gap)
 
 st.divider()
 
@@ -369,37 +432,23 @@ with tab2:
 
     with col_gap_tab:
         st.markdown("#### 🔍 Gap Analysis")
-
-        # Try stored JSONB first, fall back to live calculation
-        stored_gaps = evaluation.get("gap_analysis")
-        if stored_gaps and isinstance(stored_gaps, list):
-            for gap in stored_gaps:
+        if gap_items:
+            for gap in gap_items:
                 sem = SEMAFORO.get(gap.get("semaforo"), "⚪")
-                tipo = gap.get("tipo", "")
-                cat = gap.get("categoria", "")
-                desc = gap.get("descrizione", "")
-                sugg = gap.get("suggerimento", "")
-                if tipo == "bloccante" or tipo == "BLOCKING":
-                    st.error(f"{sem} **{cat}** — {desc}")
-                elif tipo == "recuperabile" or tipo == "RECOVERABLE":
-                    st.warning(f"{sem} **{cat}** — {desc}")
-                    if sugg:
-                        st.caption(f"💡 {sugg}")
+                tipo = str(gap.get("tipo", "")).lower()
+                categoria = gap.get("categoria", "")
+                descrizione = gap.get("descrizione", "")
+                suggerimento = gap.get("suggerimento", "")
+
+                if "bloccante" in tipo or "blocking" in tipo or gap.get("semaforo") == "rosso":
+                    st.error(f"{sem} **{categoria}** — {descrizione}")
+                elif "recuperabile" in tipo or "recoverable" in tipo or gap.get("semaforo") == "giallo":
+                    st.warning(f"{sem} **{categoria}** — {descrizione}")
                 else:
-                    st.info(f"{sem} {desc}")
-        elif _gap_result:
-            for gap in _gap_result.gaps:
-                sem = SEMAFORO.get(gap.semaforo, "⚪")
-                if gap.tipo == GapType.BLOCKING:
-                    st.error(f"{sem} **{gap.categoria}** — {gap.descrizione}")
-                elif gap.tipo == GapType.RECOVERABLE:
-                    st.warning(f"{sem} **{gap.categoria}** — {gap.descrizione}")
-                    if gap.suggerimento:
-                        st.caption(f"💡 {gap.suggerimento}")
-                else:
-                    st.info(f"{sem} {gap.descrizione}")
-        elif _hs.excluded:
-            st.error(f"⛔ Hard Stop: {_hs.reason}")
+                    st.info(f"{sem} {descrizione}")
+
+                if suggerimento:
+                    st.caption(f"💡 {suggerimento}")
         else:
             st.info("Gap analysis non disponibile")
 

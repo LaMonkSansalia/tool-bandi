@@ -2,11 +2,12 @@
 Gestione Progetti — lista, creazione, modifica, onboarding wizard.
 """
 import json
+import re
 import streamlit as st
 from engine.projects.manager import (
-    get_active_projects, get_project, get_project_stats,
-    create_project, update_project,
+    get_active_projects, get_project_stats, create_project,
 )
+from engine.ui.utils.project_form import seed_from_profile_json, validate_project_form
 st.title("📂 Gestione Progetti")
 
 # ── Scoring templates ────────────────────────────────────────────────────────
@@ -132,94 +133,353 @@ st.divider()
 # ── Onboarding wizard ────────────────────────────────────────────────────────
 st.subheader("➕ Nuovo Progetto")
 
-with st.form("new_project"):
-    st.markdown("### Dati identificativi")
+if "project_seed" not in st.session_state:
+    st.session_state["project_seed"] = {}
+
+FORMA_GIURIDICA_OPTIONS = [
+    "impresa individuale", "associazione", "pro loco", "fondazione",
+    "cooperativa", "srl", "srls", "spa", "snc", "sas",
+    "ente pubblico", "comune", "altro",
+]
+REGIONE_OPTIONS = [
+    "Sicilia", "Calabria", "Campania", "Puglia", "Basilicata", "Sardegna",
+    "Lazio", "Lombardia", "Piemonte", "Veneto", "Emilia-Romagna",
+    "Toscana", "Liguria", "Marche", "Abruzzo", "Molise",
+    "Friuli Venezia Giulia", "Trentino-Alto Adige", "Umbria", "Valle d'Aosta",
+]
+
+WIZARD_STEPS = [
+    "Dati identificativi",
+    "Profilo organizzazione",
+    "Attivita, ATECO e dimensione",
+    "Skills e template",
+    "Revisione finale",
+]
+FORM_KEY_PREFIX = "project_form_"
+BOOL_FIELDS = {"zona_zes", "zona_mezzogiorno", "micro_impresa", "iso_9001", "iso_27001", "soa"}
+INT_FIELDS = {"anni_attivita", "dipendenti", "fatturato_max"}
+FORM_DEFAULTS = {
+    "new_slug": "",
+    "new_nome": "",
+    "new_desc_breve": "",
+    "new_desc": "",
+    "new_prefix": "",
+    "new_chat_id": "",
+    "denominazione": "",
+    "forma_giuridica": FORMA_GIURIDICA_OPTIONS[0],
+    "partita_iva": "",
+    "regime_fiscale": "ordinario",
+    "comune": "",
+    "provincia": "",
+    "regione": REGIONE_OPTIONS[0],
+    "zona_zes": True,
+    "zona_mezzogiorno": True,
+    "ateco": "",
+    "ateco_secondari_text": "",
+    "settore": "",
+    "data_inizio": "",
+    "anni_attivita": 0,
+    "dipendenti": 0,
+    "fatturato_max": 0,
+    "micro_impresa": True,
+    "iso_9001": False,
+    "iso_27001": False,
+    "soa": False,
+    "skills_text": "",
+    "template_choice": next(iter(SCORING_TEMPLATES.keys())),
+}
+
+
+def _field_key(name: str) -> str:
+    return f"{FORM_KEY_PREFIX}{name}"
+
+
+def _normalize_value(name: str, value):
+    if name in BOOL_FIELDS:
+        return bool(value)
+    if name in INT_FIELDS:
+        try:
+            return int(value or 0)
+        except Exception:
+            return 0
+    if name == "template_choice" and value not in SCORING_TEMPLATES:
+        return FORM_DEFAULTS["template_choice"]
+    return value
+
+
+def _initialize_form_state(seed_data: dict | None = None, reset: bool = False):
+    seed_data = seed_data or {}
+    for name, default in FORM_DEFAULTS.items():
+        key = _field_key(name)
+        if reset or key not in st.session_state:
+            value = seed_data.get(name, default)
+            st.session_state[key] = _normalize_value(name, value)
+
+
+def _get_form_data() -> dict:
+    data: dict = {}
+    for name, default in FORM_DEFAULTS.items():
+        data[name] = _normalize_value(name, st.session_state.get(_field_key(name), default))
+    return data
+
+
+def _parse_ateco_secondari(text: str) -> tuple[list[str], list[str]]:
+    items = [x.strip() for x in text.splitlines() if x.strip()]
+    invalid = [x for x in items if not re.fullmatch(r"\d{2}(?:\.\d{2}){0,2}", x)]
+    return items, invalid
+
+
+def _validate_step(step_idx: int, data: dict) -> list[str]:
+    errors: list[str] = []
+    if step_idx == 0:
+        slug = str(data["new_slug"]).strip()
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,30}[a-z0-9]", slug):
+            errors.append("Slug non valido: usa solo minuscole, numeri e trattini (3-32 caratteri).")
+        if not str(data["new_nome"]).strip():
+            errors.append("Nome progetto obbligatorio.")
+    elif step_idx == 1:
+        if not str(data["denominazione"]).strip():
+            errors.append("Denominazione legale obbligatoria.")
+        piva = str(data["partita_iva"]).strip().upper()
+        if piva and not re.fullmatch(r"(?:\d{11}|[A-Z0-9]{16})", piva):
+            errors.append("P.IVA/Codice Fiscale non valido.")
+    elif step_idx == 2:
+        ateco = str(data["ateco"]).strip()
+        if ateco and not re.fullmatch(r"\d{2}(?:\.\d{2}){0,2}", ateco):
+            errors.append("ATECO principale non valido (esempio corretto: 62.01.00).")
+        data_inizio = str(data["data_inizio"]).strip()
+        if data_inizio and not re.fullmatch(r"\d{2}/\d{2}/\d{4}", data_inizio):
+            errors.append("Data inizio non valida (usa formato GG/MM/AAAA).")
+        _, invalid_ateco_secondary = _parse_ateco_secondari(str(data["ateco_secondari_text"]))
+        if invalid_ateco_secondary:
+            errors.append("ATECO secondari non validi: " + ", ".join(invalid_ateco_secondary))
+    return errors
+
+
+def _validate_final(data: dict) -> list[str]:
+    payload = {
+        "new_slug": data["new_slug"],
+        "new_nome": data["new_nome"],
+        "denominazione": data["denominazione"],
+        "ateco": data["ateco"],
+        "partita_iva": data["partita_iva"],
+        "data_inizio": data["data_inizio"],
+    }
+    errors = validate_project_form(payload)
+    _, invalid_ateco_secondary = _parse_ateco_secondari(str(data["ateco_secondari_text"]))
+    if invalid_ateco_secondary:
+        errors.append("ATECO secondari non validi: " + ", ".join(invalid_ateco_secondary))
+    return errors
+
+
+if "project_wizard_step" not in st.session_state:
+    st.session_state["project_wizard_step"] = 0
+
+_initialize_form_state(st.session_state.get("project_seed", {}))
+
+with st.expander("📥 Importa profilo JSON (prefill automatico)"):
+    st.caption("Carica un `company_profile.json`: i campi del wizard verranno precompilati.")
+    uploaded = st.file_uploader("Seleziona file JSON", type=["json"], key="project_profile_upload")
+    if uploaded is not None:
+        st.caption(f"File selezionato: `{uploaded.name}`")
+        if st.button("Applica prefill", key="apply_project_seed", type="primary"):
+            try:
+                data = json.load(uploaded)
+                seed = seed_from_profile_json(data)
+                st.session_state["project_seed"] = seed
+                _initialize_form_state(seed, reset=True)
+                st.session_state["project_wizard_step"] = 0
+                st.success("Prefill caricato: controlla i dati e prosegui step-by-step.")
+                st.rerun()
+            except json.JSONDecodeError:
+                st.error("File JSON non valido.")
+            except Exception as e:
+                st.error(f"Errore durante l'import: {e}")
+
+    if st.button("Pulisci prefill", key="clear_project_seed"):
+        st.session_state["project_seed"] = {}
+        _initialize_form_state({}, reset=True)
+        st.session_state["project_wizard_step"] = 0
+        st.rerun()
+
+step_idx = int(st.session_state.get("project_wizard_step", 0))
+step_idx = max(0, min(step_idx, len(WIZARD_STEPS) - 1))
+st.session_state["project_wizard_step"] = step_idx
+step_title = WIZARD_STEPS[step_idx]
+
+st.progress((step_idx + 1) / len(WIZARD_STEPS), text=f"Step {step_idx + 1}/{len(WIZARD_STEPS)} — {step_title}")
+
+form_data = _get_form_data()
+
+if step_idx == 0:
+    st.markdown("### 1) Dati identificativi")
     col_a, col_b = st.columns(2)
     with col_a:
-        new_slug = st.text_input("Slug (identificativo breve)", placeholder="es. pds")
-        new_nome = st.text_input("Nome completo", placeholder="es. Paese Delle Stelle")
-        new_desc_breve = st.text_input("Descrizione breve", placeholder="es. Astroturismo e cultura")
-        new_desc = st.text_area("Descrizione completa", placeholder="Descrizione dettagliata del progetto, obiettivi, attività...")
+        st.text_input(
+            "Slug (identificativo breve)",
+            key=_field_key("new_slug"),
+            placeholder="es. pds",
+            help="Solo lettere minuscole, numeri e trattini.",
+        )
+        st.text_input("Nome completo", key=_field_key("new_nome"), placeholder="es. Paese Delle Stelle")
+        st.text_input(
+            "Descrizione breve",
+            key=_field_key("new_desc_breve"),
+            placeholder="es. Astroturismo e cultura",
+        )
+        st.text_area(
+            "Descrizione completa",
+            key=_field_key("new_desc"),
+            placeholder="Descrizione dettagliata del progetto, obiettivi, attività...",
+        )
     with col_b:
-        new_prefix = st.text_input("Prefisso Telegram", placeholder="es. [PDS]")
-        new_chat_id = st.text_input("Chat ID Telegram (opzionale)", placeholder="Lascia vuoto per usare quello globale")
+        st.text_input("Prefisso Telegram", key=_field_key("new_prefix"), placeholder="es. [PDS]")
+        st.text_input(
+            "Chat ID Telegram (opzionale)",
+            key=_field_key("new_chat_id"),
+            placeholder="Lascia vuoto per usare quello globale",
+        )
 
-    st.markdown("### Profilo organizzazione")
+elif step_idx == 1:
+    st.markdown("### 2) Profilo organizzazione")
     col_c, col_d = st.columns(2)
     with col_c:
-        denominazione = st.text_input("Denominazione legale")
-        forma_giuridica = st.selectbox("Forma giuridica", [
-            "impresa individuale", "associazione", "pro loco", "fondazione",
-            "cooperativa", "srl", "srls", "spa", "snc", "sas",
-            "ente pubblico", "comune", "altro",
-        ])
-        partita_iva = st.text_input("P.IVA / Codice Fiscale")
-        regime_fiscale = st.text_input("Regime fiscale", value="ordinario")
+        st.text_input("Denominazione legale", key=_field_key("denominazione"))
+        forma_current = form_data["forma_giuridica"]
+        if forma_current not in FORMA_GIURIDICA_OPTIONS:
+            forma_current = FORMA_GIURIDICA_OPTIONS[0]
+        st.selectbox(
+            "Forma giuridica",
+            FORMA_GIURIDICA_OPTIONS,
+            index=FORMA_GIURIDICA_OPTIONS.index(forma_current),
+            key=_field_key("forma_giuridica"),
+        )
+        st.text_input("P.IVA / Codice Fiscale", key=_field_key("partita_iva"))
+        st.text_input("Regime fiscale", key=_field_key("regime_fiscale"))
     with col_d:
-        comune = st.text_input("Comune", placeholder="es. Roccapalumba")
-        provincia = st.text_input("Provincia", placeholder="es. PA")
-        regione = st.selectbox("Regione", [
-            "Sicilia", "Calabria", "Campania", "Puglia", "Basilicata", "Sardegna",
-            "Lazio", "Lombardia", "Piemonte", "Veneto", "Emilia-Romagna",
-            "Toscana", "Liguria", "Marche", "Abruzzo", "Molise",
-            "Friuli Venezia Giulia", "Trentino-Alto Adige", "Umbria", "Valle d'Aosta",
-        ])
-        zona_zes = st.checkbox("Zona ZES", value=True)
-        zona_mezzogiorno = st.checkbox("Zona Mezzogiorno", value=True)
+        st.text_input("Comune", key=_field_key("comune"), placeholder="es. Roccapalumba")
+        st.text_input("Provincia", key=_field_key("provincia"), placeholder="es. PA")
+        regione_current = form_data["regione"]
+        if regione_current not in REGIONE_OPTIONS:
+            regione_current = REGIONE_OPTIONS[0]
+        st.selectbox(
+            "Regione",
+            REGIONE_OPTIONS,
+            index=REGIONE_OPTIONS.index(regione_current),
+            key=_field_key("regione"),
+        )
+        st.checkbox("Zona ZES", key=_field_key("zona_zes"))
+        st.checkbox("Zona Mezzogiorno", key=_field_key("zona_mezzogiorno"))
 
-    st.markdown("### Attivita")
+elif step_idx == 2:
+    st.markdown("### 3) Attivita, ATECO e dimensione")
     col_e, col_f = st.columns(2)
     with col_e:
-        ateco = st.text_input("Codice ATECO", placeholder="es. 79.90.20")
-        settore = st.text_input("Settore principale", placeholder="es. Turismo / Promozione culturale")
-        data_inizio = st.text_input("Data inizio attivita (GG/MM/AAAA)")
-        anni_attivita = st.number_input("Anni attivita", min_value=0, value=0)
+        st.text_input(
+            "Codice ATECO principale",
+            key=_field_key("ateco"),
+            placeholder="es. 79.90.20",
+        )
+        st.text_area(
+            "ATECO secondari (uno per riga)",
+            key=_field_key("ateco_secondari_text"),
+            placeholder="62.01.00\n63.11.20",
+        )
+        st.text_input(
+            "Settore principale",
+            key=_field_key("settore"),
+            placeholder="es. Turismo / Promozione culturale",
+        )
+        st.text_input("Data inizio attivita (GG/MM/AAAA)", key=_field_key("data_inizio"))
+        st.number_input("Anni attivita", min_value=0, key=_field_key("anni_attivita"))
     with col_f:
-        dipendenti = st.number_input("Dipendenti", min_value=0, value=0)
-        fatturato_max = st.number_input("Fatturato max (EUR)", min_value=0, value=0)
-        micro_impresa = st.checkbox("Micro-impresa", value=True)
+        st.number_input("Dipendenti", min_value=0, key=_field_key("dipendenti"))
+        st.number_input("Fatturato max (EUR)", min_value=0, key=_field_key("fatturato_max"))
+        st.checkbox("Micro-impresa", key=_field_key("micro_impresa"))
+        st.markdown("**Certificazioni possedute**")
+        st.checkbox("ISO 9001", key=_field_key("iso_9001"))
+        st.checkbox("ISO 27001", key=_field_key("iso_27001"))
+        st.checkbox("SOA", key=_field_key("soa"))
 
-    st.markdown("### Template scoring")
-    template_choice = st.selectbox(
+elif step_idx == 3:
+    st.markdown("### 4) Skills e template")
+    st.text_area(
+        "Competenze (una per riga)",
+        key=_field_key("skills_text"),
+        placeholder="Project management\nRendicontazione\nPartnership territoriali",
+        height=180,
+    )
+    template_current = form_data["template_choice"]
+    if template_current not in SCORING_TEMPLATES:
+        template_current = next(iter(SCORING_TEMPLATES.keys()))
+    st.selectbox(
         "Scegli un template di scoring",
         list(SCORING_TEMPLATES.keys()),
+        index=list(SCORING_TEMPLATES.keys()).index(template_current),
+        key=_field_key("template_choice"),
     )
+    with st.expander("Anteprima template selezionato"):
+        st.json(SCORING_TEMPLATES[st.session_state[_field_key("template_choice")]])
 
-    submitted = st.form_submit_button("Crea progetto", type="primary")
+else:
+    st.markdown("### 5) Revisione finale")
+    col_r1, col_r2 = st.columns(2)
+    with col_r1:
+        st.markdown(f"**Slug:** `{form_data['new_slug']}`")
+        st.markdown(f"**Nome:** {form_data['new_nome'] or '—'}")
+        st.markdown(f"**Denominazione:** {form_data['denominazione'] or '—'}")
+        st.markdown(f"**ATECO:** {form_data['ateco'] or '—'}")
+        st.markdown(f"**Regione:** {form_data['regione'] or '—'}")
+        st.markdown(f"**Template:** {form_data['template_choice']}")
+    with col_r2:
+        secondary_codes, invalid_secondary = _parse_ateco_secondari(str(form_data["ateco_secondari_text"]))
+        st.markdown(f"**ATECO secondari:** {', '.join(secondary_codes) if secondary_codes else '—'}")
+        st.markdown(f"**Competenze:** {len([x for x in str(form_data['skills_text']).splitlines() if x.strip()])}")
+        if invalid_secondary:
+            st.warning("ATECO secondari da correggere: " + ", ".join(invalid_secondary))
 
-    if submitted:
-        if not new_slug or not new_nome:
-            st.error("Slug e nome sono obbligatori.")
+    if st.button("✅ Crea progetto", type="primary", use_container_width=True):
+        form_data = _get_form_data()
+        errors = _validate_final(form_data)
+        if errors:
+            for err in errors:
+                st.error(err)
         else:
+            ateco_secondari, _ = _parse_ateco_secondari(str(form_data["ateco_secondari_text"]))
+            skills_keywords = [x.strip() for x in str(form_data["skills_text"]).splitlines() if x.strip()]
+            skills_payload = {"keywords": skills_keywords} if skills_keywords else None
+
             profilo = {
                 "anagrafica": {
-                    "denominazione": denominazione,
-                    "partita_iva": partita_iva,
-                    "forma_giuridica": forma_giuridica,
-                    "regime_fiscale": regime_fiscale,
+                    "denominazione": form_data["denominazione"],
+                    "partita_iva": form_data["partita_iva"],
+                    "forma_giuridica": form_data["forma_giuridica"],
+                    "regime_fiscale": form_data["regime_fiscale"],
                 },
                 "sede": {
-                    "comune": comune,
-                    "provincia": provincia,
-                    "regione": regione,
-                    "zona_zes": zona_zes,
-                    "zona_mezzogiorno": zona_mezzogiorno,
+                    "comune": form_data["comune"],
+                    "provincia": form_data["provincia"],
+                    "regione": form_data["regione"],
+                    "zona_zes": form_data["zona_zes"],
+                    "zona_mezzogiorno": form_data["zona_mezzogiorno"],
                 },
                 "attivita": {
-                    "ateco_2025": ateco,
-                    "settore_principale": settore,
-                    "data_inizio": data_inizio,
-                    "anni_attivita": anni_attivita,
+                    "ateco_2025": form_data["ateco"],
+                    "ateco_secondari": ateco_secondari,
+                    "settore_principale": form_data["settore"],
+                    "data_inizio": form_data["data_inizio"],
+                    "anni_attivita": form_data["anni_attivita"],
                 },
                 "dimensione": {
-                    "dipendenti": dipendenti,
-                    "fatturato_stimato_max": fatturato_max,
-                    "micro_impresa": micro_impresa,
+                    "dipendenti": form_data["dipendenti"],
+                    "fatturato_stimato_max": form_data["fatturato_max"],
+                    "micro_impresa": form_data["micro_impresa"],
                 },
                 "certificazioni": {
-                    "soa": None,
-                    "iso_9001": False,
-                    "iso_27001": False,
+                    # Keep None for missing SOA due to downstream boolean conversion logic.
+                    "soa": "present" if form_data["soa"] else None,
+                    "iso_9001": form_data["iso_9001"],
+                    "iso_27001": form_data["iso_27001"],
                 },
                 "eligibility_constraints": {
                     "HARD_STOP": [],
@@ -228,34 +488,46 @@ with st.form("new_project"):
                 },
             }
 
-            scoring_rules = SCORING_TEMPLATES[template_choice]
-
+            scoring_rules = SCORING_TEMPLATES[form_data["template_choice"]]
             try:
                 project_id = create_project(
-                    slug=new_slug,
-                    nome=new_nome,
+                    slug=str(form_data["new_slug"]).strip(),
+                    nome=str(form_data["new_nome"]).strip(),
                     profilo=profilo,
                     scoring_rules=scoring_rules,
-                    descrizione=new_desc or None,
-                    descrizione_breve=new_desc_breve or None,
-                    telegram_chat_id=new_chat_id or None,
-                    telegram_prefix=new_prefix or None,
+                    descrizione=str(form_data["new_desc"]).strip() or None,
+                    descrizione_breve=str(form_data["new_desc_breve"]).strip() or None,
+                    skills=skills_payload,
+                    telegram_chat_id=str(form_data["new_chat_id"]).strip() or None,
+                    telegram_prefix=str(form_data["new_prefix"]).strip() or None,
                 )
                 st.success(f"Progetto creato con successo! ID: {project_id}")
+                st.session_state["project_seed"] = {}
+                _initialize_form_state({}, reset=True)
+                st.session_state["project_wizard_step"] = 0
                 st.rerun()
             except Exception as e:
                 st.error(f"Errore nella creazione: {e}")
 
 st.divider()
-
-# ── Import da JSON ───────────────────────────────────────────────────────────
-with st.expander("📥 Importa profilo da file JSON"):
-    st.caption("Carica un file company_profile.json per creare un nuovo progetto.")
-    uploaded = st.file_uploader("Seleziona file JSON", type=["json"])
-    if uploaded:
-        try:
-            data = json.load(uploaded)
-            st.json(data)
-            st.info("Usa il form sopra per creare il progetto con questi dati.")
-        except json.JSONDecodeError:
-            st.error("File JSON non valido.")
+col_prev, col_next, col_reset = st.columns([1, 1, 2])
+with col_prev:
+    if st.button("← Indietro", disabled=step_idx == 0, use_container_width=True):
+        st.session_state["project_wizard_step"] = max(0, step_idx - 1)
+        st.rerun()
+with col_next:
+    if st.button("Avanti →", type="primary", disabled=step_idx >= len(WIZARD_STEPS) - 1, use_container_width=True):
+        current_data = _get_form_data()
+        step_errors = _validate_step(step_idx, current_data)
+        if step_errors:
+            for err in step_errors:
+                st.error(err)
+        else:
+            st.session_state["project_wizard_step"] = min(len(WIZARD_STEPS) - 1, step_idx + 1)
+            st.rerun()
+with col_reset:
+    if st.button("♻️ Reset wizard", use_container_width=True):
+        st.session_state["project_seed"] = {}
+        _initialize_form_state({}, reset=True)
+        st.session_state["project_wizard_step"] = 0
+        st.rerun()

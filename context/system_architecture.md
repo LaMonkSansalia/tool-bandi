@@ -1,7 +1,8 @@
 # System Architecture — Bandi Researcher
 
-**Version:** 0.4.0 — Multi-Project Architecture
-**Date:** 2026-03-03
+**Version:** 0.6.0 — Soggetti/Progetti split + UI Layer pianificato
+**Date:** 2026-03-19
+**Precedente:** 0.5.0 — Multi-Project + Strategic UX Layer (2026-03-04)
 **Scope:** Multi-project (La Monica Luciano + Paese Delle Stelle + future projects)
 **Deployment:** Local (Docker Compose)
 
@@ -11,6 +12,57 @@
 
 1. **Human-in-the-loop is mandatory.** The system handles 90% of the cognitive work. The human reviews, decides, authorizes. No declaration is ever submitted autonomously. Ever.
 2. **Bandi are objective, evaluations are subjective.** Bandi exist independently of who evaluates them. Each project has its own profile, scoring rules, and evaluation states.
+
+---
+
+## UI Layer (v0.6.0 — pianificato)
+
+Lo Streamlit UI viene sostituito da una nuova applicazione web (`tool-bandi-ui/`).
+Il Python engine rimane invariato — cambia solo il layer UI.
+
+**Nuovo progetto:** `tool-bandi-ui/` — stack da scegliere (Sprint 0 US-001)
+**Piano completo:** `/Users/lucianolamonica/.claude/plans/cheeky-mapping-gray.md`
+**Requisiti UI:** `context/ui_requirements.md`
+**Workspace + Profilo Progetto:** `context/project_workspace.md`
+
+### Routing nuovo
+
+```
+/                     ← Dashboard (4 stat cards + scadenze imminenti)
+/bandi                ← Lista bandi con filtri (default: solo aperti)
+/bandi/{id}           ← Scheda bando read-only + eligibility
+/candidature/{pe_id}  ← Workspace candidatura (write)
+/progetti/{id}        ← Profilo progetto (fonte di verità, 4 tab)
+/pipeline             ← Log scansioni + trigger manuale
+```
+
+### Separazione chiave Soggetti ≠ Progetti (v0.6.0)
+
+```
+SOGGETTO → determina hard stops (P.IVA, regime fiscale, dipendenti)
+PROGETTO → determina scoring (keywords, settore, template)
+VALUTAZIONE = bando × progetto × soggetto
+```
+
+Questo risolve il problema del modello dati precedente che mescolava
+anagrafica (hard stops) e scoring rules nella stessa tabella `projects`.
+
+---
+
+## UX Decision Layer (v0.5.0 — Streamlit, deprecato)
+
+La UI Streamlit seguiva questo flusso (solo per riferimento storico):
+
+1. **Command Center (`02_bandi.py`)** — tabella con filtri, colonne decisionali
+2. **Dettaglio in 60 secondi (`03_dettaglio.py`)** — strip + gap + azioni (in fondo — problema UX critico)
+3. **Gap suggestions** — sezione "Cosa ti manca per vincere?"
+4. **Project context switching** — dropdown topbar, cache invalidation
+
+**Problemi UI Streamlit che motivano il replacement:**
+- Full-page rerun ad ogni click
+- Nessun modale nativo
+- Azioni sempre in fondo alla pagina (non in header)
+- Session state fragile, nessun URL dedicato per workspace candidatura
 
 ---
 
@@ -35,8 +87,10 @@ ENGINE (Python 3.14)
   Notifications:   python-telegram-bot
   Doc Output:      WeasyPrint + Jinja2 (PDF)  +  python-docx (DOCX)
 
-UI/ADMIN
+UI/ADMIN (v0.5.0 — in sostituzione)
   Streamlit        (speed over beauty — internal tool)
+  ↓ IN SOSTITUZIONE CON tool-bandi-ui/ (stack da scegliere — Sprint 0)
+  Opzioni: FastAPI+HTMX / Django+Unfold / Laravel13+Filament4 / Next.js+FastAPI
 
 INFRASTRUCTURE
   Database:        PostgreSQL 16 + pgvector
@@ -261,12 +315,64 @@ CREATE TABLE bandi (
 );
 ```
 
+### Table: `soggetti` (NEW in v0.6.0 — migration 008)
+```sql
+CREATE TABLE soggetti (
+    id              SERIAL PRIMARY KEY,
+    slug            TEXT UNIQUE NOT NULL,        -- 'lamonica_piva', 'lamonica_srl'
+    nome            TEXT NOT NULL,
+    forma_giuridica TEXT,                        -- 'impresa_individuale', 'srl', ...
+    regime_fiscale  TEXT,                        -- 'forfettario', 'ordinario'
+    profilo         JSONB NOT NULL,              -- anagrafica + eligibility_constraints (hard stops)
+    attivo          BOOLEAN DEFAULT TRUE
+);
+```
+
+Dati migrati da `projects.profilo` (anagrafica + hard stops) verso questa tabella.
+`hard_stops.py` legge da `soggetti.profilo`, non più da `projects.profilo`.
+
+### Estensioni a `project_evaluations` (NEW in v0.6.0 — migration 009)
+```sql
+ALTER TABLE project_evaluations ADD COLUMN IF NOT EXISTS
+    soggetto_id         INT REFERENCES soggetti(id),  -- valutazione sa ESPLICITAMENTE il soggetto
+    workspace_checklist JSONB,   -- [{id, label, completato, nota, tipo: auto|manuale}]
+    workspace_notes     JSONB,   -- [{testo, created_at}]
+    workspace_completezza INT DEFAULT 0;  -- 0-100, calcolato da checklist
+```
+
+### Estensioni a `projects` (NEW in v0.6.0 — migration 009)
+```sql
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS
+    soggetto_id INT REFERENCES soggetti(id);
+-- profilo JSONB diventa scoring-only: settore, keywords, scoring_rules, KPI, partner, piano lavoro
+-- i campi anagrafica/hard_stops migrano a soggetti
+```
+
+### Table: `project_decisions` (NEW in v0.6.0 — UI-owned)
+```sql
+CREATE TABLE project_decisions (
+    id                  SERIAL PRIMARY KEY,
+    project_id          INT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    descrizione         TEXT NOT NULL,
+    tipo                TEXT,               -- 'forma_giuridica', 'sede', 'cofinanziamento', ...
+    impatto_bandi_count INT DEFAULT 0,      -- stima bandi sbloccati da questa decisione
+    scadenza            DATE,
+    stato               TEXT DEFAULT 'pianificata', -- 'pianificata', 'in_corso', 'eseguita'
+    note                TEXT,
+    created_at          TIMESTAMPTZ DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
 ### Supporting Tables
 ```sql
 CREATE TABLE bando_documenti (...);        -- downloaded PDF/docs
 CREATE TABLE bando_requisiti (...);        -- parsed requirements (+ project_id)
 CREATE TABLE bando_documenti_generati (...); -- generated docs (+ project_id)
 CREATE TABLE company_embeddings (...);     -- pgvector (+ project_id)
+-- (UI-owned)
+CREATE TABLE users (...);                  -- autenticazione single user
+CREATE TABLE project_decisions (...);      -- decisioni strategiche per progetto (vedi sopra)
 ```
 
 ---
@@ -344,20 +450,23 @@ daily_scan.serve(cron="0 8 * * *")  # every day at 08:00
 
 ---
 
-## Streamlit UI — Pages
+## Streamlit UI — Pages (v0.5.0 — DEPRECATO, in sostituzione)
 
 ```
-app.py (entry point + project selector in sidebar)
+app.py (entry point + project selector in top-bar, cache invalidation on switch)
 pages/
 ├── 01_dashboard.py        ← metrics per project, charts, upcoming deadlines
-├── 02_bandi.py            ← filterable table, urgency badges, CSV export
-├── 03_dettaglio.py        ← full bando card + score breakdown + actions
+├── 02_bandi.py            ← command center table, decision columns, live scoring toggle
+├── 03_dettaglio.py        ← decision strip + gap suggestions + score breakdown + actions
 ├── 04_documenti.py        ← generate, review, approve documents
 ├── 05_profilo.py          ← view project profile + scoring rules
 ├── 06_config.py           ← active portals, thresholds, spider stats
 ├── 07_log.py              ← pipeline run logs + errors
-└── 08_progetti.py         ← project management + onboarding wizard
+└── 08_progetti.py         ← project management + onboarding with JSON prefill/validation
 ```
+
+Sostituito da `tool-bandi-ui/` con routing dedicato per pagina.
+Vedere `context/ui_requirements.md` per i requisiti completi.
 
 ---
 
@@ -380,7 +489,10 @@ Project-specific `telegram_chat_id` supported for dedicated channels.
 ## File Structure
 
 ```
-bandi_researcher/
+tool-bandi/         (nome directory attuale)
+tool-bandi-ui/      (da creare — nuovo UI layer, Sprint 0 US-004)
+
+bandi_researcher/   (alias legacy)
 ├── AGENT_INSTRUCTIONS.md
 ├── COMMS.md
 ├── context/
@@ -434,16 +546,16 @@ bandi_researcher/
 │   │   ├── telegram_bot.py
 │   │   └── alerts.py                     ← project context
 │   └── ui/
-│       ├── app.py                        ← project selector
+│       ├── app.py                        ← project selector (top-bar) + context switch invalidation
 │       └── pages/
 │           ├── 01_dashboard.py
-│           ├── 02_bandi.py
-│           ├── 03_dettaglio.py
+│           ├── 02_bandi.py               ← Command Center UX
+│           ├── 03_dettaglio.py           ← Decision in 60s + gap action section
 │           ├── 04_documenti.py
 │           ├── 05_profilo.py
 │           ├── 06_config.py
 │           ├── 07_log.py
-│           └── 08_progetti.py            ← NEW
+│           └── 08_progetti.py            ← onboarding with JSON prefill + validations
 ├── output/
 └── bandi_trovati/
 ```
@@ -470,3 +582,11 @@ bandi_researcher/
 | 003_fixes.sql | Column additions (score, tipo_finanziamento, etc.) | 2026-03-02 |
 | 005_multi_project.sql | projects + project_evaluations tables | 2026-03-03 |
 | 005_seed_projects.py | Migrated 125 bandi to project #1 (lamonica) | 2026-03-03 |
+
+### Migrations Pianificate (Sprint 0 — @agent-python)
+
+| Migration | Description | Sprint |
+|-----------|-------------|--------|
+| 008_soggetti.sql | Nuova tabella `soggetti` + FK su projects e project_evaluations | Sprint 0 US-002 |
+| 009_workspace_fields.sql | Campi workspace su project_evaluations (checklist, notes, completezza) | Sprint 0 US-002 |
+| Script migrazione dati | La Monica P.IVA da `projects.profilo` → `soggetti` | Sprint 0 US-002 |

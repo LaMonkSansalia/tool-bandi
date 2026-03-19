@@ -1,0 +1,29 @@
+{# Badge components — Jinja2 macros #}
+
+{% macro stato_badge(stato, label, css) %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ css }}">
+  {{ label }}
+</span>
+{% endmacro %}
+
+{% macro score_badge(score, display, css) %}
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold {{ css }}">
+  {{ display }}
+</span>
+{% endmacro %}
+
+{% macro tipo_fp_badge(label, css) %}
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ css }}">
+  {{ label }}
+</span>
+{% endmacro %}
+
+{% macro urgenza_badge() %}
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+  Urgente
+</span>
+{% endmacro %}
+
+{% macro giorni_badge(label, css) %}
+<span class="text-xs font-medium {{ css }}">{{ label }}</span>
+{% endmacro %}

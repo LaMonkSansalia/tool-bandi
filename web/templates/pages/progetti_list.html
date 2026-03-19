@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block title %}Progetti — Tool Bandi{% endblock %}
+{% block page_title %}Progetti{% endblock %}
+
+{% block page_actions %}
+<div class="ml-auto" x-data="{ open: false }">
+  <button @click="open = true"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+    </svg>
+    Nuovo Progetto
+  </button>
+
+  {# Modal: Crea progetto #}
+  <div x-show="open" x-cloak class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" @click.self="open = false">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl" @click.stop>
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Nuovo Progetto</h3>
+      <form method="post" action="/progetti/nuovo" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+          <input type="text" name="nome" required
+                 class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500"
+                 placeholder="Es. Digitalizzazione PMI">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Soggetto</label>
+          <select name="soggetto_id" class="w-full rounded-lg border-gray-300 text-sm">
+            <option value="0">Nessun soggetto</option>
+            {% for s in soggetti %}
+            <option value="{{ s.id }}">{{ s.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" @click="open = false" class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Annulla</button>
+          <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">Crea</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<p class="text-sm text-gray-500 mb-6">{{ total_progetti }} progett{{ 'o' if total_progetti == 1 else 'i' }} attiv{{ 'o' if total_progetti == 1 else 'i' }}</p>
+
+{% for soggetto_nome, progetti in grouped_progetti.items() %}
+<div class="mb-8">
+  <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{{ soggetto_nome }}</h3>
+  <div class="space-y-3">
+    {% for p in progetti %}
+    <a href="/progetti/{{ p.id }}" class="block bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow
+                                          {% if p.is_current %}ring-2 ring-blue-500 ring-offset-1{% endif %}">
+      <div class="flex items-center justify-between">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ p.nome }}</h3>
+            {% if p.is_current %}
+            <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 shrink-0">Attivo</span>
+            {% endif %}
+          </div>
+          <p class="text-xs text-gray-500 mt-0.5">
+            {% if p.settore_label %}{{ p.settore_label }}{% else %}Settore non definito{% endif %}
+          </p>
+        </div>
+
+        <div class="flex items-center gap-6 shrink-0 ml-4">
+          {# Completezza bar #}
+          <div class="w-24">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="text-gray-500">Completezza</span>
+              <span class="font-medium {% if p.completezza_pct >= 75 %}text-green-600{% elif p.completezza_pct >= 50 %}text-yellow-600{% else %}text-gray-600{% endif %}">{{ p.completezza_pct }}%</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5">
+              <div class="h-1.5 rounded-full {% if p.completezza_pct >= 75 %}bg-green-500{% elif p.completezza_pct >= 50 %}bg-yellow-500{% else %}bg-gray-300{% endif %}"
+                   style="width: {{ p.completezza_pct }}%"></div>
+            </div>
+          </div>
+
+          <span class="text-xs text-gray-500">{{ p.n_candidature }} cand.</span>
+
+          <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+          </svg>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+{% if total_progetti == 0 %}
+<div class="text-center py-12">
+  <svg class="mx-auto w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
+  </svg>
+  <p class="mt-3 text-sm text-gray-500">Nessun progetto attivo</p>
+</div>
+{% endif %}
+{% endblock %}

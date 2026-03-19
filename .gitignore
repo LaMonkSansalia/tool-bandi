@@ -8,9 +8,13 @@ dist/
 build/
 .eggs/
 
-# Environment
+# Environment (SECURITY.md compliance)
 .env
+.env.*
+!.env.example
 engine/.env
+engine/.env.*
+!engine/.env.example
 
 # IDE
 .vscode/
@@ -40,3 +44,19 @@ logs/
 # Docker volumes
 postgres_data/
 redis_data/
+
+# Security (SECURITY.md)
+*.sql
+*.xlsx
+*.tar.gz
+*.zip
+*.bak
+*.old
+*.pem
+*.key
+*credentials*.json
+service-account*.json
+
+# AI context
+.ai/
+.claude/

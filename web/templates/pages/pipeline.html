@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% from "components/empty_state.html" import empty_state %}
+
+{% block title %}Pipeline — Tool Bandi{% endblock %}
+{% block page_title %}Pipeline{% endblock %}
+
+{% block page_actions %}
+<form hx-post="/pipeline/trigger" hx-swap="none" class="inline">
+  <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+          hx-confirm="Avviare una nuova scansione?">
+    Avvia Scansione
+  </button>
+</form>
+{% endblock %}
+
+{% block content %}
+{% if triggered %}
+<div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+  <p class="text-sm text-blue-700 font-medium">Scansione avviata in background. Aggiorna la pagina tra qualche minuto per vedere i risultati.</p>
+</div>
+{% endif %}
+
+{% if runs %}
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+  <table class="w-full">
+    <thead>
+      <tr class="border-b border-gray-100 bg-gray-50/50">
+        <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+        <th class="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Stato</th>
+        <th class="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Scraped</th>
+        <th class="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Nuovi</th>
+        <th class="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aggiornati</th>
+        <th class="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase">Notificati</th>
+        <th class="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase">Durata</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-50">
+      {% for run in runs %}
+      <tr class="hover:bg-gray-50 transition-colors">
+        <td class="px-5 py-3 text-sm text-gray-900">
+          {{ run.started_at.strftime('%d/%m/%Y %H:%M') if run.started_at else '—' }}
+        </td>
+        <td class="px-5 py-3 text-center">
+          {% if run.successo %}
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">OK</span>
+          {% else %}
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Errori</span>
+          {% endif %}
+        </td>
+        <td class="px-5 py-3 text-center text-sm text-gray-600">{{ run.scraped or 0 }}</td>
+        <td class="px-5 py-3 text-center text-sm text-gray-600">{{ run.inserted or 0 }}</td>
+        <td class="px-5 py-3 text-center text-sm text-gray-600">{{ run.updated or 0 }}</td>
+        <td class="px-5 py-3 text-center text-sm text-gray-600">{{ run.notified or 0 }}</td>
+        <td class="px-5 py-3 text-right text-sm text-gray-500">
+          {% if run.duration_seconds %}{{ run.duration_seconds }}s{% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+  {{ empty_state(
+    "Nessuna esecuzione",
+    "Avvia una scansione per iniziare",
+    "", "",
+    "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+  ) }}
+</div>
+{% endif %}
+{% endblock %}

@@ -2,8 +2,9 @@
   "_meta": {
     "version": "1.0.0",
     "created": "2026-03-02",
+    "updated": "2026-03-04",
     "source": "visura_storica_LMNLCN95P22G273W-VISUSTOR-20260302.pdf + analisi codebase CodiceCodice",
-    "note": "Fonte di verita' per il sistema di ricerca e applicazione bandi. Aggiornare manualmente quando cambiano dati anagrafici, certificazioni o competenze."
+    "note": "Fonte di verita' per il sistema di ricerca e applicazione bandi. Validato per onboarding JSON prefill e controlli UX (slug/ATECO/P.IVA/data). Aggiornare manualmente quando cambiano dati anagrafici, certificazioni o competenze."
   },
 
   "anagrafica": {

@@ -73,6 +73,7 @@ class CompanyProfile:
     # Certificazioni
     soa: bool
     iso_9001: bool
+    iso_27001: bool
 
     # Eligibility
     hard_stops: list[HardStop]
@@ -180,6 +181,7 @@ def _parse_profile_data(data: dict) -> CompanyProfile:
         data_inizio=attivita.get("data_inizio", ""),
         soa=certificazioni.get("soa") is not None,
         iso_9001=certificazioni.get("iso_9001", False),
+        iso_27001=certificazioni.get("iso_27001", False),
         hard_stops=hard_stops,
         yellow_flags=yellow_flags,
         vantaggi=constraints.get("VANTAGGI", []),
@@ -223,6 +225,26 @@ def get_profile(project_id: int | None = None) -> CompanyProfile:
         profile = load_profile_from_dict(data)
 
     _profiles[project_id] = profile
+    return profile
+
+
+def get_profile_for_soggetto(soggetto_id: int) -> CompanyProfile:
+    """
+    Load CompanyProfile from soggetti.profilo (DB) by soggetto_id.
+    Used by rivaluta_singolo after migration 008.
+    Falls back to JSON singleton if soggetto not found.
+    """
+    cache_key = f"soggetto_{soggetto_id}"
+    if cache_key in _profiles:
+        return _profiles[cache_key]  # type: ignore[index]
+
+    from engine.projects.manager import get_soggetto_profile
+    data = get_soggetto_profile(soggetto_id)
+    if data is None:
+        raise ValueError(f"Soggetto {soggetto_id} not found or inactive")
+
+    profile = load_profile_from_dict(data)
+    _profiles[cache_key] = profile  # type: ignore[index]
     return profile
 
 

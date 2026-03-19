@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ pe.titolo[:50] }} — Workspace{% endblock %}
+{% block page_title %}Workspace{% endblock %}
+
+{% block content %}
+{# Breadcrumb #}
+<nav class="text-sm text-gray-500 mb-4">
+  <a href="/candidature" class="hover:text-gray-700">Candidature</a>
+  <span class="mx-1">/</span>
+  <span class="text-gray-900 truncate">{{ pe.titolo[:60] }}{% if pe.titolo|length > 60 %}...{% endif %}</span>
+</nav>
+
+{# Header card #}
+<div id="workspace-header" class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+  <div class="flex items-start justify-between gap-4">
+    <div class="flex-1 min-w-0">
+      <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ pe.titolo }}</h3>
+      <p class="text-sm text-gray-500 mt-1">{{ pe.ente_erogatore or '—' }}</p>
+      <div class="flex items-center gap-4 mt-3">
+        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium {{ pe.stato_css }}">{{ pe.stato_label }}</span>
+        <span class="text-sm font-semibold {{ pe.score_css }}">{{ pe.score_display }}</span>
+        {% if pe.data_scadenza %}
+        <span class="text-xs {{ pe.giorni_css }}">{{ pe.giorni_label }}</span>
+        {% endif %}
+        {% if pe.budget_label %}
+        <span class="text-xs text-gray-500">{{ pe.budget_label }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Action buttons #}
+    <div class="flex items-center gap-2 shrink-0">
+      {% if pe.can_segna_pronto %}
+      <form method="post" action="/candidature/{{ pe.pe_id }}/stato">
+        <input type="hidden" name="action" value="segna_pronto">
+        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
+                onclick="return confirm('Segna come pronto per invio?')">
+          Segna Pronto
+        </button>
+      </form>
+      {% endif %}
+      {% if pe.can_segna_inviato %}
+      <div x-data="{ open: false }">
+        <button @click="open = true" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+          Segna Inviato
+        </button>
+        <div x-show="open" x-cloak class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" @click.self="open = false">
+          <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl" @click.stop>
+            <h4 class="text-sm font-semibold text-gray-900 mb-4">Conferma Invio</h4>
+            <form method="post" action="/candidature/{{ pe.pe_id }}/stato" class="space-y-3">
+              <input type="hidden" name="action" value="segna_inviato">
+              <div>
+                <label class="block text-xs text-gray-600 mb-1">Data invio *</label>
+                <input type="date" name="data_invio" required class="w-full rounded-lg border-gray-300 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-600 mb-1">Protocollo</label>
+                <input type="text" name="protocollo_ricevuto" class="w-full rounded-lg border-gray-300 text-sm" placeholder="N. protocollo">
+              </div>
+              <div class="flex justify-end gap-2 pt-2">
+                <button type="button" @click="open = false" class="px-3 py-1.5 text-xs border border-gray-300 rounded-lg">Annulla</button>
+                <button type="submit" class="px-3 py-1.5 text-xs text-white bg-blue-600 rounded-lg hover:bg-blue-700">Conferma</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if pe.can_torna_idoneo %}
+      <form method="post" action="/candidature/{{ pe.pe_id }}/stato">
+        <input type="hidden" name="action" value="torna_idoneo">
+        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                onclick="return confirm('Tornare allo stato Idoneo? La checklist verra\' persa.')">
+          Torna Idoneo
+        </button>
+      </form>
+      {% endif %}
+      {% if pe.can_torna_lavorazione %}
+      <form method="post" action="/candidature/{{ pe.pe_id }}/stato">
+        <input type="hidden" name="action" value="torna_lavorazione">
+        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+          Torna in Lavorazione
+        </button>
+      </form>
+      {% endif %}
+      {% if pe.can_scartare %}
+      <form method="post" action="/candidature/{{ pe.pe_id }}/stato">
+        <input type="hidden" name="action" value="scarta">
+        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50"
+                onclick="return confirm('Scartare questa candidatura?')">
+          Scarta
+        </button>
+      </form>
+      {% endif %}
+
+      <a href="/bandi/{{ pe.bando_id }}" class="px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">
+        Scheda Bando
+      </a>
+    </div>
+  </div>
+
+  {# Progress bar #}
+  <div class="mt-4 pt-3 border-t border-gray-100">
+    <div class="flex items-center justify-between text-xs mb-1.5">
+      <span class="text-gray-500">Progresso checklist: {{ done_items }}/{{ total_items }}</span>
+      {% set pct = (done_items / total_items * 100)|int if total_items else 0 %}
+      <span class="font-medium {% if pct >= 75 %}text-green-600{% elif pct >= 50 %}text-yellow-600{% else %}text-gray-500{% endif %}">{{ pct }}%</span>
+    </div>
+    <div class="w-full bg-gray-100 rounded-full h-2">
+      <div class="h-2 rounded-full transition-all {% if pct >= 75 %}bg-green-500{% elif pct >= 50 %}bg-yellow-500{% else %}bg-gray-300{% endif %}"
+           style="width: {{ pct }}%"></div>
+    </div>
+  </div>
+</div>
+
+{# Tabs #}
+<div class="border-b border-gray-200 mb-6">
+  <nav class="flex gap-6" role="tablist">
+    {% set tabs = [
+      ("overview", "Overview"),
+      ("checklist", "Checklist (" ~ total_items ~ ")"),
+      ("documenti", "Documenti"),
+      ("note", "Note (" ~ notes|length ~ ")"),
+    ] %}
+    {% for key, label in tabs %}
+    <button hx-get="/candidature/{{ pe.pe_id }}/tab/{{ key }}" hx-target="#tab-content"
+            hx-push-url="/candidature/{{ pe.pe_id }}?tab={{ key }}"
+            class="pb-3 text-sm font-medium border-b-2 transition-colors
+                   {% if active_tab == key %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}">
+      {{ label }}
+    </button>
+    {% endfor %}
+  </nav>
+</div>
+
+<div id="tab-content">
+  {% if active_tab == 'checklist' %}
+    {% include "partials/workspace_tab_checklist.html" %}
+  {% elif active_tab == 'documenti' %}
+    {% include "partials/workspace_tab_documenti.html" %}
+  {% elif active_tab == 'note' %}
+    {% include "partials/workspace_tab_note.html" %}
+  {% else %}
+    {% include "partials/workspace_tab_overview.html" %}
+  {% endif %}
+</div>
+{% endblock %}

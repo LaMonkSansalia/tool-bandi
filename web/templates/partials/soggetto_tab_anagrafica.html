@@ -1,0 +1,112 @@
+{# Tab Anagrafica — edit form for soggetto #}
+<form method="post" action="/soggetti/{{ soggetto.id }}" class="space-y-6">
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h3 class="text-sm font-semibold text-gray-900 mb-4">Dati Anagrafici</h3>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+        <input type="text" name="nome" value="{{ soggetto.nome }}" required
+               class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Forma Giuridica</label>
+          <select name="forma_giuridica" class="w-full rounded-lg border-gray-300 text-sm">
+            <option value="">Seleziona...</option>
+            {% for val, label in [("impresa_individuale", "Impresa Individuale"), ("srl", "SRL"), ("srls", "SRLS"), ("snc", "SNC"), ("sas", "SAS"), ("cooperativa", "Cooperativa"), ("associazione", "Associazione"), ("fondazione", "Fondazione"), ("consorzio", "Consorzio"), ("ente_pubblico", "Ente Pubblico")] %}
+            <option value="{{ val }}" {% if soggetto.forma_giuridica == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Regime Fiscale</label>
+          <select name="regime_fiscale" class="w-full rounded-lg border-gray-300 text-sm">
+            <option value="">Seleziona...</option>
+            {% for val, label in [("forfettario", "Forfettario"), ("ordinario", "Ordinario"), ("semplificato", "Semplificato")] %}
+            <option value="{{ val }}" {% if soggetto.regime_fiscale == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Codice ATECO</label>
+          <input type="text" name="ateco" value="{{ soggetto.profilo.ateco or '' }}"
+                 class="w-full rounded-lg border-gray-300 text-sm" placeholder="62.01.00">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">P.IVA</label>
+          <input type="text" name="piva" value="{{ soggetto.profilo.piva or '' }}"
+                 class="w-full rounded-lg border-gray-300 text-sm" placeholder="IT12345678901">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Sede</label>
+        <input type="text" name="sede" value="{{ soggetto.profilo.sede or '' }}"
+               class="w-full rounded-lg border-gray-300 text-sm" placeholder="Palermo, PA">
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Dipendenti</label>
+          <input type="number" name="dipendenti" value="{{ soggetto.profilo.dipendenti or 0 }}" min="0"
+                 class="w-full rounded-lg border-gray-300 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Anno Costituzione</label>
+          <input type="number" name="anno_costituzione" value="{{ soggetto.profilo.anno_costituzione or '' }}"
+                 class="w-full rounded-lg border-gray-300 text-sm" placeholder="2020">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Fatturato (EUR)</label>
+          <input type="number" name="fatturato" value="{{ soggetto.profilo.fatturato or '' }}"
+                 class="w-full rounded-lg border-gray-300 text-sm" placeholder="50000">
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+        Salva Anagrafica
+      </button>
+    </div>
+  </div>
+</form>
+
+{# Hard stops section (read-only, derived from eligibility engine) #}
+{% if hard_stops %}
+<div class="bg-white rounded-xl border border-gray-200 p-6 mt-6">
+  <h3 class="text-sm font-semibold text-gray-900 mb-4">Hard Stops (dal motore di eligibilita')</h3>
+  <div class="space-y-2">
+    {% for hs in hard_stops %}
+    <div class="flex items-start gap-2 text-sm">
+      <svg class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+      </svg>
+      <span class="text-gray-700">{{ hs if hs is string else hs.label or hs.motivo or hs }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if vantaggi %}
+<div class="bg-white rounded-xl border border-gray-200 p-6 mt-6">
+  <h3 class="text-sm font-semibold text-gray-900 mb-4">Vantaggi Competitivi</h3>
+  <div class="space-y-2">
+    {% for v in vantaggi %}
+    <div class="flex items-start gap-2 text-sm">
+      <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span class="text-gray-700">{{ v if v is string else v.label or v }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

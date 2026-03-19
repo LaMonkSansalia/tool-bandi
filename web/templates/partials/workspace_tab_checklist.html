@@ -1,0 +1,31 @@
+{# Tab Checklist — requisiti auto + manuali #}
+<div class="bg-white rounded-xl border border-gray-200 p-5">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-sm font-semibold text-gray-900">
+      Checklist Requisiti
+      <span class="font-normal text-gray-400 ml-1">{{ done_items }}/{{ total_items }}</span>
+    </h3>
+  </div>
+
+  {# Checklist items #}
+  <div id="checklist-items" class="space-y-1">
+    {% for item in checklist if item is mapping %}
+    {% include "partials/checklist_item.html" %}
+    {% endfor %}
+  </div>
+
+  {% if not checklist %}
+  <p class="text-sm text-gray-400 py-4">Nessun requisito nella checklist. Aggiungi requisiti manuali qui sotto.</p>
+  {% endif %}
+
+  {# Add manual item #}
+  <div class="mt-4 pt-4 border-t border-gray-100">
+    <form method="post" action="/candidature/{{ pe.pe_id }}/checklist" class="flex items-center gap-2">
+      <input type="text" name="label" placeholder="Aggiungi requisito manuale..."
+             class="flex-1 rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+      <button type="submit" class="px-3 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 shrink-0">
+        Aggiungi
+      </button>
+    </form>
+  </div>
+</div>

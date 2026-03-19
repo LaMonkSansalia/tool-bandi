@@ -1,0 +1,68 @@
+{# State-dependent action buttons for bando detail #}
+
+{% if bando.can_avvia %}
+<button hx-post="/bandi/{{ bando.bando_id }}/state"
+        hx-vals='{"azione": "avvia_lavorazione"}'
+        hx-target="#bando-header" hx-swap="outerHTML"
+        hx-confirm="Avviare la lavorazione?"
+        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+  Avvia Lavorazione
+</button>
+{% endif %}
+
+{% if bando.can_segna_pronto %}
+<button hx-post="/bandi/{{ bando.bando_id }}/state"
+        hx-vals='{"azione": "segna_pronto"}'
+        hx-target="#bando-header" hx-swap="outerHTML"
+        hx-confirm="Segnare come pronto?"
+        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+  Segna Pronto
+</button>
+{% endif %}
+
+{% if bando.can_segna_inviato %}
+<button hx-post="/bandi/{{ bando.bando_id }}/state"
+        hx-vals='{"azione": "segna_inviato"}'
+        hx-target="#bando-header" hx-swap="outerHTML"
+        hx-confirm="Segnare come inviato?"
+        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+  Segna Inviato
+</button>
+{% endif %}
+
+{% if bando.can_torna_idoneo %}
+<button hx-post="/bandi/{{ bando.bando_id }}/state"
+        hx-vals='{"azione": "torna_idoneo"}'
+        hx-target="#bando-header" hx-swap="outerHTML"
+        class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+  Torna a Idoneo
+</button>
+{% endif %}
+
+{% if bando.can_rivalutare %}
+<button hx-post="/bandi/{{ bando.bando_id }}/state"
+        hx-vals='{"azione": "rivaluta"}'
+        hx-target="#bando-header" hx-swap="outerHTML"
+        class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+  Ri-valuta
+</button>
+{% endif %}
+
+{% if bando.can_scartare %}
+<button hx-post="/bandi/{{ bando.bando_id }}/state"
+        hx-vals='{"azione": "scarta"}'
+        hx-target="#bando-header" hx-swap="outerHTML"
+        hx-confirm="Scartare questo bando?"
+        class="px-3 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50">
+  Scarta
+</button>
+{% endif %}
+
+{% if bando.can_ripristinare %}
+<button hx-post="/bandi/{{ bando.bando_id }}/state"
+        hx-vals='{"azione": "ripristina"}'
+        hx-target="#bando-header" hx-swap="outerHTML"
+        class="px-3 py-2 text-sm font-medium text-green-600 bg-white border border-green-200 rounded-lg hover:bg-green-50">
+  Ripristina
+</button>
+{% endif %}

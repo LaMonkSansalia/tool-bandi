@@ -506,14 +506,153 @@ def daily_scan(spiders: list[str] | None = None) -> dict[str, Any]:
         return summary
 
 
+# ─────────────────────────────────────────────
+# ON-DEMAND RE-EVALUATION (importable by UI)
+# ─────────────────────────────────────────────
+
+FROZEN_EVAL_STATES = {"lavorazione", "pronto", "inviato", "archiviato"}
+
+
+def rivaluta_singolo(pe_id: int) -> dict:
+    """
+    Re-evaluate a single project_evaluation by id.
+    Skips if stato is frozen (lavorazione/pronto/inviato/archiviato).
+    Loads soggetto profile from soggetti.profilo if soggetto_id is set,
+    otherwise falls back to project profile.
+
+    Importable directly by Django UI: from engine.pipeline.flows import rivaluta_singolo
+    """
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    from engine.config import DATABASE_URL
+    from engine.projects.manager import upsert_evaluation
+    from engine.eligibility.rules import get_profile, get_profile_for_soggetto
+    from engine.eligibility.hard_stops import check_hard_stops
+    from engine.eligibility.configurable_scorer import score_bando_configurable
+
+    with psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor) as conn:
+        with conn.cursor() as cur:
+            # Load evaluation + bando + project data in a single query
+            cur.execute("""
+                SELECT
+                    pe.id, pe.project_id, pe.bando_id, pe.stato, pe.soggetto_id,
+                    p.scoring_rules,
+                    b.titolo, b.ente_erogatore, b.tipo_finanziamento,
+                    b.data_scadenza, b.importo_max, b.budget_totale,
+                    b.fatturato_minimo, b.dipendenti_minimi, b.soa_richiesta,
+                    b.tipo_beneficiario, b.regioni_ammesse, b.anzianita_minima_anni,
+                    b.settori_ateco, b.score_breakdown, b.gap_analysis,
+                    b.criteri_valutazione, b.raw_text, b.portale, b.url_fonte
+                FROM project_evaluations pe
+                JOIN projects p ON pe.project_id = p.id
+                JOIN bandi b ON pe.bando_id = b.id
+                WHERE pe.id = %s
+            """, (pe_id,))
+            row = cur.fetchone()
+
+    if not row:
+        return {"error": f"project_evaluation {pe_id} not found"}
+
+    if row["stato"] in FROZEN_EVAL_STATES:
+        return {"skipped": True, "reason": f"stato '{row['stato']}' è frozen", "pe_id": pe_id}
+
+    bando = dict(row)
+
+    # Load profile: prefer soggetto (post-migration), fallback to project
+    try:
+        if row["soggetto_id"]:
+            profile = get_profile_for_soggetto(row["soggetto_id"])
+        else:
+            profile = get_profile(row["project_id"])
+    except Exception:
+        profile = get_profile()  # ultimate fallback: JSON singleton
+
+    scoring_rules = row["scoring_rules"] or {}
+
+    hs_result = check_hard_stops(bando, profile)
+    if hs_result.excluded:
+        upsert_evaluation(
+            project_id=row["project_id"],
+            bando_id=row["bando_id"],
+            score=0,
+            stato="scartato",
+            motivo_scarto=hs_result.reason,
+            hard_stop_reason=hs_result.reason,
+        )
+        return {"pe_id": pe_id, "stato": "scartato", "reason": hs_result.reason}
+
+    score_result = score_bando_configurable(bando, profile, scoring_rules)
+    nuovo_stato = "scartato" if score_result.score < 40 else "idoneo"
+    breakdown_dicts = [
+        {"rule": b.rule, "points": b.points, "desc": b.description, "matched": b.matched}
+        for b in score_result.breakdown
+    ]
+
+    upsert_evaluation(
+        project_id=row["project_id"],
+        bando_id=row["bando_id"],
+        score=score_result.score,
+        stato=nuovo_stato,
+        score_breakdown={"breakdown": breakdown_dicts},
+    )
+    return {"pe_id": pe_id, "stato": nuovo_stato, "score": score_result.score}
+
+
+def rivaluta_progetto(project_id: int) -> dict:
+    """
+    Re-evaluate ALL non-frozen project_evaluations for a project.
+    Skips frozen states (lavorazione/pronto/inviato/archiviato).
+
+    Importable directly by Django UI: from engine.pipeline.flows import rivaluta_progetto
+    """
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    from engine.config import DATABASE_URL
+
+    with psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor) as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id FROM project_evaluations
+                WHERE project_id = %s AND stato NOT IN %s
+            """, (project_id, tuple(FROZEN_EVAL_STATES)))
+            pe_ids = [row["id"] for row in cur.fetchall()]
+
+    results = {"project_id": project_id, "total": len(pe_ids), "updated": 0, "skipped": 0, "errors": 0}
+    for pe_id in pe_ids:
+        try:
+            r = rivaluta_singolo(pe_id)
+            if r.get("skipped"):
+                results["skipped"] += 1
+            elif "error" not in r:
+                results["updated"] += 1
+            else:
+                results["errors"] += 1
+        except Exception as e:
+            logger.error(f"rivaluta_singolo({pe_id}) failed: {e}")
+            results["errors"] += 1
+
+    return results
+
+
 if __name__ == "__main__":
-    if "--serve" in sys.argv:
-        # Deploy as scheduled flow
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Bandi pipeline")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--scan", action="store_true", help="Run daily scan once immediately")
+    group.add_argument("--serve", action="store_true", help="Start scheduled flow (cron 08:00)")
+    group.add_argument("--rivaluta", type=int, metavar="PE_ID", help="Re-evaluate a single project_evaluation by id")
+    args = parser.parse_args()
+
+    if args.serve:
         daily_scan.serve(
             name="bandi-daily-scan-scheduled",
-            cron="0 8 * * *",  # Every day at 08:00
+            cron="0 8 * * *",
         )
+    elif args.rivaluta:
+        result = rivaluta_singolo(args.rivaluta)
+        print(f"\nRivalutazione pe_id={args.rivaluta}: {result}")
     else:
-        # Run once
+        # --scan or no args: run once
         result = daily_scan()
         print(f"\nScan complete: {result}")

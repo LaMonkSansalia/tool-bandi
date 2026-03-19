@@ -1,0 +1,36 @@
+{# Tab Note — cronologia note + form aggiungi #}
+<div class="bg-white rounded-xl border border-gray-200 p-5">
+  <h3 class="text-sm font-semibold text-gray-900 mb-4">Note & Decisioni</h3>
+
+  {# Add note form #}
+  <form method="post" action="/candidature/{{ pe.pe_id }}/note" class="mb-6">
+    <textarea name="testo" rows="3" required placeholder="Aggiungi una nota..."
+              class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-2"></textarea>
+    <div class="flex justify-end">
+      <button type="submit" class="px-3 py-1.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+        Aggiungi Nota
+      </button>
+    </div>
+  </form>
+
+  {# Notes list (newest first) #}
+  {% if notes %}
+  <div class="space-y-3 border-t border-gray-100 pt-4">
+    {% for note in notes|reverse %}
+    <div class="flex gap-3">
+      <div class="shrink-0 mt-1">
+        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm text-gray-700 whitespace-pre-line">{{ note.testo }}</p>
+        <p class="text-xs text-gray-400 mt-1">{{ note.created_at }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-6 border-t border-gray-100">
+    <p class="text-sm text-gray-400">Nessuna nota. Aggiungi la prima nota per tracciare le decisioni.</p>
+  </div>
+  {% endif %}
+</div>

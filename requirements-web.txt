@@ -1,0 +1,13 @@
+# FastAPI + server
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+itsdangerous==2.2.0
+
+# Templates
+jinja2==3.1.5
+
+# Session middleware
+starlette==0.45.3
+
+# Form parsing
+python-multipart==0.0.18

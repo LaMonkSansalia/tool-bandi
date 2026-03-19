@@ -2,15 +2,15 @@
 Tests for engine/eligibility/hard_stops.py
 All tests use a mock CompanyProfile (no file I/O).
 """
-import pytest
-from unittest.mock import patch, MagicMock
-from dataclasses import dataclass, field
-from engine.eligibility.hard_stops import check_hard_stops, HardStopResult
+from dataclasses import dataclass
+from engine.eligibility.hard_stops import check_hard_stops
 
 
 @dataclass
 class MockProfile:
     """Minimal CompanyProfile substitute for testing."""
+    denominazione: str = "Impresa Test"
+    forma_giuridica: str = "impresa individuale"
     fatturato_max: float = 85_000.0
     dipendenti: int = 1
     anni_attivita: int = 3
@@ -19,6 +19,18 @@ class MockProfile:
     ateco: str = "62.01.00"
     under_36: bool = True
     regione: str = "Sicilia"
+    soa: bool = False
+
+    @property
+    def forma_giuridica_keywords(self):
+        return ["impresa_individuale", "micro_impresa", "pmi"]
+
+    @property
+    def regione_match_terms(self):
+        terms = ["tutte", "tutte le regioni", "tutto il territorio nazionale", self.regione.lower()]
+        if self.zona_mezzogiorno:
+            terms.extend(["sud", "mezzogiorno", "sud italia"])
+        return terms
 
 
 PROFILE = MockProfile()

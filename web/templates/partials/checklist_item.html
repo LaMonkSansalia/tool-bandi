@@ -1,0 +1,27 @@
+{# Single checklist item — HTMX toggle #}
+<div id="check-{{ item.id }}" class="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 group">
+  <button hx-post="/candidature/{{ pe.pe_id if pe is defined else pe_id }}/checklist/{{ item.id }}"
+          hx-target="#check-{{ item.id }}" hx-swap="outerHTML"
+          class="shrink-0 focus:outline-none">
+    {% if item.completato %}
+    <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    {% else %}
+    <svg class="w-5 h-5 text-gray-300 group-hover:text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    {% endif %}
+  </button>
+  <div class="flex-1 min-w-0">
+    <span class="text-sm {% if item.completato %}text-gray-400 line-through{% else %}text-gray-700{% endif %}">
+      {{ item.label }}
+    </span>
+    {% if item.nota %}
+    <p class="text-xs text-gray-400 mt-0.5 truncate">{{ item.nota }}</p>
+    {% endif %}
+  </div>
+  <span class="text-xs px-1.5 py-0.5 rounded {% if item.tipo == 'auto' %}bg-blue-50 text-blue-600{% else %}bg-gray-100 text-gray-500{% endif %}">
+    {{ item.tipo }}
+  </span>
+</div>

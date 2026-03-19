@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+{% from "components/badge.html" import stato_badge, score_badge, tipo_fp_badge, giorni_badge, urgenza_badge %}
+{% from "components/tabs.html" import tab_bar %}
+
+{% block title %}{{ bando.titolo[:40] }} — Tool Bandi{% endblock %}
+{% block page_title %}
+  <a href="/bandi" class="text-gray-400 hover:text-gray-600">Bandi</a>
+  <span class="text-gray-300 mx-2">/</span>
+  {{ bando.titolo[:50] }}{% if bando.titolo|length > 50 %}…{% endif %}
+{% endblock %}
+
+{% block content %}
+{# ── Header Card ─────────────────────────────────────────────────────────── #}
+<div id="bando-header" class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-6">
+  <div class="flex items-start justify-between gap-4">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-lg font-semibold text-gray-900">{{ bando.titolo }}</h2>
+      <div class="flex flex-wrap items-center gap-3 mt-2">
+        {% if bando.ente_erogatore %}
+        <span class="text-sm text-gray-500">{{ bando.ente_erogatore }}</span>
+        {% endif %}
+        {{ stato_badge(bando.stato, bando.stato_label, bando.stato_css) }}
+        {{ score_badge(bando.score, bando.score_display, bando.score_css) }}
+        {{ tipo_fp_badge(bando.tipo_fp_label, bando.tipo_fp_css) }}
+        {{ giorni_badge(bando.giorni_label, bando.giorni_css) }}
+        {% if bando.urgente %}{{ urgenza_badge() }}{% endif %}
+      </div>
+      <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
+        <span>Budget: {{ bando.budget_label }}</span>
+        {% if bando.portale %}<span>Portale: {{ bando.portale }}</span>{% endif %}
+        {% if bando.url_fonte %}
+        <a href="{{ bando.url_fonte }}" target="_blank" class="text-blue-600 hover:underline">Apri fonte</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Action Buttons #}
+    <div class="flex flex-wrap gap-2 shrink-0" id="action-buttons">
+      {% include "partials/stato_action_buttons.html" %}
+    </div>
+  </div>
+</div>
+
+{# ── Tabs ────────────────────────────────────────────────────────────────── #}
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+  {{ tab_bar(
+    [("decisione", "Decisione 60s"), ("dettaglio", "Dettaglio"), ("testo", "Testo")],
+    active_tab,
+    "/bandi/" ~ bando.bando_id
+  ) }}
+  <div id="tab-content" class="p-5">
+    {% if active_tab == "decisione" %}
+      {% include "partials/bando_tab_decisione.html" %}
+    {% elif active_tab == "dettaglio" %}
+      {% include "partials/bando_tab_dettaglio.html" %}
+    {% else %}
+      {% include "partials/bando_tab_testo.html" %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

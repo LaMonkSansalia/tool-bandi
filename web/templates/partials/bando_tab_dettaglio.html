@@ -1,0 +1,70 @@
+{# Tab Dettaglio — metadata + score breakdown #}
+
+<div class="space-y-6">
+  {# Score Breakdown #}
+  {% if bando.score_breakdown %}
+  <div>
+    <h4 class="text-sm font-semibold text-gray-700 mb-3">Score Breakdown</h4>
+    <div class="space-y-2">
+      {% for item in bando.score_breakdown %}
+      {% if item is mapping %}
+      <div class="flex items-center justify-between py-2 px-3 rounded-lg {{ 'bg-green-50' if item.get('matched') else 'bg-gray-50' }}">
+        <div class="flex items-center gap-2">
+          {% if item.get('matched') %}
+          <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+          </svg>
+          {% else %}
+          <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          {% endif %}
+          <span class="text-sm {{ 'text-gray-900' if item.get('matched') else 'text-gray-500' }}">
+            {{ item.get('criterio', item.get('rule', '')) }}
+          </span>
+        </div>
+        <span class="text-sm font-semibold {{ 'text-green-700' if item.get('matched') else 'text-gray-400' }}">
+          {{ item.get('punti', item.get('points', 0)) }}pt
+        </span>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Gap Analysis #}
+  {% if bando.gap_analysis %}
+  <div>
+    <h4 class="text-sm font-semibold text-gray-700 mb-3">Gap Analysis</h4>
+    <div class="space-y-2">
+      {% for gap in bando.gap_analysis %}
+      {% if gap is mapping %}
+      <div class="p-3 rounded-lg border border-gray-200 bg-gray-50">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full
+            {% if gap.get('semaforo') == 'rosso' or gap.get('gravita') == 'blocking' %}bg-red-100 text-red-700
+            {% elif gap.get('semaforo') == 'giallo' %}bg-yellow-100 text-yellow-700
+            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            {{ gap.get('tipo', gap.get('categoria', 'Gap')) }}
+          </span>
+        </div>
+        <p class="text-sm text-gray-700">{{ gap.get('descrizione_originale', gap.get('label', '')) }}</p>
+        {% if gap.get('suggerimento', gap.get('azione_suggerita')) %}
+        <p class="text-xs text-gray-500 mt-1">{{ gap.get('suggerimento', gap.get('azione_suggerita', '')) }}</p>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Metadata #}
+  {% if bando.metadata %}
+  <div>
+    <h4 class="text-sm font-semibold text-gray-700 mb-3">Metadati estrazione</h4>
+    <pre class="text-xs bg-gray-50 rounded-lg p-4 overflow-x-auto border border-gray-200 max-h-60">{{ bando.metadata | tojson(indent=2) }}</pre>
+  </div>
+  {% endif %}
+</div>

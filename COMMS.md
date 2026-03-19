@@ -13,6 +13,50 @@
 
 ---
 
+## Current Status — 2026-03-19 (aggiornato)
+
+**Phase:** tool-bandi-ui — COMPLETATO (Sprint 0-3 + 5 + QA)
+**Stato:** Sistema operativo. Sprint 4 (generazione documenti) deferred.
+
+[DONE Sprint 5 QA] 2026-03-19 — QA Finale US-052:
+  - 27/27 test passati (12 check end-to-end)
+  - Fix: parsing difensivo JSONB in workspace + bando_detail views (_as_list helper)
+  - Fix: template `{% firstof gap.tipo gap.categoria gap %}` sostituisce `default:gap.categoria` per evitare VariableDoesNotExist come argomento di filter
+  - Test: tests_qa.py copre Check01-Check12 (login, filtri, project switcher, state machine, urgente, pipeline, dashboard, gap analysis, scoring)
+
+[DONE Sprint 5 UI] 2026-03-19 — Dashboard + Pipeline:
+  - US-050: Dashboard — 4 stat cards (Idonei, Scadono 14gg, In lavorazione, Ultima scansione) + tabella ScadenzeImminenti (idonei/lavorazione <30gg) con display metadata
+  - US-051: Pipeline page — tabella last 20 pipeline_runs + trigger manuale (POST /pipeline/trigger/) + background thread
+  - Template: templates/core/dashboard.html, templates/pipeline/pipeline.html
+
+[DONE Sprint 3 UI] 2026-03-19 — ProgettoDetail /progetti/<pk>/ completo:
+  - US-030: 7 sezioni (Identità, Descrizione, Economico, Partner, Piano lavoro, KPI, Punti di forza) + checklist completezza 12 item
+  - US-031: Gap Analysis Aggregata — query JSONB su project_evaluations, top 20 gap raggruppati per tipo
+  - US-032: Editor Scoring Rules JSONB + checkbox "Ri-valuta tutti" con background thread
+  - Test: 7/7 assertions passate
+
+[DONE Sprint 2 UI] 2026-03-19 — Candidature complete:
+  - US-020: Avvia Lavorazione — modale conferma + state_action endpoint + init workspace_checklist da gap_analysis
+  - US-021: Workspace /candidature/<pe_id>/ — 4 tab (Overview, Checklist, Documenti placeholder, Note), progress bar, checklist toggle via fetch API
+  - US-023: State machine completa — tutte le transizioni: avvia_lavorazione, segna_pronto, segna_inviato (modale), torna_idoneo, torna_lavorazione, scarta (modale + motivo), archivia, ripristina
+  - Test: 9/9 state machine assertions passate
+
+[DONE Sprint 1 UI] 2026-03-19 — Lista Bandi completa: /bandi/ + /bandi/<pk>/ + filtri + empty state + bulk actions. 8/8 test 200.
+
+[DONE Sprint 0 UI] 2026-03-19 — Django 5.2 LTS + Unfold setup completo:
+  - DB migrations 008 (soggetti), 009 (workspace fields + project_decisions) applicate
+  - Migration 010: 1 soggetto seedato (lamonica_piva), 250 evaluations migrated
+  - tool-bandi-ui/ Django project creato, venv, requirements.txt, settings.py, urls.py
+  - Auth funzionante (luciano@toolbandi.local), DB connection verified (125 bandi)
+  - CurrentProjectMiddleware + context processor current_project
+  - Unfold SITE_DROPDOWN dinamico (project switcher callable)
+  - URL patterns placeholder: /, /bandi/, /bandi/<pk>/, /candidature/<pk>/, /progetti/<pk>/, /pipeline/
+  - flows.py: rivaluta_singolo + rivaluta_progetto + CLI --rivaluta / --scan
+  - package_builder.py: build_package_for_pe(pe_id) wrapper
+  - rules.py + manager.py: get_profile_for_soggetto / get_soggetto_profile
+
+---
+
 ## Current Status — 2026-03-03 (aggiornato fine giornata)
 
 **Phase:** Sprint 0-6 **COMPLETE** | Sprint 6 UX refactoring DONE

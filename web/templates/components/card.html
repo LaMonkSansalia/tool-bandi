@@ -1,0 +1,26 @@
+{# Card components — Jinja2 macros #}
+
+{% macro card(classes="") %}
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm {{ classes }}">
+  {{ caller() }}
+</div>
+{% endmacro %}
+
+{% macro stat_card(label, value, icon_path, color="blue", subtitle="") %}
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-sm font-medium text-gray-500">{{ label }}</p>
+      <p class="mt-1 text-2xl font-bold text-gray-900">{{ value }}</p>
+      {% if subtitle %}
+      <p class="mt-0.5 text-xs text-gray-400">{{ subtitle }}</p>
+      {% endif %}
+    </div>
+    <div class="w-10 h-10 bg-{{ color }}-50 rounded-lg flex items-center justify-center">
+      <svg class="w-5 h-5 text-{{ color }}-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}"/>
+      </svg>
+    </div>
+  </div>
+</div>
+{% endmacro %}

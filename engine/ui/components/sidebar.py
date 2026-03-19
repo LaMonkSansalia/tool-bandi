@@ -9,6 +9,11 @@ import streamlit as st
 def render_sidebar() -> None:
     """Render scan button and app info in sidebar."""
     st.sidebar.title("🎯 Bandi Researcher")
+    current_project = st.session_state.get("current_project")
+    if current_project:
+        prefix = current_project.get("telegram_prefix", "")
+        name = current_project.get("nome", "")
+        st.sidebar.caption(f"Progetto attivo: {prefix} {name}".strip())
 
     st.sidebar.markdown("---")
 

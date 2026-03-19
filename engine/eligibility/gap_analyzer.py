@@ -49,6 +49,18 @@ class GapAnalysisResult:
         return "verde"
 
 
+def _has_certification(profile: CompanyProfile, cert_text: str) -> bool:
+    """Return True when the profile already has the requested certification."""
+    cert_lower = cert_text.lower()
+    if "9001" in cert_lower:
+        return bool(getattr(profile, "iso_9001", False))
+    if "27001" in cert_lower:
+        return bool(getattr(profile, "iso_27001", False))
+    if "soa" in cert_lower:
+        return bool(getattr(profile, "soa", False))
+    return False
+
+
 def analyze_gaps(bando: dict, profile: CompanyProfile | None = None) -> GapAnalysisResult:
     """
     Analyze gaps between bando requirements and company profile.
@@ -71,21 +83,39 @@ def analyze_gaps(bando: dict, profile: CompanyProfile | None = None) -> GapAnaly
     for cert in certificazioni:
         cert_lower = cert.lower()
         if "9001" in cert_lower or "iso 9001" in cert_lower:
-            gaps.append(Gap(
-                tipo=GapType.RECOVERABLE,
-                categoria="certificazione",
-                descrizione="Bando richiede ISO 9001 — impresa non certificata",
-                suggerimento="ISO 9001 ottenibile in 3-6 mesi (~2.000-5.000€). Valutare se deadline lo consente.",
-                semaforo="giallo",
-            ))
+            if _has_certification(profile, cert):
+                gaps.append(Gap(
+                    tipo=GapType.INFORMATIONAL,
+                    categoria="certificazione",
+                    descrizione="Bando richiede ISO 9001 — certificazione gia' presente",
+                    suggerimento="Allega attestato ISO 9001 aggiornato nella documentazione.",
+                    semaforo="verde",
+                ))
+            else:
+                gaps.append(Gap(
+                    tipo=GapType.RECOVERABLE,
+                    categoria="certificazione",
+                    descrizione="Bando richiede ISO 9001 — impresa non certificata",
+                    suggerimento="ISO 9001 ottenibile in 3-6 mesi (~2.000-5.000€). Valutare se deadline lo consente.",
+                    semaforo="giallo",
+                ))
         elif "27001" in cert_lower:
-            gaps.append(Gap(
-                tipo=GapType.RECOVERABLE,
-                categoria="certificazione",
-                descrizione="Bando richiede ISO 27001 — impresa non certificata",
-                suggerimento="ISO 27001 richiede 6-12 mesi. Difficilmente recuperabile per bando imminente.",
-                semaforo="giallo",
-            ))
+            if _has_certification(profile, cert):
+                gaps.append(Gap(
+                    tipo=GapType.INFORMATIONAL,
+                    categoria="certificazione",
+                    descrizione="Bando richiede ISO 27001 — certificazione gia' presente",
+                    suggerimento="Allega attestato ISO 27001 aggiornato nella documentazione.",
+                    semaforo="verde",
+                ))
+            else:
+                gaps.append(Gap(
+                    tipo=GapType.RECOVERABLE,
+                    categoria="certificazione",
+                    descrizione="Bando richiede ISO 27001 — impresa non certificata",
+                    suggerimento="ISO 27001 richiede 6-12 mesi. Difficilmente recuperabile per bando imminente.",
+                    semaforo="giallo",
+                ))
         else:
             gaps.append(Gap(
                 tipo=GapType.INFORMATIONAL,

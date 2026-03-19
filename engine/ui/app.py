@@ -14,6 +14,7 @@ st.set_page_config(
 
 from engine.ui.components.sidebar import render_sidebar
 from engine.projects.manager import get_active_projects, get_project_stats
+from engine.eligibility.rules import clear_profile_cache
 from engine.config import DEFAULT_PROJECT_ID
 
 # ── Pages ─────────────────────────────────────────────────────────────────────
@@ -58,8 +59,17 @@ if _projects:
             format_func=lambda p: f"{p.get('telegram_prefix', '')} {p['nome']}".strip(),
             label_visibility="collapsed",
         )
-        st.session_state["current_project_id"] = _selected["id"]
-        st.session_state["current_project"] = _selected
+        _selected_id = _selected["id"]
+        if _selected_id != _current_id:
+            # Ensure all pages recalculate with the freshly selected project context.
+            clear_profile_cache()
+            st.session_state["project_context_version"] = st.session_state.get("project_context_version", 0) + 1
+            st.session_state["current_project_id"] = _selected_id
+            st.session_state["current_project"] = _selected
+            st.rerun()
+        else:
+            st.session_state["current_project_id"] = _selected_id
+            st.session_state["current_project"] = _selected
 
     with col_desc:
         _desc_breve = _selected.get("descrizione_breve") or _selected.get("descrizione") or ""

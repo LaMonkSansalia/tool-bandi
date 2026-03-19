@@ -1,0 +1,100 @@
+{# Tab Overview — pro/contro + gap analysis + info bando #}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  {# Pro (score_breakdown matched) #}
+  <div class="bg-white rounded-xl border border-gray-200 p-5">
+    <h3 class="text-sm font-semibold text-green-700 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Punti di Forza
+    </h3>
+    {% set pro_list = [] %}
+    {% for item in pe.score_breakdown if item is mapping and item.matched %}
+      {% set _ = pro_list.append(item) %}
+    {% endfor %}
+    {% if pro_list %}
+    <ul class="space-y-2">
+      {% for item in pe.score_breakdown if item is mapping and item.matched %}
+      <li class="flex items-start gap-2 text-sm">
+        <svg class="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+        </svg>
+        <span class="text-gray-700">{{ item.name or item.label or item }}</span>
+        {% if item.points %}<span class="text-xs text-gray-400">(+{{ item.points }}pt)</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-gray-400">Nessun punto di forza identificato</p>
+    {% endif %}
+  </div>
+
+  {# Contro (gap_analysis + yellow_flags) #}
+  <div class="bg-white rounded-xl border border-gray-200 p-5">
+    <h3 class="text-sm font-semibold text-red-700 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+      </svg>
+      Gap & Rischi
+    </h3>
+    {% if pe.gap_analysis or pe.yellow_flags %}
+    <ul class="space-y-2">
+      {% for item in pe.gap_analysis if item is mapping %}
+      <li class="flex items-start gap-2 text-sm">
+        <svg class="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        <div>
+          <span class="text-gray-700">{{ item.tipo or item.categoria or item.label or '—' }}</span>
+          {% if item.suggerimento %}
+          <p class="text-xs text-gray-400 mt-0.5">{{ item.suggerimento }}</p>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+      {% for item in pe.yellow_flags if item is mapping %}
+      <li class="flex items-start gap-2 text-sm">
+        <svg class="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-gray-700">{{ item.tipo or item.label or item }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-gray-400">Nessun gap identificato</p>
+    {% endif %}
+  </div>
+</div>
+
+{# Bando info #}
+<div class="bg-white rounded-xl border border-gray-200 p-5 mt-6">
+  <h3 class="text-sm font-semibold text-gray-900 mb-3">Info Bando</h3>
+  <dl class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+    <div>
+      <dt class="text-gray-500 text-xs">Portale</dt>
+      <dd class="text-gray-900 font-medium">{{ pe.portale or '—' }}</dd>
+    </div>
+    <div>
+      <dt class="text-gray-500 text-xs">Tipo</dt>
+      <dd class="text-gray-900 font-medium">{{ pe.tipo_fp_label or '—' }}</dd>
+    </div>
+    <div>
+      <dt class="text-gray-500 text-xs">Budget</dt>
+      <dd class="text-gray-900 font-medium">{{ pe.budget_label or '—' }}</dd>
+    </div>
+    <div>
+      <dt class="text-gray-500 text-xs">Scadenza</dt>
+      <dd class="text-gray-900 font-medium">{{ pe.data_scadenza or '—' }}</dd>
+    </div>
+  </dl>
+  {% if pe.url_fonte %}
+  <a href="{{ pe.url_fonte }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mt-3 text-xs text-blue-600 hover:text-blue-700">
+    Apri bando originale
+    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+    </svg>
+  </a>
+  {% endif %}
+</div>
