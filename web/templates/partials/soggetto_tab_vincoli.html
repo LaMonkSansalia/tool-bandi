@@ -1,10 +1,38 @@
-{# Tab Vincoli & Vantaggi — hard stops, vincoli eligibility, vantaggi competitivi (D7) #}
+{# Tab Vincoli & Vantaggi — hard stops calcolati + manuali, vantaggi competitivi (D7 + B-05) #}
+
+{# ── Vincoli Calcolati (dall'engine) ─────────────────────────────────────── #}
+{% if vincoli_calcolati %}
+<div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-sm font-semibold text-gray-900">Vincoli Calcolati (Engine)</h3>
+    <span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium">{{ vincoli_calcolati|length }} vincoli attivi</span>
+  </div>
+  <p class="text-xs text-gray-500 mb-4">Hard stop rilevati automaticamente dalle valutazioni dei bandi, ordinati per impatto.</p>
+  <div class="space-y-3">
+    {% for v in vincoli_calcolati %}
+    <div class="flex items-start gap-3 p-3 rounded-lg bg-red-50 border border-red-100">
+      <svg class="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+      </svg>
+      <div class="flex-1">
+        <p class="text-sm font-medium text-red-800">{{ v.label }}</p>
+        <div class="flex items-center gap-3 mt-1">
+          <span class="text-xs text-red-600 font-medium">{{ v.bandi_bloccati }} bandi bloccati</span>
+          <span class="text-xs text-gray-500">Progetto: {{ v.progetto_nome }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-  {# Hard Stops / Vincoli #}
+  {# Hard Stops / Vincoli Manuali #}
   <div class="bg-white rounded-xl border border-gray-200 p-5">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-semibold text-gray-900">Vincoli (Hard Stops)</h3>
+      <h3 class="text-sm font-semibold text-gray-900">Vincoli Manuali</h3>
       <span class="text-xs text-gray-400">{{ hard_stops|length }} vincoli</span>
     </div>
 
@@ -25,7 +53,7 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-sm text-gray-400 text-center py-6">Nessun vincolo definito</p>
+    <p class="text-sm text-gray-400 text-center py-6">Nessun vincolo manuale</p>
     {% endif %}
 
     {# Add vincolo form #}

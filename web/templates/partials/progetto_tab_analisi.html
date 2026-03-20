@@ -91,7 +91,7 @@
       {% if soggetto %}
       <div class="space-y-2 text-sm">
         <p><span class="text-gray-500">Nome:</span> <a href="/soggetti/{{ soggetto.id }}" class="text-blue-600 hover:underline">{{ soggetto.nome }}</a></p>
-        <p><span class="text-gray-500">Forma:</span> {{ soggetto.forma_giuridica or '—' }}</p>
+        <p><span class="text-gray-500">Forma:</span> {{ soggetto.forma_giuridica|forma_label }}</p>
         <p><span class="text-gray-500">ATECO:</span> {{ soggetto.ateco or '—' }}</p>
         <p><span class="text-gray-500">Dipendenti:</span> {{ soggetto.dipendenti or '—' }}</p>
       </div>

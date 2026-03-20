@@ -169,6 +169,28 @@ async def soggetto_create(
     return RedirectResponse(url=f"/soggetti/{new_id}", status_code=303)
 
 
+def _get_vincoli_calcolati(conn, soggetto_id: int) -> list[dict]:
+    """
+    Aggregate hard_stop_reason from project_evaluations for all projects
+    of this soggetto. Returns list of {label, bandi_bloccati, progetto_nome}.
+    """
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute("""
+            SELECT pe.hard_stop_reason AS label,
+                   COUNT(*) AS bandi_bloccati,
+                   p.nome AS progetto_nome
+            FROM project_evaluations pe
+            JOIN projects p ON pe.project_id = p.id
+            WHERE p.soggetto_id = %s
+              AND pe.hard_stop_reason IS NOT NULL
+              AND pe.hard_stop_reason != ''
+            GROUP BY pe.hard_stop_reason, p.nome
+            ORDER BY COUNT(*) DESC
+            LIMIT 30
+        """, (soggetto_id,))
+        return [dict(r) for r in cur.fetchall()]
+
+
 @router.get("/{soggetto_id}")
 def soggetto_detail(request: Request, soggetto_id: int, conn=Depends(get_db)):
     """Dettaglio soggetto — anagrafica, progetti, hard stops."""
@@ -192,10 +214,13 @@ def soggetto_detail(request: Request, soggetto_id: int, conn=Depends(get_db)):
         """, (soggetto_id,))
         progetti = [dict(r) for r in cur.fetchall()]
 
-    # Hard stops dal profilo
+    # Hard stops dal profilo (manuali)
     profilo = s["profilo"]
     hard_stops = profilo.get("hard_stops", [])
     vantaggi = profilo.get("vantaggi", [])
+
+    # Vincoli calcolati dall'engine (hard stops aggregati dalle evaluations)
+    vincoli_calcolati = _get_vincoli_calcolati(conn, soggetto_id)
 
     saved = request.query_params.get("saved", "")
     rivaluta = request.query_params.get("rivaluta", "")
@@ -209,6 +234,7 @@ def soggetto_detail(request: Request, soggetto_id: int, conn=Depends(get_db)):
         "progetti": progetti,
         "hard_stops": hard_stops,
         "vantaggi": vantaggi,
+        "vincoli_calcolati": vincoli_calcolati,
         "saved": saved,
         "rivaluta": rivaluta,
         "active_tab": active_tab,
@@ -239,12 +265,14 @@ def soggetto_tab(request: Request, soggetto_id: int, tab_name: str, conn=Depends
         progetti = [dict(r) for r in cur.fetchall()]
 
     profilo = s["profilo"]
+    vincoli_calcolati = _get_vincoli_calcolati(conn, soggetto_id)
     ctx = {
         "request": request,
         "soggetto": s,
         "progetti": progetti,
         "hard_stops": profilo.get("hard_stops", []),
         "vantaggi": profilo.get("vantaggi", []),
+        "vincoli_calcolati": vincoli_calcolati,
         "FORME_GIURIDICHE": FORME_GIURIDICHE,
         "REGIMI_FISCALI": REGIMI_FISCALI,
         "QUALIFICHE_SOGGETTO": QUALIFICHE_SOGGETTO,

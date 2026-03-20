@@ -18,7 +18,7 @@
       {% if soggetto %}
       <a href="/soggetti/{{ soggetto.id }}" class="text-sm text-blue-600 hover:text-blue-700">
         {{ soggetto.nome }}
-        <span class="text-gray-400 ml-1">({{ soggetto.forma_giuridica or '?' }})</span>
+        <span class="text-gray-400 ml-1">({{ soggetto.forma_giuridica|forma_label }})</span>
       </a>
       {% else %}
       <span class="text-sm text-gray-400">Nessun soggetto associato</span>
@@ -71,6 +71,13 @@
     <button hx-get="/progetti/{{ proj.id }}/tab/{{ key }}" hx-target="#tab-content" hx-push-url="/progetti/{{ proj.id }}?tab={{ key }}"
             class="pb-3 text-sm font-medium border-b-2 transition-colors
                    {% if active_tab == key %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}"
+            onclick="this.parentElement.querySelectorAll('[role=tab]').forEach(t => {
+              t.classList.remove('border-blue-600','text-blue-600');
+              t.classList.add('border-transparent','text-gray-500');
+            });
+            this.classList.add('border-blue-600','text-blue-600');
+            this.classList.remove('border-transparent','text-gray-500');"
+            role="tab"
             {% if active_tab == key %}aria-selected="true"{% endif %}>
       {{ label }}
     </button>

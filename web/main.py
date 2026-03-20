@@ -171,6 +171,17 @@ def _clean_html(text: str) -> str:
 
 templates.env.filters["clean_html"] = _clean_html
 
+# Human-readable label filters for raw DB values
+from web.services.completezza import FORME_GIURIDICHE, REGIMI_FISCALI, SETTORI
+
+_FORME_MAP = dict(FORME_GIURIDICHE)
+_REGIMI_MAP = dict(REGIMI_FISCALI)
+_SETTORI_MAP = dict(SETTORI)
+
+templates.env.filters["forma_label"] = lambda v: _FORME_MAP.get(v, v.replace("_", " ").title() if v else "—")
+templates.env.filters["regime_label"] = lambda v: _REGIMI_MAP.get(v, v.replace("_", " ").title() if v else "—")
+templates.env.filters["settore_label"] = lambda v: _SETTORI_MAP.get(v, v.replace("_", " ").title() if v else "—")
+
 
 # ── Include routers ──────────────────────────────────────────────────────────
 

@@ -13,7 +13,21 @@
 
 ---
 
-## Current Status — 2026-03-20 (v0.8.3-dev)
+## Current Status — 2026-03-20 (v0.8.4-dev)
+
+**Phase:** v0.8.4-dev — Audit staging fix
+**Stato:** 21 bug risolti totali, 7 audit aperti. 29/29 smoke test.
+
+[IN CORSO] 2026-03-20 — Audit manuale bandi.sansalia.com:
+  - CRITICO: DB staging era vuoto (bandi, evaluations, pipeline_runs = 0). Dati esistevano SOLO nel DB locale.
+  - Decisione: pg_dump locale + restore su staging (non rieseguire scraper — troppo lento)
+  - Fix UI: 5 bug UI (tab active, stat card cliccabili, label raw, completezza spacing, vincoli calcolati)
+  - Decisione: filtri Jinja2 per traduzione valori DB (forma_label, regime_label, settore_label) — estensibile
+  - Decisione: vincoli calcolati aggregati da project_evaluations, mostrati SOPRA vincoli manuali (non sostituiti)
+  - 7 bug audit ancora aperti (B-03, B-04, B-07, B-10, B-11, B-12, B-13) — prossima sessione
+  - Prossimi passi: deploy fix su staging (git pull + rebuild), poi B-04 (lista soggetti tabella)
+
+## Previous Status — 2026-03-20 (v0.8.3-dev)
 
 **Phase:** v0.8.3-dev — Deploy & stabilizzazione
 **Stato:** 15 bug risolti totali, 0 aperti. 29/29 smoke test.

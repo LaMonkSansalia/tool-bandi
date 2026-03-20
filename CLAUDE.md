@@ -1,6 +1,6 @@
 # Tool Bandi — CLAUDE.md
 
-**Versione:** 0.8.2-dev
+**Versione:** 0.8.4-dev
 **Repo:** github.com/LaMonkSansalia/tool-bandi
 **Stack:** FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind CSS — single-process Python, zero build frontend
 **Avvio:** `venv/bin/python -m uvicorn web.main:app --reload --port 8000`
@@ -85,6 +85,22 @@ PostgreSQL 16 + pgvector. Tabelle principali:
 - `candidatura` — tabella separata (migration 011, non deployata)
 
 Schema completo: `context/system_architecture.md` sezione Database.
+
+---
+
+## Filtri Jinja2 Custom (registrati in main.py)
+
+| Filtro | Esempio | Output |
+|--------|---------|--------|
+| `format_budget` | `1500000 \| format_budget` | "1.5M" |
+| `giorni_label` | `7 \| giorni_label` | "7gg" |
+| `giorni_css` | `7 \| giorni_css` | "text-red-600" |
+| `score_display` | `75 \| score_display` | "75" |
+| `score_css` | `75 \| score_css` | "bg-green-100 text-green-800" |
+| `clean_html` | `html_str \| clean_html` | testo pulito |
+| `forma_label` | `"impresa_individuale" \| forma_label` | "Impresa individuale / Ditta individuale" |
+| `regime_label` | `"forfettario" \| regime_label` | "Regime forfettario" |
+| `settore_label` | `"ict_freelancer" \| settore_label` | "ICT / Digital / Freelancer" |
 
 ---
 

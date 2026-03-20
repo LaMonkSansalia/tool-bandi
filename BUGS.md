@@ -100,6 +100,65 @@
   2. **`hx-boost="false"` su 6 form in partials** — progetto_tab_scoring, soggetto_tab_vincoli (2 form), workspace_tab_note, workspace_tab_checklist, workspace_tab_documenti_full
   3. **Audit completo** — verificati tutti i 37 partial (nessuno estende layout), tutti gli hx-get (puntano a tab partial), tutte le route (restituiscono partial corretti)
 
-## Bug aperti
+### BUG-FIXED-016: DB staging vuoto — contatori tutti a 0 (A-01)
+- **Pagina:** Tutte (dashboard, progetti, soggetti)
+- **Causa:** Dati bandi (125 bandi, 250 evaluations) esistevano solo nel DB locale engine-postgres-1, mai migrati su staging. Volume bandi-ui_pgdata corretto ma le tabelle erano vuote.
+- **Fix:** pg_dump locale + restore su staging (TRUNCATE + INSERT con --column-inserts --disable-triggers)
 
-_Nessuno al momento. 29 smoke test passano._
+### BUG-FIXED-017: Tab active non evidenziato al click (B-01)
+- **Pagina:** soggetto_detail, progetto_detail, candidatura_workspace
+- **Causa:** Tab button inline senza onclick handler per switch classi CSS (bando_detail usava tab_bar macro con onclick, le altre pagine no)
+- **Fix:** Aggiunto onclick handler su tutti i tab button inline (3 pagine)
+
+### BUG-FIXED-018: Stat card dashboard non cliccabili (B-02)
+- **Pagina:** Dashboard /
+- **Causa:** Macro stat_card non supportava href
+- **Fix:** Aggiunto parametro href alla macro stat_card + wrapping in `<a>` se presente. 8 card ora linkano a pagine filtrate.
+
+### BUG-FIXED-019: Valori DB raw nelle label (B-08)
+- **Pagina:** progetto_detail, progetto_tab_analisi
+- **Causa:** `soggetto.forma_giuridica` mostrato raw (es. `impresa_individuale`)
+- **Fix:** Filtro Jinja2 `forma_label` (+ `regime_label`, `settore_label`) registrato in main.py usando dict da FORME_GIURIDICHE
+
+### BUG-FIXED-020: "Completezza50%" senza spazio (B-09)
+- **Pagina:** /progetti (lista)
+- **Causa:** Container completezza bar troppo stretto (w-24 = 96px) per "Completezza" + "50%"
+- **Fix:** Allargato a w-32 (128px)
+
+### BUG-FIXED-021: Vincoli non calcolati dall'engine (B-05)
+- **Pagina:** /soggetti/{id} tab Vincoli & Vantaggi
+- **Causa:** Mostrava solo vincoli manuali dal profilo JSONB, ignorava hard_stop_reason dalle project_evaluations
+- **Fix:** Nuova query _get_vincoli_calcolati() aggrega hard_stop_reason per soggetto, mostra vincoli calcolati sopra quelli manuali con conteggio bandi bloccati
+
+## Bug aperti (audit manuale)
+
+### BUG-AUDIT-B03: Dashboard incompleta — mancano 5 blocchi spec
+- **Pagina:** Dashboard /
+- **Spec:** §5.1 richiede candidature per stato, nuovi bandi, progetti incompleti, hard stop impattanti, timeline
+- **Priorita':** Media
+
+### BUG-AUDIT-B04: Lista soggetti — card anziché tabella
+- **Pagina:** /soggetti
+- **Spec:** §5.2.1 richiede tabella con hard stop count, bandi bloccati, completezza
+- **Priorita':** Media
+
+### BUG-AUDIT-B07: Slug interno visibile in tab Progetti
+- **Pagina:** /soggetti/{id} tab Progetti
+- **Priorita':** Bassa
+
+### BUG-AUDIT-B10: Score medio e bandi match mancanti in lista progetti
+- **Pagina:** /progetti
+- **Spec:** §5.3.1 richiede score medio + bandi compatibili
+- **Priorita':** Media
+
+### BUG-AUDIT-B11: Scoring rules vuote (non pre-compilate)
+- **Pagina:** /progetti/{id} tab Profilo
+- **Priorita':** Media
+
+### BUG-AUDIT-B12: PDS senza settore
+- **Pagina:** /progetti
+- **Priorita':** Bassa
+
+### BUG-AUDIT-B13: Tab Analisi — sotto-sezioni spec mancanti
+- **Pagina:** /progetti/{id} tab Analisi
+- **Priorita':** Bassa

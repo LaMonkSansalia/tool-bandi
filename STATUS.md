@@ -1,6 +1,6 @@
 # Tool Bandi — Contesto & Status
 
-**Versione:** 0.8.3-dev
+**Versione:** 0.8.4-dev
 **Ultimo aggiornamento:** 2026-03-20
 **Repo:** GitHub — LaMonkSansalia/tool-bandi (rinominato da bandiresearcher il 2026-03-20)
 **Inizio progetto:** 2026-03-02
@@ -471,6 +471,34 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 - [x] 20 test Playwright end-to-end in `tests/test_functional.py`
 - [x] Copertura: navigazione (3), progetti (6), bandi (2), soggetti (3), candidature (1), pipeline (2), integrita' globale (3)
 - [x] Report console + BUGS.md append automatico + screenshot
+
+### v0.8.4-dev — Audit Staging Fix (2026-03-20)
+
+Audit manuale su bandi.sansalia.com: 13 bug trovati, 6 fixati in questa sessione.
+
+#### A-01: Dati DB staging vuoti — CRITICO
+- [x] Causa: 125 bandi + 250 evaluations esistevano solo nel DB locale (engine-postgres-1), mai migrati su staging
+- [x] Fix: pg_dump --column-inserts --disable-triggers da locale, scp su parco-giuochi, TRUNCATE + restore
+- [x] Staging ora ha: 125 bandi, 250 evaluations, 3 progetti, 5 soggetti, 6 pipeline_runs
+
+#### Fase 2: Tab e navigazione
+- [x] B-01: Tab active onclick handler su soggetto_detail, progetto_detail, candidatura_workspace
+- [x] B-02: Stat card cliccabili — macro stat_card con href, 8 card linkano a pagine filtrate
+- [x] B-08: Filtri Jinja2 forma_label/regime_label/settore_label per tradurre valori DB raw
+- [x] B-09: Completezza bar w-24 → w-32 in lista progetti
+
+#### Fase 3: Vincoli calcolati
+- [x] B-05: _get_vincoli_calcolati() query aggrega hard_stop_reason da project_evaluations per soggetto
+- [x] Template vincoli: sezione calcolati sopra manuali, con conteggio bandi bloccati per vincolo
+
+#### Bug audit ancora aperti (7)
+- B-03: Dashboard blocchi mancanti (candidature per stato, nuovi bandi, progetti incompleti, hard stop, timeline)
+- B-04: Soggetti lista tabella con hard stop count
+- B-07: Slug interni visibili in tab Progetti
+- B-10: Score medio e bandi match in lista progetti
+- B-11: Scoring rules pre-compilate
+- B-12: PDS senza settore
+- B-13: Tab Analisi sotto-sezioni
 
 ### v0.8.3-dev — Deploy & Stabilizzazione (2026-03-20)
 

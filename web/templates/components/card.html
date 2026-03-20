@@ -17,7 +17,8 @@
   "slate":  "from-slate-500 to-slate-600",
 } %}
 
-{% macro stat_card(label, value, icon_path, color="blue", subtitle="") %}
+{% macro stat_card(label, value, icon_path, color="blue", subtitle="", href="") %}
+{% if href %}<a href="{{ href }}" class="block hover:opacity-90 transition-opacity">{% endif %}
 <div class="bg-gradient-to-br {{ GRAD.get(color, GRAD.blue) }} rounded-xl p-5 text-white shadow-sm">
   <div class="flex items-center justify-between">
     <div>
@@ -34,4 +35,5 @@
     </div>
   </div>
 </div>
+{% if href %}</a>{% endif %}
 {% endmacro %}
