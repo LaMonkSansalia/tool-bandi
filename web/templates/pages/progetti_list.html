@@ -71,10 +71,10 @@
           <div class="w-24">
             <div class="flex items-center justify-between text-xs mb-1">
               <span class="text-gray-500">Completezza</span>
-              <span class="font-medium {% if p.completezza_pct >= 75 %}text-green-600{% elif p.completezza_pct >= 50 %}text-yellow-600{% else %}text-gray-600{% endif %}">{{ p.completezza_pct }}%</span>
+              <span class="font-medium {% if p.completezza_pct > 75 %}text-green-600{% elif p.completezza_pct >= 40 %}text-yellow-600{% else %}text-gray-600{% endif %}">{{ p.completezza_pct }}%</span>
             </div>
             <div class="w-full bg-gray-100 rounded-full h-1.5">
-              <div class="h-1.5 rounded-full {% if p.completezza_pct >= 75 %}bg-green-500{% elif p.completezza_pct >= 50 %}bg-yellow-500{% else %}bg-gray-300{% endif %}"
+              <div class="h-1.5 rounded-full {% if p.completezza_pct > 75 %}bg-green-500{% elif p.completezza_pct >= 40 %}bg-yellow-500{% else %}bg-gray-300{% endif %}"
                    style="width: {{ p.completezza_pct }}%"></div>
             </div>
           </div>

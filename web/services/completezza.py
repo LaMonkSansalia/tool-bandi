@@ -23,44 +23,77 @@ PROFILO_DEFAULT = {
     "documenti_supporto": [],
     "avvio_previsto": "",
     "durata_mesi": 24,
+    # Nuovi campi v0.8
+    "tipo_investimento": "",
+    "impatto_occupazionale": "",
+    "sostenibilita": "",
 }
 
+TIPI_INVESTIMENTO = [
+    ("beni_strumentali", "Beni strumentali / macchinari"),
+    ("digitale", "Digitalizzazione / ICT"),
+    ("rd", "Ricerca & Sviluppo"),
+    ("formazione", "Formazione / capitale umano"),
+    ("internazionalizzazione", "Internazionalizzazione / export"),
+    ("efficientamento", "Efficientamento energetico"),
+    ("avvio_impresa", "Avvio nuova impresa"),
+    ("altro", "Altro"),
+]
+
+# Completezza checks su 3 livelli: obbligatorio, importante, opzionale
+# Formato: (key, label, livello, check_fn)
 COMPLETEZZA_CHECKS = [
-    ("descrizione_breve", "Descrizione breve",
+    # ── OBBLIGATORI — senza questi il progetto e' inutilizzabile
+    ("descrizione_breve", "Descrizione breve", "obbligatorio",
         lambda p: bool(p.get("descrizione_breve", "").strip())),
-    ("settore_keywords", "Settore + keywords (min 3)",
-        lambda p: bool(p.get("settore")) and len(p.get("keywords", [])) >= 3),
-    ("comuni_target", "Comuni target (min 1)",
-        lambda p: len(p.get("comuni_target", [])) >= 1),
-    ("descrizione_estesa", "Descrizione estesa (min 500 parole)",
-        lambda p: len((p.get("descrizione_estesa") or "").split()) >= 500),
-    ("budget", "Budget previsto",
+    ("settore", "Settore", "obbligatorio",
+        lambda p: bool(p.get("settore"))),
+    ("budget", "Budget previsto", "obbligatorio",
         lambda p: p.get("budget_min") is not None),
-    ("cofinanziamento", "Capacita' cofinanziamento",
+    ("tipo_investimento", "Tipo investimento", "obbligatorio",
+        lambda p: bool(p.get("tipo_investimento"))),
+
+    # ── IMPORTANTI — migliorano matching e score
+    ("keywords", "Keywords (min 3)", "importante",
+        lambda p: len(p.get("keywords", [])) >= 3),
+    ("comuni_target", "Comuni target (min 1)", "importante",
+        lambda p: len(p.get("comuni_target", [])) >= 1),
+    ("descrizione_estesa", "Descrizione estesa (min 200 car.)", "importante",
+        lambda p: len((p.get("descrizione_estesa") or "").strip()) >= 200),
+    ("cofinanziamento", "Capacita' cofinanziamento", "importante",
         lambda p: p.get("cofinanziamento_pct") is not None),
-    ("partner", "Almeno 1 partner",
-        lambda p: len(p.get("partner", [])) >= 1),
-    ("lettere", "Lettera d'intento (min 1)",
-        lambda p: any(part.get("lettera_intento") for part in p.get("partner", []))),
-    ("piano_lavoro", "Piano di lavoro (min 2 fasi)",
-        lambda p: len(p.get("piano_lavoro", [])) >= 2),
-    ("kpi", "KPI definiti (min 2)",
+    ("piano_lavoro", "Piano di lavoro (min 1 fase)", "importante",
+        lambda p: len(p.get("piano_lavoro", [])) >= 1),
+    ("kpi", "KPI definiti (min 2)", "importante",
         lambda p: len(p.get("kpi", [])) >= 2),
-    ("documenti", "Documento di supporto (min 1)",
+
+    # ── OPZIONALI — premiali ma non bloccanti
+    ("partner", "Partner previsti", "opzionale",
+        lambda p: len(p.get("partner", [])) >= 1),
+    ("lettere", "Lettera d'intento (min 1)", "opzionale",
+        lambda p: any(part.get("lettera_intento") for part in p.get("partner", []))),
+    ("documenti", "Documento di supporto (min 1)", "opzionale",
         lambda p: len(p.get("documenti_supporto", [])) >= 1),
-    ("referenze", "Referenze simili",
+    ("referenze", "Referenze simili", "opzionale",
         lambda p: bool(p.get("referenze_simili", "").strip())),
+    ("impatto_occup", "Impatto occupazionale", "opzionale",
+        lambda p: bool(p.get("impatto_occupazionale"))),
+    ("sostenibilita", "Sostenibilita'", "opzionale",
+        lambda p: bool(p.get("sostenibilita"))),
 ]
 
 SETTORI = [
-    ("turismo_astronomia", "Turismo / Astronomia"),
-    ("turismo_cultura", "Turismo / Cultura / Borghi"),
-    ("ict_freelancer", "ICT / Freelancer / Digitale"),
-    ("ecommerce_pmi", "E-commerce / PMI"),
-    ("artigianato", "Artigianato / Manifattura"),
-    ("agricoltura", "Agricoltura / Agroalimentare"),
-    ("innovazione", "Innovazione / R&D"),
-    ("sociale", "Welfare / Sociale"),
+    ("turismo_cultura", "Turismo & Cultura"),
+    ("ict_digitale", "ICT & Digitale"),
+    ("manifatturiero", "Manifatturiero & Artigianato"),
+    ("agricoltura_agroalimentare", "Agricoltura & Agroalimentare"),
+    ("commercio_servizi", "Commercio & Servizi"),
+    ("energia_ambiente", "Energia & Ambiente"),
+    ("sociale_terzo_settore", "Sociale & Terzo Settore"),
+    ("edilizia_infrastrutture", "Edilizia & Infrastrutture"),
+    ("ricerca_formazione", "Ricerca & Formazione"),
+    ("trasporti_logistica", "Trasporti & Logistica"),
+    ("altro", "Altro"),
 ]
 
 COFINANZIAMENTO_FONTI = [
@@ -131,14 +164,15 @@ QUALIFICHE_SOGGETTO = [
 def check_completezza(profilo: dict) -> tuple[list[dict], int, int]:
     """Check completezza of a project profile.
     Returns (items, done_count, percentage).
+    Items have: key, label, level (obbligatorio/importante/opzionale), ok.
     """
     items = []
     done = 0
-    for key, label, check_fn in COMPLETEZZA_CHECKS:
+    for key, label, level, check_fn in COMPLETEZZA_CHECKS:
         ok = check_fn(profilo)
         if ok:
             done += 1
-        items.append({"key": key, "label": label, "ok": ok})
+        items.append({"key": key, "label": label, "level": level, "ok": ok})
     pct = int(done / len(COMPLETEZZA_CHECKS) * 100)
     return items, done, pct
 

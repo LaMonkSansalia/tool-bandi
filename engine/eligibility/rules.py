@@ -106,6 +106,16 @@ class CompanyProfile:
     # Optional: birth year for age-based checks (default: not set)
     anno_nascita: int | None = None
 
+    # Ammissibilita' (from soggetto profilo JSONB)
+    durc_valido: bool = True
+    de_minimis_totale: int = 0
+    procedura_concorsuale: bool = False
+    debiti_fiscali_rilevanti: bool = False
+    iscrizione_cciaa: bool = True
+    patrimonio_netto: int | None = None
+    impresa_in_difficolta: bool = False
+    qualifiche: list[str] = field(default_factory=list)
+
     @property
     def under_36(self) -> bool:
         from datetime import date
@@ -209,6 +219,15 @@ def _parse_profile_data(data: dict) -> CompanyProfile:
         yellow_flags=yellow_flags,
         vantaggi=constraints.get("VANTAGGI", []),
         anno_nascita=anno_nascita,
+        # Ammissibilita' — flat keys from soggetto profilo JSONB
+        durc_valido=data.get("durc_valido", True),
+        de_minimis_totale=int(data.get("de_minimis_totale", 0) or 0),
+        procedura_concorsuale=data.get("procedura_concorsuale", False),
+        debiti_fiscali_rilevanti=data.get("debiti_fiscali_rilevanti", False),
+        iscrizione_cciaa=data.get("iscrizione_cciaa", True),
+        patrimonio_netto=data.get("patrimonio_netto"),
+        impresa_in_difficolta=data.get("impresa_in_difficolta", False),
+        qualifiche=data.get("qualifiche", []) or [],
     )
 
 

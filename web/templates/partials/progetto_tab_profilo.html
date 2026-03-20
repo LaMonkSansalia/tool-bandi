@@ -39,6 +39,15 @@
             </select>
           </div>
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo investimento</label>
+            <select name="tipo_investimento" class="w-full rounded-lg border-gray-300 text-sm">
+              <option value="">Seleziona...</option>
+              {% for val, label in TIPI_INVESTIMENTO %}
+              <option value="{{ val }}" {% if profilo.tipo_investimento == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
               Keywords <span class="font-normal text-gray-400">(separate da virgola, min 3)</span>
             </label>
@@ -184,7 +193,7 @@
         <textarea name="scoring_rules_json" rows="12"
                   class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs focus:ring-blue-500 focus:border-blue-500"
                   spellcheck="false">{{ scoring_json }}</textarea>
-        <p class="text-xs text-gray-400">Tipi: region_match, ateco_match, keyword_in_title, keyword_and_profile, importo_min, beneficiary_match, no_certifications_required, profile_age_check, company_age.</p>
+        <p class="text-xs text-gray-400">Tipi: region_match, ateco_match, keyword_in_title, keyword_and_profile, importo_min, beneficiary_match, no_certifications_required, profile_age_check, company_age, qualifica_match.</p>
 
         <div class="flex items-center gap-4">
           <label class="flex items-center gap-2 text-sm">
@@ -208,30 +217,39 @@
     <div class="bg-white rounded-xl border border-gray-200 p-5 sticky top-20">
       <h3 class="text-sm font-semibold text-gray-900 mb-4">Checklist Completezza</h3>
 
-      <div class="space-y-2.5">
-        {% for item in completezza_items %}
-        <div class="flex items-center gap-2.5">
-          {% if item.ok %}
-          <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          {% else %}
-          <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          {% endif %}
-          <span class="text-sm {% if item.ok %}text-gray-700{% else %}text-gray-400{% endif %}">{{ item.label }}</span>
+      {% set levels = [("obbligatorio", "Obbligatori"), ("importante", "Importanti"), ("opzionale", "Opzionali")] %}
+      {% for level_key, level_label in levels %}
+      {% set level_items = completezza_items | selectattr("level", "equalto", level_key) | list %}
+      {% if level_items %}
+      <div class="{% if not loop.first %}mt-3 pt-3 border-t border-gray-50{% endif %}">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">{{ level_label }}</p>
+        <div class="space-y-2">
+          {% for item in level_items %}
+          <div class="flex items-center gap-2.5">
+            {% if item.ok %}
+            <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {% else %}
+            <svg class="w-4 h-4 {% if level_key == 'obbligatorio' %}text-red-300{% else %}text-gray-300{% endif %} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {% endif %}
+            <span class="text-sm {% if item.ok %}text-gray-700{% elif level_key == 'obbligatorio' %}text-red-400{% else %}text-gray-400{% endif %}">{{ item.label }}</span>
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </div>
+      {% endif %}
+      {% endfor %}
 
       <div class="mt-4 pt-4 border-t border-gray-100">
         <div class="flex items-center justify-between text-sm mb-2">
           <span class="text-gray-500">{{ completezza_done }}/{{ completezza_total }}</span>
-          <span class="font-semibold {% if completezza_pct >= 75 %}text-green-600{% elif completezza_pct >= 50 %}text-yellow-600{% else %}text-red-600{% endif %}">{{ completezza_pct }}%</span>
+          <span class="font-semibold {% if completezza_pct > 75 %}text-green-600{% elif completezza_pct >= 40 %}text-yellow-600{% else %}text-red-600{% endif %}">{{ completezza_pct }}%</span>
         </div>
         <div class="w-full bg-gray-100 rounded-full h-2">
-          <div class="h-2 rounded-full transition-all {% if completezza_pct >= 75 %}bg-green-500{% elif completezza_pct >= 50 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
+          <div class="h-2 rounded-full transition-all {% if completezza_pct > 75 %}bg-green-500{% elif completezza_pct >= 40 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
                style="width: {{ completezza_pct }}%"></div>
         </div>
       </div>

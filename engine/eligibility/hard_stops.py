@@ -125,5 +125,66 @@ def check_hard_stops(bando: dict, profile: CompanyProfile | None = None) -> Hard
         except (ValueError, TypeError):
             yellow_flags.append("anzianita_minima_anni non parsabile — verificare manualmente")
 
+    # ── 7. DURC non valido ────────────────────────────────────────────────────
+    if not profile.durc_valido:
+        return HardStopResult(
+            excluded=True,
+            reason="DURC non in regola — la maggior parte dei bandi richiede regolarita' contributiva",
+        )
+
+    # ── 8. Procedura concorsuale ────────────────────────────────────────────
+    if profile.procedura_concorsuale:
+        return HardStopResult(
+            excluded=True,
+            reason="Soggetto in procedura concorsuale (fallimento, concordato, liquidazione) — escluso dalla quasi totalita' dei bandi",
+        )
+
+    # ── 9. Impresa in difficolta' ──────────────────────────────────────────
+    if profile.impresa_in_difficolta:
+        return HardStopResult(
+            excluded=True,
+            reason="Impresa in difficolta' ai sensi del Reg. UE 651/2014 art. 2(18) — esclusa da aiuti di Stato",
+        )
+
+    # ── 10. Debiti fiscali rilevanti ────────────────────────────────────────
+    if profile.debiti_fiscali_rilevanti:
+        return HardStopResult(
+            excluded=True,
+            reason="Debiti fiscali/contributivi rilevanti — la maggior parte dei bandi richiede regolarita' fiscale",
+        )
+
+    # ── 11. De minimis ─────────────────────────────────────────────────────
+    de_minimis_cap = 300_000  # tetto triennale Reg. UE 2023/2831
+    importo_bando = bando.get("importo_max")
+    if profile.de_minimis_totale > 0 and importo_bando:
+        try:
+            importo = float(importo_bando)
+            if profile.de_minimis_totale + importo > de_minimis_cap:
+                yellow_flags.append(
+                    f"De minimis: totale gia' ricevuto ({profile.de_minimis_totale:,.0f}EUR) + bando ({importo:,.0f}EUR) potrebbe superare il tetto triennale ({de_minimis_cap:,.0f}EUR)"
+                )
+        except (ValueError, TypeError):
+            pass
+
+    # ── 12. Iscrizione CCIAA ───────────────────────────────────────────────
+    richiede_cciaa = bando.get("iscrizione_cciaa_richiesta")
+    if richiede_cciaa and not profile.iscrizione_cciaa:
+        return HardStopResult(
+            excluded=True,
+            reason="Bando richiede iscrizione alla Camera di Commercio — soggetto non iscritto CCIAA",
+        )
+
+    # ── 13. Budget range mismatch ──────────────────────────────────────────
+    budget_min_bando = bando.get("budget_minimo_progetto")
+    if budget_min_bando is not None:
+        try:
+            budget_min = float(budget_min_bando)
+            if profile.patrimonio_netto is not None and budget_min > profile.patrimonio_netto * 5:
+                yellow_flags.append(
+                    f"Budget minimo bando ({budget_min:,.0f}EUR) molto elevato rispetto al patrimonio netto ({profile.patrimonio_netto:,.0f}EUR)"
+                )
+        except (ValueError, TypeError):
+            pass
+
     # ── Passed all hard stops ────────────────────────────────────────────────
     return HardStopResult(excluded=False, yellow_flags=yellow_flags)

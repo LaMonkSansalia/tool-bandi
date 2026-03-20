@@ -22,12 +22,20 @@ router = APIRouter(prefix="/candidature/{pe_id}/documenti")
 
 CATEGORIE = [
     ("proposta_tecnica", "Proposta Tecnica"),
+    ("relazione_tecnica", "Relazione Tecnica"),
+    ("business_plan", "Business Plan"),
     ("dichiarazione", "Dichiarazione Sostitutiva"),
+    ("autocertificazione", "Autocertificazione / DSAN"),
     ("cv_impresa", "CV Impresa"),
     ("budget", "Budget / Piano Finanziario"),
     ("preventivo", "Preventivo"),
+    ("cronoprogramma", "Cronoprogramma"),
     ("visura", "Visura Camerale"),
+    ("durc", "DURC"),
+    ("antimafia", "Certificazione Antimafia"),
+    ("fideiussione", "Fideiussione / Garanzia"),
     ("lettera_intento", "Lettera d'Intento"),
+    ("piano_assunzioni", "Piano Assunzioni"),
     ("formulario", "Formulario"),
     ("altro", "Altro"),
 ]
@@ -40,7 +48,7 @@ STATI_DOCUMENTO = [
     ("da_firmare", "Da Firmare", "bg-purple-100 text-purple-800"),
 ]
 
-CATEGORIE_GENERABILI_AI = {"proposta_tecnica", "dichiarazione"}
+CATEGORIE_GENERABILI_AI = {"proposta_tecnica", "relazione_tecnica", "business_plan", "dichiarazione"}
 
 
 def _check_pe_ownership(conn, pe_id: int, project_id: int) -> dict | None:
@@ -74,11 +82,17 @@ def _get_documents(conn, pe_id: int) -> list[dict]:
             ORDER BY
                 CASE categoria
                     WHEN 'proposta_tecnica' THEN 1
-                    WHEN 'dichiarazione' THEN 2
-                    WHEN 'cv_impresa' THEN 3
-                    WHEN 'budget' THEN 4
-                    WHEN 'formulario' THEN 5
-                    ELSE 9
+                    WHEN 'relazione_tecnica' THEN 2
+                    WHEN 'business_plan' THEN 3
+                    WHEN 'dichiarazione' THEN 4
+                    WHEN 'autocertificazione' THEN 5
+                    WHEN 'cv_impresa' THEN 6
+                    WHEN 'budget' THEN 7
+                    WHEN 'cronoprogramma' THEN 8
+                    WHEN 'visura' THEN 9
+                    WHEN 'durc' THEN 10
+                    WHEN 'formulario' THEN 11
+                    ELSE 15
                 END,
                 nome
         """, (pe_id,))

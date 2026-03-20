@@ -87,6 +87,70 @@
     </div>
     {% endif %}
 
+    {# Sezione Requisiti Ammissibilita' #}
+    <div class="mt-5 pt-5 border-t border-gray-100">
+      <h4 class="text-sm font-semibold text-gray-900 mb-3">Requisiti Ammissibilita'</h4>
+      <p class="text-xs text-gray-400 mb-4">Questi dati determinano l'esclusione automatica dai bandi (hard stops)</p>
+
+      <div class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" name="durc_valido" value="1"
+                   {% if soggetto.profilo.durc_valido is not defined or soggetto.profilo.durc_valido %}checked{% endif %}
+                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            DURC valido (regolarita' contributiva)
+          </label>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Scadenza DURC</label>
+            <input type="date" name="durc_scadenza" value="{{ soggetto.profilo.durc_scadenza or '' }}"
+                   class="w-full rounded-lg border-gray-300 text-sm">
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2 text-sm text-gray-700">
+          <input type="checkbox" name="iscrizione_cciaa" value="1"
+                 {% if soggetto.profilo.iscrizione_cciaa is not defined or soggetto.profilo.iscrizione_cciaa %}checked{% endif %}
+                 class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+          Iscrizione CCIAA (Registro Imprese)
+        </label>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">De minimis utilizzato (EUR, ultimi 3 anni)</label>
+            <input type="number" name="de_minimis_totale" value="{{ soggetto.profilo.de_minimis_totale or 0 }}" min="0" max="300000"
+                   class="w-full rounded-lg border-gray-300 text-sm" placeholder="0">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Patrimonio netto (EUR)</label>
+            <input type="number" name="patrimonio_netto" value="{{ soggetto.profilo.patrimonio_netto or '' }}"
+                   class="w-full rounded-lg border-gray-300 text-sm" placeholder="10000">
+          </div>
+        </div>
+
+        <div class="bg-red-50 rounded-lg p-3 space-y-2">
+          <p class="text-xs font-medium text-red-700">Condizioni di esclusione (se presenti = hard stop)</p>
+          <label class="flex items-center gap-2 text-sm text-red-700">
+            <input type="checkbox" name="procedura_concorsuale" value="1"
+                   {% if soggetto.profilo.procedura_concorsuale %}checked{% endif %}
+                   class="rounded border-red-300 text-red-600 focus:ring-red-500">
+            Procedura concorsuale attiva
+          </label>
+          <label class="flex items-center gap-2 text-sm text-red-700">
+            <input type="checkbox" name="debiti_fiscali_rilevanti" value="1"
+                   {% if soggetto.profilo.debiti_fiscali_rilevanti %}checked{% endif %}
+                   class="rounded border-red-300 text-red-600 focus:ring-red-500">
+            Debiti fiscali &gt; 5.000 EUR senza rateizzazione
+          </label>
+          <label class="flex items-center gap-2 text-sm text-red-700">
+            <input type="checkbox" name="impresa_in_difficolta" value="1"
+                   {% if soggetto.profilo.impresa_in_difficolta %}checked{% endif %}
+                   class="rounded border-red-300 text-red-600 focus:ring-red-500">
+            Impresa in difficolta' (def. UE Reg. 651/2014)
+          </label>
+        </div>
+      </div>
+    </div>
+
     <div class="mt-6 flex justify-end">
       <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
         Salva Anagrafica

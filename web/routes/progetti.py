@@ -15,6 +15,7 @@ from web.main import templates
 from web.services.display import enrich_bando_row
 from web.services.completezza import (
     PROFILO_DEFAULT, SETTORI, COFINANZIAMENTO_FONTI, ZONE_SPECIALI_OPTIONS,
+    TIPI_INVESTIMENTO,
     check_completezza, normalize_profilo, parse_int_or_none,
 )
 
@@ -257,6 +258,7 @@ def progetto_detail(request: Request, pk: int, conn=Depends(get_db)):
         "SETTORI": SETTORI,
         "COFINANZIAMENTO_FONTI": COFINANZIAMENTO_FONTI,
         "ZONE_SPECIALI_OPTIONS": ZONE_SPECIALI_OPTIONS,
+        "TIPI_INVESTIMENTO": TIPI_INVESTIMENTO,
     }
 
     # HTMX partial: return only tab content
@@ -354,6 +356,7 @@ def progetto_tab(request: Request, pk: int, tab_name: str, conn=Depends(get_db))
         "SETTORI": SETTORI,
         "COFINANZIAMENTO_FONTI": COFINANZIAMENTO_FONTI,
         "ZONE_SPECIALI_OPTIONS": ZONE_SPECIALI_OPTIONS,
+        "TIPI_INVESTIMENTO": TIPI_INVESTIMENTO,
     }
 
     # Load opportunita data if needed

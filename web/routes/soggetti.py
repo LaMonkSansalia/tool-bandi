@@ -139,6 +139,15 @@ async def soggetto_create(
         "fatturato": _safe_int(fatturato, None),
         "anno_costituzione": _safe_int(anno_costituzione, None),
         "qualifiche": qualifiche,
+        # Campi ammissibilita'
+        "durc_valido": "durc_valido" in form_data,
+        "durc_scadenza": form_data.get("durc_scadenza", "").strip() or None,
+        "de_minimis_totale": _safe_int(form_data.get("de_minimis_totale"), 0),
+        "procedura_concorsuale": "procedura_concorsuale" in form_data,
+        "debiti_fiscali_rilevanti": "debiti_fiscali_rilevanti" in form_data,
+        "iscrizione_cciaa": "iscrizione_cciaa" in form_data,
+        "patrimonio_netto": _safe_int(form_data.get("patrimonio_netto"), None),
+        "impresa_in_difficolta": "impresa_in_difficolta" in form_data,
         "hard_stops": [],
         "vantaggi": [],
     }
@@ -279,6 +288,15 @@ async def soggetto_update(
         "fatturato": _safe_int(fatturato, None),
         "anno_costituzione": _safe_int(anno_costituzione, None),
         "qualifiche": qualifiche,
+        # Campi ammissibilita'
+        "durc_valido": "durc_valido" in form_data,
+        "durc_scadenza": form_data.get("durc_scadenza", "").strip() or None,
+        "de_minimis_totale": _safe_int(form_data.get("de_minimis_totale"), 0),
+        "procedura_concorsuale": "procedura_concorsuale" in form_data,
+        "debiti_fiscali_rilevanti": "debiti_fiscali_rilevanti" in form_data,
+        "iscrizione_cciaa": "iscrizione_cciaa" in form_data,
+        "patrimonio_netto": _safe_int(form_data.get("patrimonio_netto"), None),
+        "impresa_in_difficolta": "impresa_in_difficolta" in form_data,
     }
 
     with conn.cursor() as cur:

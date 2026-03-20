@@ -30,10 +30,10 @@
       <div class="w-32">
         <div class="flex items-center justify-between text-xs mb-1">
           <span class="text-gray-500">Completezza {{ completezza_done }}/{{ completezza_total }}</span>
-          <span class="font-semibold {% if completezza_pct >= 75 %}text-green-600{% elif completezza_pct >= 50 %}text-yellow-600{% else %}text-red-600{% endif %}">{{ completezza_pct }}%</span>
+          <span class="font-semibold {% if completezza_pct > 75 %}text-green-600{% elif completezza_pct >= 40 %}text-yellow-600{% else %}text-red-600{% endif %}">{{ completezza_pct }}%</span>
         </div>
         <div class="w-full bg-gray-100 rounded-full h-2">
-          <div class="h-2 rounded-full transition-all {% if completezza_pct >= 75 %}bg-green-500{% elif completezza_pct >= 50 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
+          <div class="h-2 rounded-full transition-all {% if completezza_pct > 75 %}bg-green-500{% elif completezza_pct >= 40 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
                style="width: {{ completezza_pct }}%"></div>
         </div>
       </div>

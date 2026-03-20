@@ -123,6 +123,27 @@ def _eval_company_age(bando: dict, profile: CompanyProfile, config: dict) -> boo
     return any(kw in titolo for kw in keywords)
 
 
+def _eval_qualifica_match(bando: dict, profile: CompanyProfile, config: dict) -> bool:
+    """Check if soggetto has qualifiche premiali matching bando keywords.
+
+    Config:
+        qualifica: str — qualifica to check (e.g. "startup_innovativa")
+        keywords: list[str] — bando title/text keywords that trigger the bonus
+    """
+    qualifica = config.get("qualifica", "")
+    if qualifica not in (profile.qualifiche or []):
+        return False
+    # Check if bando title/text mentions relevant keywords
+    titolo = (bando.get("titolo") or "").lower()
+    raw = (bando.get("raw_text") or "")[:2000].lower()
+    tipo_ben = " ".join(t.lower() for t in (bando.get("tipo_beneficiario") or []))
+    text = f"{titolo} {tipo_ben} {raw}"
+    keywords = config.get("keywords", [])
+    if not keywords:
+        return True  # qualifica presente, nessun keyword filter
+    return any(kw in text for kw in keywords)
+
+
 # ── Handler registry ────────────────────────────────────────────────────────────
 
 RULE_HANDLERS = {
@@ -135,6 +156,7 @@ RULE_HANDLERS = {
     "no_certifications_required": _eval_no_certs,
     "profile_age_check": _eval_age_check,
     "company_age": _eval_company_age,
+    "qualifica_match": _eval_qualifica_match,
 }
 
 
