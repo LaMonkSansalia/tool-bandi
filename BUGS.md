@@ -45,6 +45,30 @@
 - **Fix:** `hx-boost="false"` sul bottone "Nuovo Soggetto" (forza navigazione browser)
 - **Test:** `test_soggetti_nuovo_from_simulazioni_tab`
 
+### BUG-FIXED-007: Salva Profilo rompe le tab (BUG-UI-001)
+- **Pagina:** `/progetti/3?tab=profilo`
+- **Causa:** `hx-boost="true"` su body intercettava form POST; redirect 303 seguito da HTMX con `HX-Request` header → server restituiva partial senza tab
+- **Fix:** `hx-boost="false"` su entrambi i form; check server-side tightened a `HX-Target == "tab-content"`
+- **Commit:** `14357c8`
+
+### BUG-FIXED-008: JSON raw visibile nel tab Profilo (BUG-UI-002)
+- **Pagina:** `/progetti/3?tab=profilo`
+- **Causa:** partner, piano_lavoro, kpi, documenti_supporto mostrati come JSON grezzo in textarea
+- **Fix:** Alpine.js dynamic forms con `x-data`, `x-for`, add/remove, hidden input serialized
+- **Commit:** `57030c8`
+
+### BUG-FIXED-009: Pipeline fallisce sempre (BUG-UI-003)
+- **Pagina:** `/pipeline`
+- **Causa:** query `pipeline_runs` senza try/except crashava se tabella non esisteva
+- **Fix:** try/except con rollback + messaggi errore in UI + `hx-boost="false"` su form trigger
+- **Commit:** `ba20c7f`
+
+### BUG-FIXED-010: Salvataggio profilo perde dati (BUG-UI-004)
+- **Pagina:** `/progetti/3?tab=profilo`
+- **Causa:** `tipo_investimento` nel form ma non nel POST handler (perso); `costituita` default `Form("1")` = sempre True; `zone_speciali` hardcoded `[]`
+- **Fix:** aggiunto tipo_investimento al handler; fix default costituita a `Form("")`; aggiunto zone_speciali multi-checkbox + getlist()
+- **Commit:** `d7e7fe6`
+
 ## Bug aperti
 
-_Nessuno al momento. Tutti i 39 test passano._
+_Nessuno al momento. 29 smoke test passano._

@@ -13,7 +13,19 @@
 
 ---
 
-## Current Status — 2026-03-19 (aggiornato)
+## Current Status — 2026-03-20 (aggiornato)
+
+**Phase:** v0.8.1-dev — Bug Fix UI + Logic
+**Stato:** 4 bug UI fixati (Sezione A). Sezione B (Logic) in corso.
+
+[IN CORSO] 2026-03-20 — Bug Fix Completo:
+  - Sezione A (UI): 4/4 fixati (BUG-UI-001→004)
+  - Sezione B (Logic): in corso (BUG-LOGIC-001→004)
+  - Sezione C (Test Playwright): pendente
+  - Decisione: hx-boost="false" su form è pattern standard per evitare conflitti redirect 303
+  - Decisione: Alpine.js x-data/x-for per campi array dinamici (partner, piano_lavoro, kpi)
+
+## Current Status — 2026-03-19 (precedente)
 
 **Phase:** tool-bandi-ui — COMPLETATO (Sprint 0-3 + 5 + QA)
 **Stato:** Sistema operativo. Sprint 4 (generazione documenti) deferred.

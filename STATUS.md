@@ -448,6 +448,15 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 - [x] Route soggetti: async per leggere qualifiche multi-valore, salvate in profilo JSONB
 - [x] 29/29 smoke test verdi post-modifica
 
+### v0.8.1-dev — Bug Fix UI (Sezione A) (2026-03-20)
+
+4 bug UI fixati. 29/29 smoke test verdi dopo ogni fix. Un commit per bug.
+
+- [x] **BUG-UI-001:** Salva Profilo rompe tab — `hx-boost="false"` su form + check `HX-Target` server-side (`14357c8`)
+- [x] **BUG-UI-002:** JSON raw in profilo — Alpine.js dynamic forms per partner/piano_lavoro/kpi/documenti_supporto (`57030c8`)
+- [x] **BUG-UI-003:** Pipeline crash — try/except su query `pipeline_runs` + messaggi errore in UI (`ba20c7f`)
+- [x] **BUG-UI-004:** Profilo perde dati — aggiunto tipo_investimento, fix costituita default, zone_speciali multi-checkbox (`d7e7fe6`)
+
 ---
 
 ## Sicurezza
