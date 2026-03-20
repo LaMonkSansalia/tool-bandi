@@ -18,6 +18,13 @@
 **Phase:** v0.8.3-dev — Deploy & stabilizzazione
 **Stato:** 15 bug risolti totali, 0 aperti. 29/29 smoke test.
 
+[COMPLETATO] 2026-03-20 — Task 3: Preparazione deploy:
+  - deploy.sh creato (idempotente: pull, build, migrate 001-010, start, smoke test)
+  - web/auth.py: SimpleAuthMiddleware — cookie-session, disabilitato in dev (env vuote)
+  - Decisione: auth disabilitata in dev (AUTH_USER/AUTH_PASS vuoti), attiva solo in staging/prod
+  - 29/29 smoke test verdi
+  - Prossimi passi: Task 4 (deploy su staging — sostituzione container Django)
+
 [COMPLETATO] 2026-03-20 — Task 2: Prerequisiti deploy:
   - Dockerfile fixato: usa requirements.txt consolidato (non split)
   - docker-compose.yml: env_file .env, migrations volume mount aggiunto

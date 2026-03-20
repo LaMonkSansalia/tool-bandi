@@ -474,6 +474,12 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 
 ### v0.8.3-dev — Deploy & Stabilizzazione (2026-03-20)
 
+#### Task 3: Preparazione deploy — COMPLETATO
+- [x] deploy.sh: script idempotente (pull, build, migrate, start, smoke test)
+- [x] web/auth.py: SimpleAuthMiddleware (cookie-session, disabilitato se env vuote)
+- [x] Auth registrata in main.py tra HTMX middleware e SessionMiddleware
+- [x] 29/29 smoke test verdi con auth middleware
+
 #### Task 2: Prerequisiti deploy — FIXATI
 - [x] Dockerfile: fix requirements (da split a consolidato), python:3.12-slim, non-root
 - [x] docker-compose.yml: env_file .env (non engine/.env), migrations volume mount

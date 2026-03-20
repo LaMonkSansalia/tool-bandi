@@ -124,6 +124,10 @@ class HTMXLayoutMiddleware(BaseHTTPMiddleware):
 import os
 
 app.add_middleware(HTMXLayoutMiddleware)
+
+from web.auth import SimpleAuthMiddleware
+app.add_middleware(SimpleAuthMiddleware)
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv("SESSION_SECRET", "tool-bandi-dev-secret-change-me"),

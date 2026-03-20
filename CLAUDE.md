@@ -128,7 +128,7 @@ Schema completo: `context/system_architecture.md` sezione Database.
 
 - **D10:** State machine su `project_evaluations` con vecchi stati. Migration 011 (candidatura) non deployata.
 - **Migrations 012-014:** Non deployate (documenti, estensioni soggetti, hard_stops JSONB).
-- **Auth:** Assente (singolo utente locale). Da implementare per staging.
+- **Auth:** `web/auth.py` SimpleAuthMiddleware — cookie-session, disabilitato in dev (AUTH_USER/AUTH_PASS vuoti).
 - **Tailwind:** CDN in dev, standalone CLI per prod (non configurato).
 
 
