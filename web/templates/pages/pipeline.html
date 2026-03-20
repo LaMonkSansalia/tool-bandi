@@ -5,9 +5,9 @@
 {% block page_title %}Pipeline{% endblock %}
 
 {% block page_actions %}
-<form hx-post="/pipeline/trigger" hx-swap="none" class="inline">
+<form method="post" action="/pipeline/trigger" hx-boost="false" class="inline">
   <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-          hx-confirm="Avviare una nuova scansione?">
+          onclick="return confirm('Avviare una nuova scansione?')">
     Avvia Scansione
   </button>
 </form>
@@ -17,6 +17,16 @@
 {% if triggered %}
 <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
   <p class="text-sm text-blue-700 font-medium">Scansione avviata in background. Aggiorna la pagina tra qualche minuto per vedere i risultati.</p>
+</div>
+{% endif %}
+{% if pipeline_error %}
+<div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+  <p class="text-sm text-yellow-700 font-medium">{{ pipeline_error }}</p>
+</div>
+{% endif %}
+{% if trigger_error %}
+<div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+  <p class="text-sm text-red-700 font-medium">Errore pipeline: {{ trigger_error }}</p>
 </div>
 {% endif %}
 
