@@ -80,6 +80,18 @@
 - **Fix:** aggiunto `qualifica_match` rule a ICT/Freelancer, Turismo/Cultura, E-commerce/PMI
 - **Commit:** `361fe2d`
 
+### BUG-FIXED-013: Profilo save non rivaluta bandi (BUG-LOGIC-003)
+- **Pagina:** `/progetti/{id}?tab=profilo`
+- **Causa:** salvataggio profilo aggiornava JSONB ma non ricalcolava score/hard_stops sulle valutazioni
+- **Fix:** background thread `rivaluta_progetto()` dopo save profilo, messaggio "Rivalutazione in corso" in UI
+- **Commit:** `fbe8012`
+
+### BUG-FIXED-014: Tab Opportunita' senza CTA (BUG-LOGIC-004)
+- **Pagina:** `/progetti/{id}` tab Opportunita'
+- **Causa:** empty state mostrava solo "Nessun bando valutato" senza azione suggerita
+- **Fix:** icona search, testo descrittivo, link "Avvia scansione" a /pipeline
+- **Commit:** `b05bc52`
+
 ## Bug aperti
 
 _Nessuno al momento. 29 smoke test passano._

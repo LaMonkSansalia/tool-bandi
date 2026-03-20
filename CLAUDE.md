@@ -1,10 +1,11 @@
 # Tool Bandi — CLAUDE.md
 
-**Versione:** 0.8.0-dev
+**Versione:** 0.8.1-dev
 **Repo:** github.com/LaMonkSansalia/tool-bandi
 **Stack:** FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind CSS — single-process Python, zero build frontend
 **Avvio:** `venv/bin/python -m uvicorn web.main:app --reload --port 8000`
-**Test:** `venv/bin/python -m pytest tests/test_smoke.py -v`
+**Test smoke:** `venv/bin/python -m pytest tests/test_smoke.py -v` (29/29)
+**Test funzionali:** `python tests/test_functional.py` (richiede Playwright + app su :8000)
 **Sicurezza:** leggere SEMPRE `/Users/lucianolamonica/CodiceCodice/SECURITY.md` prima di operare
 
 ---
@@ -48,7 +49,7 @@ tool-bandi/
     static/                  # htmx.min.js, alpine.min.js, output.css
 
   context/                   # Documentazione di riferimento (vedi sotto)
-  tests/                     # pytest (smoke) + playwright (browser)
+  tests/                     # pytest (smoke) + playwright (functional, 20 test)
 ```
 
 ---
@@ -114,7 +115,7 @@ Schema completo: `context/system_architecture.md` sezione Database.
 |------|-----------|-------|
 | `STATUS.md` | Changelog completo v0.1→v0.8, ogni commit | Aggiornato |
 | `COMMS.md` | Log comunicazioni PM↔Agent, decisioni | Aggiornato |
-| `BUGS.md` | Bug tracker (6 risolti, 0 aperti) | Aggiornato |
+| `BUGS.md` | Bug tracker (12 risolti, 0 aperti) | Aggiornato |
 | `context/system_architecture.md` | Architettura, schema DB, state machine, scoring | Autorita' tecnica |
 | `context/project_workspace.md` | Spec profilo progetto + workspace candidatura | Autorita' UX |
 | `context/spec/tool-bandi-spec (1).md` | Spec UI/UX completa (5 entita', stati, flussi) | Autorita' suprema |
@@ -129,3 +130,68 @@ Schema completo: `context/system_architecture.md` sezione Database.
 - **Migrations 012-014:** Non deployate (documenti, estensioni soggetti, hard_stops JSONB).
 - **Auth:** Assente (singolo utente locale). Da implementare per staging.
 - **Tailwind:** CDN in dev, standalone CLI per prod (non configurato).
+
+
+## Comandi Utente
+
+Quando l'utente scrive uno di questi comandi, eseguire IMMEDIATAMENTE senza chiedere conferma.
+
+### `/salva`
+
+Checkpoint obbligatorio. Aggiorna TUTTI i file di contesto con lo stato corrente:
+
+1. **`BUGS.md`** — Per ogni bug lavorato in questa sessione:
+   - Se fixato: sposta in "Bug risolti" con commit hash, causa, fix
+   - Se trovato ma non fixato: aggiungi in "Bug aperti"
+   - Se era aperto e non toccato: lascia invariato
+
+2. **`STATUS.md`** — Aggiungi sezione nel changelog con:
+   - Versione bump se applicabile (es. v0.8.1-dev → v0.8.2-dev)
+   - Lista di tutti i fix/feature di questa sessione con commit hash
+   - Stato migrazioni se cambiato
+   - Aggiorna "Ultimo aggiornamento" in cima
+
+3. **`COMMS.md`** — Aggiungi entry con:
+   - Data e ora
+   - Riassunto delle decisioni prese (non i fix tecnici, le DECISIONI)
+   - Problemi aperti / domande per la prossima sessione
+
+4. **`CLAUDE.md`** — Aggiorna SOLO se:
+   - Nuove costanti aggiunte (tabella Costanti Centralizzate)
+   - Nuovi file di contesto creati (tabella File di Contesto)
+   - Nuovi invarianti scoperti
+   - Debito tecnico cambiato
+
+5. **Commit finale:** `git add *.md && git commit -m "checkpoint: /salva — [breve descrizione sessione]"`
+
+6. **Output:** Stampa un riepilogo:
+   ```
+   ✅ CHECKPOINT SALVATO
+   - BUGS.md: N fixati, M aperti
+   - STATUS.md: vX.Y.Z-dev, K commit questa sessione
+   - COMMS.md: aggiornato
+   - CLAUDE.md: [aggiornato/invariato]
+   - Commit: [hash]
+   ```
+
+### `/stato`
+
+Stampa lo stato corrente SENZA modificare file:
+- Versione attuale
+- Bug aperti (da BUGS.md)
+- Test: esegui `pytest tests/test_smoke.py -q` e mostra risultato
+- Ultimo commit: `git log --oneline -3`
+- File modificati non committati: `git status --short`
+
+### `/test`
+
+Esegui TUTTI i test disponibili e riporta:
+```bash
+venv/bin/python -m pytest tests/test_smoke.py -v
+venv/bin/python -m pytest tests/test_browser.py -v 2>/dev/null || echo "Browser test non disponibili"
+```
+
+### `/prossimo`
+
+Leggi BUGS.md e lavorazioni-mancanti-tool-bandi.md (se esiste in context/spec/),
+identifica il prossimo task per priorità, e proponilo con piano di implementazione.

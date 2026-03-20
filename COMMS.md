@@ -13,17 +13,20 @@
 
 ---
 
-## Current Status — 2026-03-20 (aggiornato)
+## Current Status — 2026-03-20 (completato)
 
-**Phase:** v0.8.1-dev — Bug Fix UI + Logic
-**Stato:** 4 bug UI fixati (Sezione A). Sezione B (Logic) in corso.
+**Phase:** v0.8.1-dev — Bug Fix UI + Logic + Test Funzionali
+**Stato:** COMPLETATO. 8 bug fixati (4 UI + 4 Logic). 20 test funzionali Playwright creati.
 
-[IN CORSO] 2026-03-20 — Bug Fix Completo:
-  - Sezione A (UI): 4/4 fixati (BUG-UI-001→004)
-  - Sezione B (Logic): in corso (BUG-LOGIC-001→004)
-  - Sezione C (Test Playwright): pendente
-  - Decisione: hx-boost="false" su form è pattern standard per evitare conflitti redirect 303
+[COMPLETATO] 2026-03-20 — Bug Fix Completo:
+  - Sezione A (UI): 4/4 fixati (BUG-UI-001→004, commit 14357c8→d7e7fe6)
+  - Sezione B (Logic): 4/4 fixati (BUG-LOGIC-001→004, commit 85db886→b05bc52)
+  - Sezione C (Test Playwright): 20 test creati in tests/test_functional.py
+  - Decisione: hx-boost="false" su form e' pattern standard per evitare conflitti redirect 303
   - Decisione: Alpine.js x-data/x-for per campi array dinamici (partner, piano_lavoro, kpi)
+  - Decisione: rivaluta_progetto() in background thread dopo save soggetto E profilo
+  - Decisione: CLAUDE.md aggiornato con comandi utente (/salva, /stato, /test, /prossimo)
+  - Prossimi passi: deploy staging, test manuale end-to-end, D10 (migrazione state machine)
 
 ## Current Status — 2026-03-19 (precedente)
 

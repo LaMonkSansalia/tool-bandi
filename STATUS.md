@@ -1,6 +1,6 @@
 # Tool Bandi — Contesto & Status
 
-**Versione:** 0.8.0-dev
+**Versione:** 0.8.1-dev
 **Ultimo aggiornamento:** 2026-03-20
 **Repo:** GitHub — LaMonkSansalia/tool-bandi (rinominato da bandiresearcher il 2026-03-20)
 **Inizio progetto:** 2026-03-02
@@ -456,6 +456,21 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 - [x] **BUG-UI-002:** JSON raw in profilo — Alpine.js dynamic forms per partner/piano_lavoro/kpi/documenti_supporto (`57030c8`)
 - [x] **BUG-UI-003:** Pipeline crash — try/except su query `pipeline_runs` + messaggi errore in UI (`ba20c7f`)
 - [x] **BUG-UI-004:** Profilo perde dati — aggiunto tipo_investimento, fix costituita default, zone_speciali multi-checkbox (`d7e7fe6`)
+
+### v0.8.1-dev — Bug Fix Logic (Sezione B) (2026-03-20)
+
+4 bug logici fixati. 29/29 smoke test verdi dopo ogni fix. Un commit per bug.
+
+- [x] **BUG-LOGIC-001:** Soggetto save non rivaluta — background thread `rivaluta_progetto()` per ogni progetto del soggetto (`85db886`)
+- [x] **BUG-LOGIC-002:** Qualifiche decorative — `qualifica_match` rule aggiunta ai 3 scoring template (`361fe2d`)
+- [x] **BUG-LOGIC-003:** Profilo save non rivaluta — background thread `rivaluta_progetto()` dopo save profilo (`fbe8012`)
+- [x] **BUG-LOGIC-004:** Tab Opportunita' senza CTA — empty state con icona, testo e link "Avvia scansione" (`b05bc52`)
+
+### v0.8.1-dev — Test funzionali Playwright (2026-03-20)
+
+- [x] 20 test Playwright end-to-end in `tests/test_functional.py`
+- [x] Copertura: navigazione (3), progetti (6), bandi (2), soggetti (3), candidature (1), pipeline (2), integrita' globale (3)
+- [x] Report console + BUGS.md append automatico + screenshot
 
 ---
 
