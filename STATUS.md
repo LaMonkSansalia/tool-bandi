@@ -474,6 +474,16 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 
 ### v0.8.3-dev — Deploy & Stabilizzazione (2026-03-20)
 
+#### Task 4+5: Deploy + Smoke test staging — COMPLETATO
+- [x] Clone tool-bandi su parco-giuochi (/home/lamonk/tool-bandi/)
+- [x] .env creato da Django .env + nuove variabili, permessi 600
+- [x] Django bandi_ui stoppato e rimosso
+- [x] Dockerfile fix: libgdk-pixbuf-2.0-0 (Debian Bookworm) — commit 13b859d
+- [x] docker-compose: container_name bandi_ui (compat NPM), volume esterno bandi-ui_pgdata — commit 89a59b4
+- [x] Build OK, containers UP, volume dati preservato
+- [x] Smoke test: tutte le route OK, https://bandi.sansalia.com/login → 200
+- [x] NPM proxy gia configurato da Django — zero modifiche
+
 #### Task 3: Preparazione deploy — COMPLETATO
 - [x] deploy.sh: script idempotente (pull, build, migrate, start, smoke test)
 - [x] web/auth.py: SimpleAuthMiddleware (cookie-session, disabilitato se env vuote)

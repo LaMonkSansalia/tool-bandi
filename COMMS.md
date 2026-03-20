@@ -18,6 +18,15 @@
 **Phase:** v0.8.3-dev — Deploy & stabilizzazione
 **Stato:** 15 bug risolti totali, 0 aperti. 29/29 smoke test.
 
+[COMPLETATO] 2026-03-20 — Task 4+5: Deploy staging + Smoke test:
+  - FastAPI sostituisce Django su parco-giuochi: stessa infrastruttura NPM, stessi dati
+  - Decisione: container_name bandi_ui (non bandi_web) per compatibilita' NPM proxy
+  - Decisione: volume esterno bandi-ui_pgdata per riutilizzare dati Django
+  - Decisione: nessuna modifica NPM — proxy gia' configurato per bandi_ui:8000
+  - Fix build: libgdk-pixbuf-2.0-0 (nome pacchetto cambiato in Debian Bookworm/Trixie)
+  - URL pubblico: https://bandi.sansalia.com — funzionante con auth
+  - Prossimi passi: Task 7 (D10 state machine) se c'e' tempo, altrimenti chiusura sessione
+
 [COMPLETATO] 2026-03-20 — Task 3: Preparazione deploy:
   - deploy.sh creato (idempotente: pull, build, migrate 001-010, start, smoke test)
   - web/auth.py: SimpleAuthMiddleware — cookie-session, disabilitato in dev (env vuote)
