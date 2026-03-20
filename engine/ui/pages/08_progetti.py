@@ -41,6 +41,10 @@ SCORING_TEMPLATES = {
              "config": {"keywords": ["pnrr", "digitalizzazione", "digitale", "ict"]}},
             {"name": "importo_adeguato", "points": 10, "type": "importo_min",
              "description": "Importo > 5.000 EUR", "config": {"min_importo": 5000}},
+            {"name": "qualifica_premiale", "points": 15, "type": "qualifica_match",
+             "description": "Criteri premiali soggetto (startup, impresa femminile, ecc.)",
+             "config": {"qualifica": "startup_innovativa",
+                        "keywords": ["startup", "innovativ", "pmi innovativ"]}},
         ],
     },
     "Turismo / Cultura": {
@@ -73,6 +77,10 @@ SCORING_TEMPLATES = {
              "description": "Tipo beneficiario compatibile",
              "config": {"accepted_types": ["associazione", "ente_no_profit",
                         "pro_loco", "tutti", "tutte_le_imprese", "ente_pubblico"]}},
+            {"name": "qualifica_premiale", "points": 10, "type": "qualifica_match",
+             "description": "Criteri premiali soggetto (impresa sociale, societa' benefit)",
+             "config": {"qualifica": "impresa_sociale",
+                        "keywords": ["sociale", "impatto", "benefit", "terzo settore"]}},
         ],
     },
     "E-commerce / PMI": {
@@ -98,6 +106,10 @@ SCORING_TEMPLATES = {
             {"name": "innovazione", "points": 10, "type": "keyword_in_title",
              "description": "Innovazione / transizione",
              "config": {"keywords": ["innovazione", "transizione", "4.0", "5.0", "pnrr"]}},
+            {"name": "qualifica_premiale", "points": 10, "type": "qualifica_match",
+             "description": "Criteri premiali soggetto (impresa femminile, giovanile)",
+             "config": {"qualifica": "impresa_femminile",
+                        "keywords": ["femminile", "donne", "imprenditoria femminile", "giovani"]}},
         ],
     },
 }
