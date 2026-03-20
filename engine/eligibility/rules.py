@@ -12,20 +12,43 @@ PROFILE_PATH = Path(__file__).parent.parent.parent / "context" / "company_profil
 
 # Mapping forma_giuridica → keywords for beneficiary matching
 _FORMA_GIURIDICA_MAP = {
-    "impresa individuale": [
+    # Imprese individuali
+    "impresa_individuale": [
         "impresa_individuale", "impresa_individuale_e_libero_professionista",
-        "micro_impresa", "pmi",
+        "micro_impresa", "pmi", "ditta_individuale",
     ],
-    "associazione": ["associazione", "ente_no_profit", "associazione_culturale"],
-    "pro loco": ["pro_loco", "associazione", "ente_no_profit"],
-    "fondazione": ["fondazione", "ente_no_profit"],
-    "cooperativa": ["cooperativa", "societa_cooperativa", "pmi"],
+    "impresa individuale": [  # legacy key
+        "impresa_individuale", "impresa_individuale_e_libero_professionista",
+        "micro_impresa", "pmi", "ditta_individuale",
+    ],
+    "libero_professionista": [
+        "libero_professionista", "impresa_individuale_e_libero_professionista",
+        "professionista", "micro_impresa", "pmi",
+    ],
+    # Societa' di persone
+    "snc": ["snc", "societa_di_persone", "pmi"],
+    "sas": ["sas", "societa_di_persone", "pmi"],
+    # Societa' di capitali
     "srl": ["srl", "societa_di_capitali", "pmi"],
     "srls": ["srls", "srl", "societa_di_capitali", "pmi"],
     "spa": ["spa", "societa_di_capitali"],
-    "snc": ["snc", "societa_di_persone", "pmi"],
-    "sas": ["sas", "societa_di_persone", "pmi"],
-    "ente pubblico": ["ente_pubblico", "pubblica_amministrazione"],
+    "sapa": ["sapa", "societa_di_capitali"],
+    # Cooperative
+    "cooperativa": ["cooperativa", "societa_cooperativa", "pmi"],
+    "cooperativa_sociale": ["cooperativa_sociale", "cooperativa", "societa_cooperativa", "pmi", "ente_no_profit"],
+    # Terzo settore
+    "associazione": ["associazione", "ente_no_profit", "associazione_culturale"],
+    "fondazione": ["fondazione", "ente_no_profit"],
+    "aps": ["aps", "associazione", "ente_no_profit", "terzo_settore"],
+    "odv": ["odv", "associazione", "ente_no_profit", "terzo_settore"],
+    # Reti e consorzi
+    "consorzio": ["consorzio", "rete_impresa"],
+    "rete_impresa": ["rete_impresa", "consorzio"],
+    # Enti pubblici
+    "ente_pubblico": ["ente_pubblico", "pubblica_amministrazione"],
+    "ente pubblico": ["ente_pubblico", "pubblica_amministrazione"],  # legacy
+    # Legacy aliases
+    "pro loco": ["pro_loco", "associazione", "ente_no_profit"],
     "comune": ["comune", "ente_pubblico", "pubblica_amministrazione"],
 }
 

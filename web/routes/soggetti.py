@@ -10,6 +10,7 @@ from psycopg2.extras import RealDictCursor
 
 from web.deps import get_db, get_nav_context
 from web.main import templates
+from web.services.completezza import FORME_GIURIDICHE, REGIMI_FISCALI, QUALIFICHE_SOGGETTO
 
 router = APIRouter(prefix="/soggetti")
 
@@ -49,23 +50,8 @@ def soggetti_list(request: Request, conn=Depends(get_db)):
         """)
         rows = [dict(r) for r in cur.fetchall()]
 
-    FORME_LABELS = {
-        "impresa_individuale": "Impresa Individuale",
-        "srl": "SRL",
-        "srls": "SRLS",
-        "snc": "SNC",
-        "sas": "SAS",
-        "cooperativa": "Cooperativa",
-        "associazione": "Associazione",
-        "fondazione": "Fondazione",
-        "consorzio": "Consorzio",
-        "ente_pubblico": "Ente Pubblico",
-    }
-    REGIME_LABELS = {
-        "forfettario": "Forfettario",
-        "ordinario": "Ordinario",
-        "semplificato": "Semplificato",
-    }
+    FORME_LABELS = dict(FORME_GIURIDICHE)
+    REGIME_LABELS = dict(REGIMI_FISCALI)
 
     for s in rows:
         raw = s.get("profilo") or {}
@@ -110,11 +96,14 @@ def soggetto_new(request: Request, conn=Depends(get_db)):
         "soggetto": None,
         "mode": "create",
         "tipo": tipo,
+        "FORME_GIURIDICHE": FORME_GIURIDICHE,
+        "REGIMI_FISCALI": REGIMI_FISCALI,
+        "QUALIFICHE_SOGGETTO": QUALIFICHE_SOGGETTO,
     })
 
 
 @router.post("/nuovo")
-def soggetto_create(
+async def soggetto_create(
     request: Request,
     nome: str = Form(""),
     forma_giuridica: str = Form(""),
@@ -137,6 +126,10 @@ def soggetto_create(
     if tipo not in ("reale", "simulazione"):
         tipo = "reale"
 
+    # Read qualifiche checkboxes from form
+    form_data = await request.form()
+    qualifiche = form_data.getlist("qualifiche")
+
     profilo = {
         "tipo": tipo,
         "ateco": ateco.strip(),
@@ -145,6 +138,7 @@ def soggetto_create(
         "dipendenti": _safe_int(dipendenti, 0),
         "fatturato": _safe_int(fatturato, None),
         "anno_costituzione": _safe_int(anno_costituzione, None),
+        "qualifiche": qualifiche,
         "hard_stops": [],
         "vantaggi": [],
     }
@@ -203,6 +197,9 @@ def soggetto_detail(request: Request, soggetto_id: int, conn=Depends(get_db)):
         "vantaggi": vantaggi,
         "saved": saved,
         "active_tab": active_tab,
+        "FORME_GIURIDICHE": FORME_GIURIDICHE,
+        "REGIMI_FISCALI": REGIMI_FISCALI,
+        "QUALIFICHE_SOGGETTO": QUALIFICHE_SOGGETTO,
     })
 
 
@@ -233,6 +230,9 @@ def soggetto_tab(request: Request, soggetto_id: int, tab_name: str, conn=Depends
         "progetti": progetti,
         "hard_stops": profilo.get("hard_stops", []),
         "vantaggi": profilo.get("vantaggi", []),
+        "FORME_GIURIDICHE": FORME_GIURIDICHE,
+        "REGIMI_FISCALI": REGIMI_FISCALI,
+        "QUALIFICHE_SOGGETTO": QUALIFICHE_SOGGETTO,
     }
 
     tab_map = {
@@ -245,7 +245,7 @@ def soggetto_tab(request: Request, soggetto_id: int, tab_name: str, conn=Depends
 
 
 @router.post("/{soggetto_id}")
-def soggetto_update(
+async def soggetto_update(
     request: Request,
     soggetto_id: int,
     nome: str = Form(""),
@@ -264,6 +264,10 @@ def soggetto_update(
     if not s:
         return RedirectResponse(url="/soggetti", status_code=303)
 
+    # Read qualifiche checkboxes from form
+    form_data = await request.form()
+    qualifiche = form_data.getlist("qualifiche")
+
     # Merge profilo preservando hard_stops e vantaggi esistenti
     old_profilo = s["profilo"]
     profilo = {
@@ -274,6 +278,7 @@ def soggetto_update(
         "dipendenti": _safe_int(dipendenti, 0),
         "fatturato": _safe_int(fatturato, None),
         "anno_costituzione": _safe_int(anno_costituzione, None),
+        "qualifiche": qualifiche,
     }
 
     with conn.cursor() as cur:

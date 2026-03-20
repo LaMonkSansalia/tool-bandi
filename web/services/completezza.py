@@ -64,18 +64,67 @@ SETTORI = [
 ]
 
 COFINANZIAMENTO_FONTI = [
-    ("autofinanziamento", "Autofinanziamento"),
-    ("partner_privato", "Partner privato"),
-    ("comune", "Comune / PA"),
-    ("banca", "Banca / Finanza"),
-    ("eu", "Fondi EU"),
+    ("mezzi_propri", "Mezzi propri / autofinanziamento"),
+    ("prestito_bancario", "Prestito bancario (mutuo, fido)"),
+    ("prestito_agevolato", "Prestito agevolato (Simest, Microcredito)"),
+    ("leasing", "Leasing / locazione finanziaria"),
+    ("equity_crowdfunding", "Equity crowdfunding"),
+    ("venture_capital", "Venture Capital / Business Angel"),
+    ("altro_bando", "Contributo da altro bando (cumulo)"),
+    ("altro", "Altro"),
 ]
 
 ZONE_SPECIALI_OPTIONS = [
-    ("ZES", "ZES (Zona Economica Speciale)"),
-    ("area_interna", "Area Interna"),
-    ("borgo_meno_5000", "Borgo < 5000 abitanti"),
-    ("montagna", "Area Montana"),
+    ("zes_unica", "ZES Unica Mezzogiorno"),
+    ("zls", "Zona Logistica Semplificata (ZLS)"),
+    ("area_interna", "Area interna SNAI (intermedia/periferica/ultra-periferica)"),
+    ("borgo_5000", "Comune < 5.000 abitanti"),
+    ("isola_minore", "Isola minore"),
+    ("cratere_sismico", "Cratere sismico / area emergenza"),
+]
+
+# ── Costanti soggetto ─────────────────────────────────────────────────────────
+
+FORME_GIURIDICHE = [
+    # Imprese individuali
+    ("impresa_individuale", "Impresa individuale / Ditta individuale"),
+    ("libero_professionista", "Libero professionista con P.IVA"),
+    # Societa' di persone
+    ("snc", "SNC — Societa' in Nome Collettivo"),
+    ("sas", "SAS — Societa' in Accomandita Semplice"),
+    # Societa' di capitali
+    ("srl", "SRL — Societa' a Responsabilita' Limitata"),
+    ("srls", "SRLS — SRL Semplificata"),
+    ("spa", "SPA — Societa' per Azioni"),
+    ("sapa", "SAPA — Societa' in Accomandita per Azioni"),
+    # Cooperative
+    ("cooperativa", "Societa' cooperativa"),
+    ("cooperativa_sociale", "Cooperativa sociale"),
+    # Terzo settore
+    ("associazione", "Associazione"),
+    ("fondazione", "Fondazione"),
+    ("aps", "APS — Associazione di Promozione Sociale"),
+    ("odv", "ODV — Organizzazione di Volontariato"),
+    # Reti e consorzi
+    ("consorzio", "Consorzio"),
+    ("rete_impresa", "Rete d'impresa"),
+]
+
+REGIMI_FISCALI = [
+    ("ordinario", "Regime ordinario"),
+    ("semplificato", "Regime semplificato"),
+    ("forfettario", "Regime forfettario"),
+    ("agricolo", "Regime speciale agricoltura"),
+    ("non_profit", "Ente non commerciale"),
+]
+
+QUALIFICHE_SOGGETTO = [
+    ("startup_innovativa", "Startup innovativa (sez. speciale CCIAA)"),
+    ("pmi_innovativa", "PMI innovativa"),
+    ("impresa_sociale", "Impresa sociale (D.Lgs. 155/2006)"),
+    ("societa_benefit", "Societa' benefit"),
+    ("impresa_femminile", "Impresa femminile (>= 2/3 quote + organi)"),
+    ("impresa_giovanile", "Impresa giovanile (titolare/soci under 35)"),
 ]
 
 
