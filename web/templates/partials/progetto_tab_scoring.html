@@ -3,7 +3,7 @@
   <h3 class="text-sm font-semibold text-gray-900 mb-1">Scoring Rules</h3>
   <p class="text-xs text-gray-500 mb-5">Regole di scoring personalizzate per questo progetto. Il JSON definisce come ogni bando viene valutato.</p>
 
-  <form method="post" action="/progetti/{{ proj.id }}/scoring" class="space-y-4">
+  <form method="post" action="/progetti/{{ proj.id }}/scoring" hx-boost="false" class="space-y-4">
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">Scoring Rules (JSON)</label>
       <textarea name="scoring_rules_json" rows="20"

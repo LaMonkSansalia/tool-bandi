@@ -8,10 +8,15 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from engine.config import DATABASE_URL
 from engine.db.pool import init_pool, close_pool
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 WEB_DIR = Path(__file__).parent
 
@@ -31,8 +36,94 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# ── HTMX Layout Middleware ────────────────────────────────────────────────────
+# Prevents double sidebar by detecting when a full-page layout is served
+# inside an HTMX partial swap (HX-Target != body and != "").
+
+class HTMXLayoutMiddleware(BaseHTTPMiddleware):
+    """
+    Generic fix for double sidebar (BUG-FIXED-015).
+
+    When a form POST inside a tab partial gets boosted by hx-boost="true",
+    HTMX follows the 303 redirect with HX-Request header but the route
+    returns a full page with layout. HTMX swaps only the target element,
+    injecting the full layout (including sidebar) inside the page.
+
+    This middleware detects that case and strips the layout, returning
+    only the page content (everything inside <div class="p-6">).
+    """
+
+    # Marker that identifies the content wrapper in layout.html
+    _CONTENT_START = '<div class="p-6">'
+    _CONTENT_END_MARKERS = ('</main>', '</div>\n\n  </div>')
+
+    async def dispatch(self, request, call_next):
+        is_htmx = request.headers.get("HX-Request") == "true"
+        hx_target = request.headers.get("HX-Target", "")
+        is_boosted = request.headers.get("HX-Boosted") == "true"
+
+        # Partial = HTMX with specific target (not full-page boost)
+        is_partial = is_htmx and hx_target and hx_target not in ("body", "") and not is_boosted
+
+        request.state.is_htmx = is_htmx
+        request.state.hx_target = hx_target
+        request.state.is_htmx_partial = is_partial
+
+        response = await call_next(request)
+
+        # Only process HTML partial responses
+        content_type = response.headers.get("content-type", "")
+        if not (is_partial and "text/html" in content_type):
+            return response
+
+        # Read body
+        body = b""
+        async for chunk in response.body_iterator:
+            body += chunk
+        body_str = body.decode("utf-8", errors="ignore")
+
+        # If response contains full layout, extract just the content
+        if "<!DOCTYPE" in body_str or "<html" in body_str:
+            extracted = self._extract_content(body_str)
+            if extracted is not None:
+                _logger.info(
+                    "HTMX partial: stripped layout from %s (HX-Target=%s)",
+                    request.url.path, hx_target,
+                )
+                body = extracted.encode("utf-8")
+
+        from starlette.responses import Response as StarletteResponse
+        return StarletteResponse(
+            content=body,
+            status_code=response.status_code,
+            headers=dict(response.headers),
+            media_type=response.media_type,
+        )
+
+    def _extract_content(self, html: str) -> str | None:
+        """Extract content between <div class="p-6"> and </main>."""
+        start = html.find(self._CONTENT_START)
+        if start == -1:
+            return None
+        # Skip past the opening tag
+        inner_start = start + len(self._CONTENT_START)
+        # Find the closing </main> or nearest structural end
+        end = html.find("</main>", inner_start)
+        if end == -1:
+            return None
+        # Find the last </div> before </main> — that's the closing of p-6
+        content = html[inner_start:end]
+        # Strip the trailing </div> that closes <div class="p-6">
+        last_div = content.rfind("</div>")
+        if last_div != -1:
+            content = content[:last_div]
+        return content.strip()
+
+
 # Session middleware (for current_project_id + flash messages)
 import os
+
+app.add_middleware(HTMXLayoutMiddleware)
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv("SESSION_SECRET", "tool-bandi-dev-secret-change-me"),

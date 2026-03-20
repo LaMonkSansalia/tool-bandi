@@ -3,7 +3,7 @@
   <h3 class="text-sm font-semibold text-gray-900 mb-4">Note & Decisioni</h3>
 
   {# Add note form #}
-  <form method="post" action="/candidature/{{ pe.pe_id }}/note" class="mb-6">
+  <form method="post" action="/candidature/{{ pe.pe_id }}/note" hx-boost="false" class="mb-6">
     <textarea name="testo" rows="3" required placeholder="Aggiungi una nota..."
               class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-2"></textarea>
     <div class="flex justify-end">

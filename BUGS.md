@@ -92,6 +92,14 @@
 - **Fix:** icona search, testo descrittivo, link "Avvia scansione" a /pipeline
 - **Commit:** `b05bc52`
 
+### BUG-FIXED-015: Sidebar doppia — fix generico a livello middleware
+- **Pagina:** tutte (ricorrente: `/bandi/{id}?project_id=X`, soggetti vincoli, workspace)
+- **Causa:** `hx-boost="true"` su body intercettava form POST nelle tab partial; redirect 303 con HX-Request restituiva pagina completa con layout → sidebar iniettata dentro il contenuto
+- **Fix 3 livelli:**
+  1. **Middleware `HTMXLayoutMiddleware`** — rileva richieste HTMX partial (HX-Target != body) che ricevono layout completo e lo stripa, estraendo solo il contenuto
+  2. **`hx-boost="false"` su 6 form in partials** — progetto_tab_scoring, soggetto_tab_vincoli (2 form), workspace_tab_note, workspace_tab_checklist, workspace_tab_documenti_full
+  3. **Audit completo** — verificati tutti i 37 partial (nessuno estende layout), tutti gli hx-get (puntano a tab partial), tutte le route (restituiscono partial corretti)
+
 ## Bug aperti
 
 _Nessuno al momento. 29 smoke test passano._

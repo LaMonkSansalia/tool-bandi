@@ -1,6 +1,6 @@
 # Tool Bandi — CLAUDE.md
 
-**Versione:** 0.8.1-dev
+**Versione:** 0.8.2-dev
 **Repo:** github.com/LaMonkSansalia/tool-bandi
 **Stack:** FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind CSS — single-process Python, zero build frontend
 **Avvio:** `venv/bin/python -m uvicorn web.main:app --reload --port 8000`
@@ -115,7 +115,7 @@ Schema completo: `context/system_architecture.md` sezione Database.
 |------|-----------|-------|
 | `STATUS.md` | Changelog completo v0.1→v0.8, ogni commit | Aggiornato |
 | `COMMS.md` | Log comunicazioni PM↔Agent, decisioni | Aggiornato |
-| `BUGS.md` | Bug tracker (12 risolti, 0 aperti) | Aggiornato |
+| `BUGS.md` | Bug tracker (15 risolti, 0 aperti) | Aggiornato |
 | `context/system_architecture.md` | Architettura, schema DB, state machine, scoring | Autorita' tecnica |
 | `context/project_workspace.md` | Spec profilo progetto + workspace candidatura | Autorita' UX |
 | `context/spec/tool-bandi-spec (1).md` | Spec UI/UX completa (5 entita', stati, flussi) | Autorita' suprema |
@@ -173,15 +173,6 @@ Checkpoint obbligatorio. Aggiorna TUTTI i file di contesto con lo stato corrente
    - CLAUDE.md: [aggiornato/invariato]
    - Commit: [hash]
    ```
-
-### `/stato`
-
-Stampa lo stato corrente SENZA modificare file:
-- Versione attuale
-- Bug aperti (da BUGS.md)
-- Test: esegui `pytest tests/test_smoke.py -q` e mostra risultato
-- Ultimo commit: `git log --oneline -3`
-- File modificati non committati: `git status --short`
 
 ### `/test`
 

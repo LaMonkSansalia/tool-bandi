@@ -472,6 +472,13 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 - [x] Copertura: navigazione (3), progetti (6), bandi (2), soggetti (3), candidature (1), pipeline (2), integrita' globale (3)
 - [x] Report console + BUGS.md append automatico + screenshot
 
+### v0.8.2-dev — Fix generico sidebar doppia (2026-03-20)
+
+- [x] **BUG-FIXED-015:** Middleware `HTMXLayoutMiddleware` — rileva e stripa layout da risposte HTMX partial
+- [x] `hx-boost="false"` su 6 form in partials (scoring, vincoli, note, checklist, documenti)
+- [x] Audit completo: 37 partial verificati, 0 estendono layout, 0 hx-get a pagine complete
+- [x] Test regressione: 10 pagine verificate, 0 sidebar doppie
+
 ---
 
 ## Sicurezza

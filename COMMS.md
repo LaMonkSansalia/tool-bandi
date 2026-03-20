@@ -13,10 +13,16 @@
 
 ---
 
-## Current Status — 2026-03-20 (completato)
+## Current Status — 2026-03-20 (v0.8.2-dev)
 
-**Phase:** v0.8.1-dev — Bug Fix UI + Logic + Test Funzionali
-**Stato:** COMPLETATO. 8 bug fixati (4 UI + 4 Logic). 20 test funzionali Playwright creati.
+**Phase:** v0.8.2-dev — Sidebar doppia fixata definitivamente
+**Stato:** 15 bug risolti totali, 0 aperti. 29/29 smoke test.
+
+[COMPLETATO] 2026-03-20 — Fix generico sidebar doppia:
+  - Decisione: middleware `HTMXLayoutMiddleware` come fix generico — rileva e stripa layout da risposte partial
+  - Decisione: `hx-boost="false"` su TUTTI i form nei partial tab (6 form fixati)
+  - Decisione: NON usare Jinja2 template guard (block duplicato non permesso) — middleware e' piu' robusto
+  - Prossimi passi: deploy staging, test manuale end-to-end, D10 (migrazione state machine)
 
 [COMPLETATO] 2026-03-20 — Bug Fix Completo:
   - Sezione A (UI): 4/4 fixati (BUG-UI-001→004, commit 14357c8→d7e7fe6)
@@ -26,7 +32,6 @@
   - Decisione: Alpine.js x-data/x-for per campi array dinamici (partner, piano_lavoro, kpi)
   - Decisione: rivaluta_progetto() in background thread dopo save soggetto E profilo
   - Decisione: CLAUDE.md aggiornato con comandi utente (/salva, /stato, /test, /prossimo)
-  - Prossimi passi: deploy staging, test manuale end-to-end, D10 (migrazione state machine)
 
 ## Current Status — 2026-03-19 (precedente)
 
