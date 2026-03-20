@@ -104,25 +104,68 @@
         </div>
       </div>
 
-      {# Sezione 4: Piano di lavoro & KPI (JSON) #}
+      {# Sezione 4: Partner, Piano di lavoro, KPI — Alpine.js dynamic forms #}
       <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">Partner, Piano di Lavoro, KPI</h3>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Partner (JSON)</label>
-            <textarea name="partner_json" rows="6"
-                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.partner | tojson(indent=2) }}</textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Piano di lavoro (JSON, min 2 fasi)</label>
-            <textarea name="piano_lavoro_json" rows="6"
-                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.piano_lavoro | tojson(indent=2) }}</textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">KPI (JSON, min 2)</label>
-            <textarea name="kpi_json" rows="6"
-                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.kpi | tojson(indent=2) }}</textarea>
-          </div>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Partner</h3>
+        <div x-data="{ items: {{ profilo.partner | tojson }} || [] }">
+          <input type="hidden" name="partner_json" :value="JSON.stringify(items)">
+          <template x-for="(item, idx) in items" :key="idx">
+            <div class="flex gap-2 mb-2 items-start">
+              <input type="text" x-model="item.nome" placeholder="Nome partner"
+                     class="flex-1 rounded-lg border-gray-300 text-sm">
+              <input type="text" x-model="item.ruolo" placeholder="Ruolo"
+                     class="flex-1 rounded-lg border-gray-300 text-sm">
+              <button type="button" @click="items.splice(idx, 1)"
+                      class="px-2 py-2 text-red-400 hover:text-red-600 text-sm shrink-0">&times;</button>
+            </div>
+          </template>
+          <div x-show="items.length === 0" class="text-sm text-gray-400 mb-2">Nessun partner aggiunto.</div>
+          <button type="button" @click="items.push({nome: '', ruolo: ''})"
+                  class="text-sm text-blue-600 hover:text-blue-700 font-medium">+ Aggiungi partner</button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Piano di Lavoro <span class="font-normal text-gray-400">(min 2 fasi)</span></h3>
+        <div x-data="{ items: {{ profilo.piano_lavoro | tojson }} || [] }">
+          <input type="hidden" name="piano_lavoro_json" :value="JSON.stringify(items)">
+          <template x-for="(item, idx) in items" :key="idx">
+            <div class="flex gap-2 mb-2 items-start">
+              <input type="text" x-model="item.fase" placeholder="Fase (es. Fase 1)"
+                     class="w-28 rounded-lg border-gray-300 text-sm shrink-0">
+              <input type="text" x-model="item.attivita" placeholder="Attivita'"
+                     class="flex-1 rounded-lg border-gray-300 text-sm">
+              <input type="text" x-model="item.durata" placeholder="Durata (es. 3 mesi)"
+                     class="w-28 rounded-lg border-gray-300 text-sm shrink-0">
+              <button type="button" @click="items.splice(idx, 1)"
+                      class="px-2 py-2 text-red-400 hover:text-red-600 text-sm shrink-0">&times;</button>
+            </div>
+          </template>
+          <div x-show="items.length === 0" class="text-sm text-gray-400 mb-2">Nessuna fase aggiunta.</div>
+          <button type="button" @click="items.push({fase: '', attivita: '', durata: ''})"
+                  class="text-sm text-blue-600 hover:text-blue-700 font-medium">+ Aggiungi fase</button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">KPI <span class="font-normal text-gray-400">(min 2)</span></h3>
+        <div x-data="{ items: {{ profilo.kpi | tojson }} || [] }">
+          <input type="hidden" name="kpi_json" :value="JSON.stringify(items)">
+          <template x-for="(item, idx) in items" :key="idx">
+            <div class="flex gap-2 mb-2 items-start">
+              <input type="text" x-model="item.nome" placeholder="Nome KPI"
+                     class="flex-1 rounded-lg border-gray-300 text-sm">
+              <input type="text" x-model="item.target" placeholder="Target (es. +20%)"
+                     class="w-28 rounded-lg border-gray-300 text-sm shrink-0">
+              <input type="text" x-model="item.metrica" placeholder="Metrica"
+                     class="w-32 rounded-lg border-gray-300 text-sm shrink-0">
+              <button type="button" @click="items.splice(idx, 1)"
+                      class="px-2 py-2 text-red-400 hover:text-red-600 text-sm shrink-0">&times;</button>
+            </div>
+          </template>
+          <div x-show="items.length === 0" class="text-sm text-gray-400 mb-2">Nessun KPI aggiunto.</div>
+          <button type="button" @click="items.push({nome: '', target: '', metrica: ''})"
+                  class="text-sm text-blue-600 hover:text-blue-700 font-medium">+ Aggiungi KPI</button>
         </div>
       </div>
 
@@ -169,10 +212,20 @@
                      class="w-full rounded-lg border-gray-300 text-sm">
             </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Documenti di supporto (JSON)</label>
-            <textarea name="documenti_supporto_json" rows="4"
-                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.documenti_supporto | tojson(indent=2) }}</textarea>
+          <div x-data="{ items: {{ profilo.documenti_supporto | tojson }} || [] }">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Documenti di supporto</label>
+            <input type="hidden" name="documenti_supporto_json" :value="JSON.stringify(items)">
+            <template x-for="(item, idx) in items" :key="idx">
+              <div class="flex gap-2 mb-2 items-start">
+                <input type="text" x-model="items[idx]" placeholder="Nome documento"
+                       class="flex-1 rounded-lg border-gray-300 text-sm">
+                <button type="button" @click="items.splice(idx, 1)"
+                        class="px-2 py-2 text-red-400 hover:text-red-600 text-sm shrink-0">&times;</button>
+              </div>
+            </template>
+            <div x-show="items.length === 0" class="text-sm text-gray-400 mb-2">Nessun documento aggiunto.</div>
+            <button type="button" @click="items.push('')"
+                    class="text-sm text-blue-600 hover:text-blue-700 font-medium">+ Aggiungi documento</button>
           </div>
         </div>
       </div>
