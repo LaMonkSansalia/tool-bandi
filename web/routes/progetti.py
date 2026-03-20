@@ -456,7 +456,17 @@ async def progetto_save_profilo(
         )
         conn.commit()
 
-    return RedirectResponse(url=f"/progetti/{pk}?tab=profilo&saved=1", status_code=303)
+    # Rivaluta bandi in background dopo modifica profilo
+    def _run():
+        try:
+            from engine.pipeline.flows import rivaluta_progetto
+            rivaluta_progetto(pk)
+        except Exception:
+            pass
+
+    threading.Thread(target=_run, daemon=True).start()
+
+    return RedirectResponse(url=f"/progetti/{pk}?tab=profilo&saved=1&rivaluta=1", status_code=303)
 
 
 @router.post("/{pk}/scoring")
