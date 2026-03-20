@@ -378,16 +378,17 @@ def progetto_tab(request: Request, pk: int, tab_name: str, conn=Depends(get_db))
 
 
 @router.post("/{pk}/profilo")
-def progetto_save_profilo(
+async def progetto_save_profilo(
     request: Request,
     pk: int,
     conn=Depends(get_db),
     descrizione_breve: str = Form(""),
     descrizione_estesa: str = Form(""),
     settore: str = Form(""),
+    tipo_investimento: str = Form(""),
     keywords: str = Form(""),
     comuni_target: str = Form(""),
-    costituita: str = Form("1"),
+    costituita: str = Form(""),
     budget_min: str = Form(""),
     budget_max: str = Form(""),
     cofinanziamento_pct: str = Form(""),
@@ -408,6 +409,10 @@ def progetto_save_profilo(
     if not proj:
         return RedirectResponse(url="/progetti", status_code=303)
 
+    # Read zone_speciali multi-select from form
+    form_data = await request.form()
+    zone_speciali = form_data.getlist("zone_speciali")
+
     def _csv_to_list(val):
         return [x.strip() for x in val.split(",") if x.strip()]
 
@@ -421,9 +426,10 @@ def progetto_save_profilo(
         "descrizione_breve": descrizione_breve.strip()[:140],
         "descrizione_estesa": descrizione_estesa.strip(),
         "settore": settore.strip(),
+        "tipo_investimento": tipo_investimento.strip(),
         "keywords": _csv_to_list(keywords),
         "comuni_target": _csv_to_list(comuni_target),
-        "zone_speciali": [],  # handled separately if multi-select
+        "zone_speciali": zone_speciali,
         "costituita": costituita == "1",
         "budget_min": parse_int_or_none(budget_min),
         "budget_max": parse_int_or_none(budget_max),
