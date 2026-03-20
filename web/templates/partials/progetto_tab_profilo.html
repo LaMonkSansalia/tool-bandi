@@ -3,7 +3,7 @@
 
   {# Left: Form (2/3) #}
   <div class="lg:col-span-2">
-    <form method="post" action="/progetti/{{ proj.id }}/profilo" class="space-y-6">
+    <form method="post" action="/progetti/{{ proj.id }}/profilo" hx-boost="false" class="space-y-6">
 
       {# Sezione 1: Descrizione #}
       <div class="bg-white rounded-xl border border-gray-200 p-5">
@@ -189,7 +189,7 @@
       <h3 class="text-sm font-semibold text-gray-900 mb-1">Scoring Rules</h3>
       <p class="text-xs text-gray-500 mb-4">Regole personalizzate per la valutazione dei bandi.</p>
 
-      <form method="post" action="/progetti/{{ proj.id }}/scoring" class="space-y-4">
+      <form method="post" action="/progetti/{{ proj.id }}/scoring" hx-boost="false" class="space-y-4">
         <textarea name="scoring_rules_json" rows="12"
                   class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs focus:ring-blue-500 focus:border-blue-500"
                   spellcheck="false">{{ scoring_json }}</textarea>

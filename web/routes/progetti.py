@@ -261,8 +261,8 @@ def progetto_detail(request: Request, pk: int, conn=Depends(get_db)):
         "TIPI_INVESTIMENTO": TIPI_INVESTIMENTO,
     }
 
-    # HTMX partial: return only tab content
-    if request.headers.get("HX-Request") and request.query_params.get("tab"):
+    # HTMX partial: return only tab content (not for hx-boost redirects)
+    if request.headers.get("HX-Target") == "tab-content" and request.query_params.get("tab"):
         tab_map = {
             "opportunita": "partials/progetto_tab_opportunita.html",
             "candidature": "partials/progetto_tab_candidature.html",
