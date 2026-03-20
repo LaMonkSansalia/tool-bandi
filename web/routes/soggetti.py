@@ -2,11 +2,15 @@
 Soggetti routes — list, detail, create, update, duplicate as simulation.
 """
 import json
+import logging
 import re
+import threading
 
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse
 from psycopg2.extras import RealDictCursor
+
+logger = logging.getLogger(__name__)
 
 from web.deps import get_db, get_nav_context
 from web.main import templates
@@ -194,6 +198,7 @@ def soggetto_detail(request: Request, soggetto_id: int, conn=Depends(get_db)):
     vantaggi = profilo.get("vantaggi", [])
 
     saved = request.query_params.get("saved", "")
+    rivaluta = request.query_params.get("rivaluta", "")
     active_tab = request.query_params.get("tab", "anagrafica")
 
     return templates.TemplateResponse("pages/soggetto_detail.html", {
@@ -205,6 +210,7 @@ def soggetto_detail(request: Request, soggetto_id: int, conn=Depends(get_db)):
         "hard_stops": hard_stops,
         "vantaggi": vantaggi,
         "saved": saved,
+        "rivaluta": rivaluta,
         "active_tab": active_tab,
         "FORME_GIURIDICHE": FORME_GIURIDICHE,
         "REGIMI_FISCALI": REGIMI_FISCALI,
@@ -309,7 +315,37 @@ async def soggetto_update(
               json.dumps(profilo, ensure_ascii=False), soggetto_id))
         conn.commit()
 
-    return RedirectResponse(url=f"/soggetti/{soggetto_id}?saved=1", status_code=303)
+    # Rivaluta tutti i progetti di questo soggetto in background
+    _rivaluta_progetti_soggetto(conn, soggetto_id)
+
+    return RedirectResponse(url=f"/soggetti/{soggetto_id}?saved=1&rivaluta=1", status_code=303)
+
+
+def _rivaluta_progetti_soggetto(conn, soggetto_id: int):
+    """Avvia rivalutazione in background per tutti i progetti del soggetto."""
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(
+            "SELECT id FROM projects WHERE soggetto_id = %s AND attivo = TRUE",
+            (soggetto_id,),
+        )
+        project_ids = [row["id"] for row in cur.fetchall()]
+
+    if not project_ids:
+        return
+
+    def _run():
+        try:
+            from engine.pipeline.flows import rivaluta_progetto
+            for pid in project_ids:
+                try:
+                    rivaluta_progetto(pid)
+                    logger.info("[RIVALUTA] Progetto %s rivalutato per soggetto %s", pid, soggetto_id)
+                except Exception as e:
+                    logger.error("[RIVALUTA] Errore progetto %s: %s", pid, e)
+        except ImportError as e:
+            logger.error("[RIVALUTA] Import error: %s", e)
+
+    threading.Thread(target=_run, daemon=True).start()
 
 
 @router.post("/{soggetto_id}/duplica")

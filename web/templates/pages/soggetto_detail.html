@@ -33,7 +33,7 @@
 {# Flash messages #}
 {% if saved %}
 <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-  Soggetto salvato con successo.
+  Soggetto salvato con successo.{% if rivaluta %} Rivalutazione bandi in corso...{% endif %}
 </div>
 {% endif %}
 
