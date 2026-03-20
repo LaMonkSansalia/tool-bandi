@@ -1,0 +1,50 @@
+# BUGS.md — Bug Tracker
+
+## Come usare
+
+1. Esegui smoke test: `venv/bin/python -m pytest tests/test_smoke.py -v`
+2. Esegui browser test: `venv/bin/python -m pytest tests/test_browser.py -v`
+3. Per ogni test FAILED, copia qui il nome del test + output
+4. Dai questo file a Claude Code con: "Fixa tutti i bug in BUGS.md"
+
+## Bug risolti
+
+### BUG-FIXED-001: Sidebar doppia innestata
+- **Pagina:** `/bandi/83?project_id=1`, `/soggetti/2?tab=vincoli`
+- **Causa:** tab_bar macro appendeva `/tab/key` dopo query string; soggetto tabs usavano full page URL in `hx-get`
+- **Fix:** separato base_url da query_string nella macro; creata route partial `/soggetti/{id}/tab/{name}`
+- **Test:** `test_no_double_sidebar_on_any_page`, `test_htmx_partials_are_not_full_pages`
+
+### BUG-FIXED-002: Bandi list full-screen (perde navigazione)
+- **Pagina:** `/bandi`
+- **Causa:** `hx-boost="true"` su body inviava `HX-Request` header; la route restituiva il partial invece della full page
+- **Fix:** check `HX-Target == "bandi-table"` instead of `HX-Request`
+- **Test:** `test_bandi_list_loads`, `test_no_double_sidebar_on_any_page`
+
+### BUG-FIXED-003: Bando testo mostra HTML grezzo
+- **Pagina:** `/bandi/53` tab Testo
+- **Causa:** `raw_text` contiene HTML della pagina sorgente, mostrato in `<pre>` senza pulizia
+- **Fix:** filtro Jinja2 `clean_html` (rimuove script/style/tags), toggle "Mostra sorgente"
+- **Test:** `test_bando_testo_no_raw_html_tags`, `test_bando_testo_toggle_source`
+
+### BUG-FIXED-004: JSON illeggibile nel profilo progetto
+- **Pagina:** `/progetti/1` tab Profilo
+- **Causa:** `| tojson` produceva JSON compatto su una riga
+- **Fix:** `| tojson(indent=2)` + textarea rows aumentati
+- **Test:** `test_progetto_profilo_json_formatted`
+
+### BUG-FIXED-005: Soggetto tipo sempre "reale"
+- **Pagina:** `/soggetti` → Nuovo dalla tab Simulazioni
+- **Causa:** form non passava `tipo`; route ignorava contesto tab attiva
+- **Fix:** query param `?tipo=simulazione`, hidden input nel form, route legge tipo
+- **Test:** `test_soggetto_form_simulazione`, `test_soggetti_nuovo_from_simulazioni_tab`
+
+### BUG-FIXED-006: hx-boost non passa query params su link JS-modificati
+- **Pagina:** `/soggetti` → click "Nuovo" dopo switch tab
+- **Causa:** hx-boost intercetta click su `<a>` ma non rispetta href modificato via JS
+- **Fix:** `hx-boost="false"` sul bottone "Nuovo Soggetto" (forza navigazione browser)
+- **Test:** `test_soggetti_nuovo_from_simulazioni_tab`
+
+## Bug aperti
+
+_Nessuno al momento. Tutti i 39 test passano._

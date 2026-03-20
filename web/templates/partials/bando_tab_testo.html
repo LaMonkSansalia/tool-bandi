@@ -1,16 +1,31 @@
-{# Tab Testo — raw text extracted from PDF #}
+{# Tab Testo — raw text extracted from PDF/web #}
 
-<div class="space-y-4">
+<div class="space-y-4" x-data="{ showSource: false }">
   {% if bando.raw_text %}
-  <div class="prose prose-sm max-w-none">
-    <div class="bg-gray-50 rounded-lg p-5 border border-gray-200 max-h-[600px] overflow-y-auto">
-      <pre class="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed">{{ bando.raw_text }}</pre>
-    </div>
+  <div class="flex items-center justify-between">
+    <p class="text-xs text-gray-400">
+      {{ bando.raw_text | length }} caratteri
+      {% if bando.portale %} — Fonte: {{ bando.portale }}{% endif %}
+    </p>
+    <button @click="showSource = !showSource" type="button"
+            class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
+      </svg>
+      <span x-text="showSource ? 'Mostra testo' : 'Mostra sorgente'"></span>
+    </button>
   </div>
-  <p class="text-xs text-gray-400">
-    {{ bando.raw_text | length }} caratteri estratti
-    {% if bando.portale %} — Fonte: {{ bando.portale }}{% endif %}
-  </p>
+
+  {# Rendered view: strip HTML tags, show clean text #}
+  <div x-show="!showSource" class="bg-gray-50 rounded-lg p-5 border border-gray-200 max-h-[600px] overflow-y-auto">
+    <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{{ bando.raw_text | clean_html }}</div>
+  </div>
+
+  {# Source view: raw text as-is #}
+  <div x-show="showSource" x-cloak class="bg-gray-50 rounded-lg p-5 border border-gray-200 max-h-[600px] overflow-y-auto">
+    <pre class="whitespace-pre-wrap text-xs text-gray-600 font-mono leading-relaxed">{{ bando.raw_text }}</pre>
+  </div>
+
   {% else %}
   <div class="text-center py-12">
     <p class="text-sm text-gray-500">Testo non ancora estratto per questo bando.</p>

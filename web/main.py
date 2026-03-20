@@ -45,12 +45,36 @@ app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=WEB_DIR / "templates")
 
 # Register custom filters for Jinja2
+import re as _re
+from markupsafe import Markup
+
 from web.services.display import format_budget, giorni_label, score_meta
 templates.env.filters["format_budget"] = format_budget
 templates.env.filters["giorni_label"] = lambda g: giorni_label(g)[0]
 templates.env.filters["giorni_css"] = lambda g: giorni_label(g)[1]
 templates.env.filters["score_display"] = lambda s: score_meta(s)[0]
 templates.env.filters["score_css"] = lambda s: score_meta(s)[1]
+
+
+def _clean_html(text: str) -> str:
+    """Strip HTML tags including <script>/<style> content, collapse whitespace."""
+    if not text:
+        return ""
+    # Remove <script> and <style> blocks with content
+    text = _re.sub(r"<(script|style)[^>]*>.*?</\1>", "", text, flags=_re.DOTALL | _re.IGNORECASE)
+    # Remove HTML tags
+    text = _re.sub(r"<[^>]+>", " ", text)
+    # Decode common HTML entities
+    text = text.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+    text = text.replace("&quot;", '"').replace("&#34;", '"').replace("&nbsp;", " ")
+    # Collapse multiple spaces/tabs on same line
+    text = _re.sub(r"[^\S\n]+", " ", text)
+    # Collapse 3+ newlines into 2
+    text = _re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+templates.env.filters["clean_html"] = _clean_html
 
 
 # ── Include routers ──────────────────────────────────────────────────────────

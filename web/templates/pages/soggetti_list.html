@@ -5,7 +5,8 @@
 
 {% block page_actions %}
 <div class="ml-auto">
-  <a href="/soggetti/nuovo"
+  <a id="btn-nuovo-soggetto" hx-boost="false"
+     href="/soggetti/nuovo{% if active_tab == 'simulazioni' %}?tipo=simulazione{% endif %}"
      class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -120,6 +121,9 @@ function showTab(tab) {
   document.getElementById('tab-btn-simulazioni').classList.toggle('text-blue-600', tab === 'simulazioni');
   document.getElementById('tab-btn-simulazioni').classList.toggle('border-transparent', tab !== 'simulazioni');
   document.getElementById('tab-btn-simulazioni').classList.toggle('text-gray-500', tab !== 'simulazioni');
+  // Update "Nuovo Soggetto" link based on active tab
+  var btn = document.getElementById('btn-nuovo-soggetto');
+  if (btn) btn.href = tab === 'simulazioni' ? '/soggetti/nuovo?tipo=simulazione' : '/soggetti/nuovo';
 }
 </script>
 {% endblock %}

@@ -101,18 +101,18 @@
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Partner (JSON)</label>
-            <textarea name="partner_json" rows="3"
-                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.partner | tojson }}</textarea>
+            <textarea name="partner_json" rows="6"
+                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.partner | tojson(indent=2) }}</textarea>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Piano di lavoro (JSON, min 2 fasi)</label>
-            <textarea name="piano_lavoro_json" rows="3"
-                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.piano_lavoro | tojson }}</textarea>
+            <textarea name="piano_lavoro_json" rows="6"
+                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.piano_lavoro | tojson(indent=2) }}</textarea>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">KPI (JSON, min 2)</label>
-            <textarea name="kpi_json" rows="3"
-                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.kpi | tojson }}</textarea>
+            <textarea name="kpi_json" rows="6"
+                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.kpi | tojson(indent=2) }}</textarea>
           </div>
         </div>
       </div>
@@ -162,8 +162,8 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Documenti di supporto (JSON)</label>
-            <textarea name="documenti_supporto_json" rows="2"
-                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.documenti_supporto | tojson }}</textarea>
+            <textarea name="documenti_supporto_json" rows="4"
+                      class="w-full rounded-lg border-gray-300 text-sm font-mono text-xs">{{ profilo.documenti_supporto | tojson(indent=2) }}</textarea>
           </div>
         </div>
       </div>

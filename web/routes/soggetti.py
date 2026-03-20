@@ -100,12 +100,16 @@ def soggetti_list(request: Request, conn=Depends(get_db)):
 def soggetto_new(request: Request, conn=Depends(get_db)):
     """Form creazione nuovo soggetto."""
     nav = get_nav_context(request, conn)
+    tipo = request.query_params.get("tipo", "reale")
+    if tipo not in ("reale", "simulazione"):
+        tipo = "reale"
     return templates.TemplateResponse("pages/soggetto_form.html", {
         "request": request,
         **nav,
         "active_page": "soggetti",
         "soggetto": None,
         "mode": "create",
+        "tipo": tipo,
     })
 
 
@@ -121,6 +125,7 @@ def soggetto_create(
     dipendenti: str = Form("0"),
     fatturato: str = Form(""),
     anno_costituzione: str = Form(""),
+    tipo: str = Form("reale"),
     conn=Depends(get_db),
 ):
     """Crea nuovo soggetto."""
@@ -129,9 +134,11 @@ def soggetto_create(
         return RedirectResponse(url="/soggetti", status_code=303)
 
     slug = re.sub(r"[^a-z0-9]+", "-", nome.lower()).strip("-")
+    if tipo not in ("reale", "simulazione"):
+        tipo = "reale"
 
     profilo = {
-        "tipo": "reale",
+        "tipo": tipo,
         "ateco": ateco.strip(),
         "sede": sede.strip(),
         "piva": piva.strip(),
