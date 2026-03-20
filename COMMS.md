@@ -13,10 +13,19 @@
 
 ---
 
-## Current Status — 2026-03-20 (v0.8.2-dev)
+## Current Status — 2026-03-20 (v0.8.3-dev)
 
-**Phase:** v0.8.2-dev — Sidebar doppia fixata definitivamente
+**Phase:** v0.8.3-dev — Deploy & stabilizzazione
 **Stato:** 15 bug risolti totali, 0 aperti. 29/29 smoke test.
+
+[COMPLETATO] 2026-03-20 — Task 1: Test e2e reattivita' dati:
+  - Verificato: soggetto save → rivaluta_progetto() in background thread (soggetti.py:318-348)
+  - Verificato: profilo save → rivaluta_progetto() in background thread (progetti.py:459-467)
+  - Verificato: scoring save → rivaluta_progetto() in background thread (progetti.py:500-504)
+  - Verificato: qualifica_match handler registrato in configurable_scorer.py:126-159
+  - Verificato: qualifica_match rule presente in tutti e 3 i template scoring (ICT, Turismo, E-commerce)
+  - 29/29 smoke test verdi
+  - Prossimi passi: Task 2 (prerequisiti deploy)
 
 [COMPLETATO] 2026-03-20 — Fix generico sidebar doppia:
   - Decisione: middleware `HTMXLayoutMiddleware` come fix generico — rileva e stripa layout da risposte partial

@@ -1,6 +1,6 @@
 # Tool Bandi — Contesto & Status
 
-**Versione:** 0.8.1-dev
+**Versione:** 0.8.3-dev
 **Ultimo aggiornamento:** 2026-03-20
 **Repo:** GitHub — LaMonkSansalia/tool-bandi (rinominato da bandiresearcher il 2026-03-20)
 **Inizio progetto:** 2026-03-02
@@ -471,6 +471,15 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 - [x] 20 test Playwright end-to-end in `tests/test_functional.py`
 - [x] Copertura: navigazione (3), progetti (6), bandi (2), soggetti (3), candidature (1), pipeline (2), integrita' globale (3)
 - [x] Report console + BUGS.md append automatico + screenshot
+
+### v0.8.3-dev — Deploy & Stabilizzazione (2026-03-20)
+
+#### Task 1: Test e2e reattivita' dati — VERIFICATO
+- [x] Soggetto save → rivaluta_progetto() in background thread (soggetti.py:318-348)
+- [x] Profilo save → rivaluta_progetto() in background thread (progetti.py:459-467)
+- [x] Scoring save → rivaluta_progetto() in background thread (progetti.py:500-504)
+- [x] qualifica_match handler registrato in configurable_scorer.py e presente in 3 template scoring
+- [x] 29/29 smoke test verdi
 
 ### v0.8.2-dev — Fix generico sidebar doppia (2026-03-20)
 
