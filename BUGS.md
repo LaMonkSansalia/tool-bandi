@@ -75,6 +75,11 @@
 - **Fix:** dopo save, query progetti del soggetto + `rivaluta_progetto()` in background thread per ciascuno
 - **Commit:** `85db886`
 
+### BUG-FIXED-012: Qualifiche soggetto decorative (BUG-LOGIC-002)
+- **Causa:** `qualifica_match` handler esisteva in configurable_scorer.py ma i 3 template di scoring non lo includevano
+- **Fix:** aggiunto `qualifica_match` rule a ICT/Freelancer, Turismo/Cultura, E-commerce/PMI
+- **Commit:** `361fe2d`
+
 ## Bug aperti
 
 _Nessuno al momento. 29 smoke test passano._
