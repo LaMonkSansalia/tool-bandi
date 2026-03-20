@@ -9,9 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Install Python deps
-COPY engine/requirements.txt requirements-engine.txt
-COPY requirements-web.txt requirements-web.txt
-RUN pip install --no-cache-dir -r requirements-engine.txt -r requirements-web.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application
 COPY engine/ engine/

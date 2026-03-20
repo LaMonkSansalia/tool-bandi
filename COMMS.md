@@ -18,6 +18,13 @@
 **Phase:** v0.8.3-dev — Deploy & stabilizzazione
 **Stato:** 15 bug risolti totali, 0 aperti. 29/29 smoke test.
 
+[COMPLETATO] 2026-03-20 — Task 2: Prerequisiti deploy:
+  - Dockerfile fixato: usa requirements.txt consolidato (non split)
+  - docker-compose.yml: env_file .env, migrations volume mount aggiunto
+  - .env.example creato a root con tutte le variabili
+  - Nota: tool-bandi-ui (Django) era gia' deployato su parco-giuochi — infrastruttura (npm_default, SSL, proxy NPM) gia' configurata
+  - Prossimi passi: Task 3 (deploy.sh, auth, aggiornamento container)
+
 [COMPLETATO] 2026-03-20 — Task 1: Test e2e reattivita' dati:
   - Verificato: soggetto save → rivaluta_progetto() in background thread (soggetti.py:318-348)
   - Verificato: profilo save → rivaluta_progetto() in background thread (progetti.py:459-467)

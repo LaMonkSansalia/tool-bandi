@@ -474,6 +474,13 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 
 ### v0.8.3-dev — Deploy & Stabilizzazione (2026-03-20)
 
+#### Task 2: Prerequisiti deploy — FIXATI
+- [x] Dockerfile: fix requirements (da split a consolidato), python:3.12-slim, non-root
+- [x] docker-compose.yml: env_file .env (non engine/.env), migrations volume mount
+- [x] .env.example: creato a root con tutte le variabili (DB, auth, API, thresholds)
+- [x] requirements.txt: 17 dipendenze pinnate (verificato)
+- [x] Migrazioni: 001-012 + 014 presenti, 013 TODO (non bloccante)
+
 #### Task 1: Test e2e reattivita' dati — VERIFICATO
 - [x] Soggetto save → rivaluta_progetto() in background thread (soggetti.py:318-348)
 - [x] Profilo save → rivaluta_progetto() in background thread (progetti.py:459-467)
