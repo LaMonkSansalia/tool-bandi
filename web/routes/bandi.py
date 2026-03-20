@@ -182,8 +182,8 @@ def bandi_list(request: Request, conn=Depends(get_db)):
         "selected_project_id": pid,
     }
 
-    # HTMX partial: return only table rows
-    if request.headers.get("HX-Request"):
+    # HTMX partial: return only table rows (but not for hx-boost navigation)
+    if request.headers.get("HX-Target") == "bandi-table":
         return templates.TemplateResponse("partials/bandi_table_rows.html", ctx)
 
     return templates.TemplateResponse("pages/bandi_list.html", ctx)

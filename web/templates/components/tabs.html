@@ -1,11 +1,11 @@
 {# Tab component — HTMX powered #}
 
-{% macro tab_bar(tabs, active_tab, base_url) %}
+{% macro tab_bar(tabs, active_tab, base_url, query_string="") %}
 <div class="border-b border-gray-200">
   <nav class="flex gap-1 px-1" role="tablist">
     {% for key, label in tabs %}
     <button
-      hx-get="{{ base_url }}/tab/{{ key }}"
+      hx-get="{{ base_url }}/tab/{{ key }}{% if query_string %}?{{ query_string }}{% endif %}"
       hx-target="#tab-content"
       hx-swap="innerHTML"
       class="px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors

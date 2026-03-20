@@ -199,6 +199,44 @@ def soggetto_detail(request: Request, soggetto_id: int, conn=Depends(get_db)):
     })
 
 
+@router.get("/{soggetto_id}/tab/{tab_name}")
+def soggetto_tab(request: Request, soggetto_id: int, tab_name: str, conn=Depends(get_db)):
+    """HTMX: return tab content partial."""
+    s = _load_soggetto(conn, soggetto_id)
+    if not s:
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse("<p>Non trovato</p>", status_code=404)
+
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute("""
+            SELECT p.id, p.nome, p.slug, p.profilo,
+                   COUNT(pe.id) FILTER (WHERE pe.stato NOT IN ('nuovo', 'archiviato')) AS n_candidature
+            FROM projects p
+            LEFT JOIN project_evaluations pe ON pe.project_id = p.id
+            WHERE p.soggetto_id = %s AND p.attivo = TRUE
+            GROUP BY p.id
+            ORDER BY p.nome
+        """, (soggetto_id,))
+        progetti = [dict(r) for r in cur.fetchall()]
+
+    profilo = s["profilo"]
+    ctx = {
+        "request": request,
+        "soggetto": s,
+        "progetti": progetti,
+        "hard_stops": profilo.get("hard_stops", []),
+        "vantaggi": profilo.get("vantaggi", []),
+    }
+
+    tab_map = {
+        "anagrafica": "partials/soggetto_tab_anagrafica.html",
+        "vincoli": "partials/soggetto_tab_vincoli.html",
+        "progetti": "partials/soggetto_tab_progetti.html",
+    }
+    tpl = tab_map.get(tab_name, "partials/soggetto_tab_anagrafica.html")
+    return templates.TemplateResponse(tpl, ctx)
+
+
 @router.post("/{soggetto_id}")
 def soggetto_update(
     request: Request,

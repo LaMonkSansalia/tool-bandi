@@ -64,7 +64,8 @@
   {{ tab_bar(
     [("decisione", "Decisione 60s"), ("dettaglio", "Dettaglio"), ("testo", "Testo")],
     active_tab,
-    "/bandi/" ~ bando.bando_id ~ "?project_id=" ~ selected_project_id
+    "/bandi/" ~ bando.bando_id,
+    "project_id=" ~ selected_project_id
   ) }}
   {% else %}
   {{ tab_bar(

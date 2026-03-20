@@ -1,6 +1,6 @@
 # Tool Bandi — Contesto & Status
 
-**Versione:** 0.7.1-dev
+**Versione:** 0.7.2-dev
 **Ultimo aggiornamento:** 2026-03-20
 **Repo:** GitHub — LaMonkSansalia/tool-bandi (rinominato da bandiresearcher il 2026-03-20)
 **Inizio progetto:** 2026-03-02
@@ -405,6 +405,24 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 
 #### Debito tecnico
 - [x] D10: **Documentato**, non implementato. State machine usa project_evaluations con vecchi stati (idoneo→lavorazione→pronto→inviato). Spec prevede tabella candidatura separata con nuovi stati (bozza→lavorazione→sospesa→pronta→inviata→abbandonata). Piano migrazione documentato in state_machine.py. Migration 011 creata ma non deployata.
+
+---
+
+### Consolidamento repo (2026-03-20)
+
+- Repo GitHub `bandiresearcher` rinominato → `tool-bandi`
+- Repo GitHub `tool-bandi` (Django) rinominato → `tool-bandi-ui-archived` e archiviato
+- Spec, mockup, screenshot copiati in `context/spec/` prima dell'archiviazione
+- Cartella locale `tool-bandi-ui/` spostata in `_archivio/`
+- `requirements.txt` pinnato con 17 dipendenze dirette
+- venv consolidato (venv_new promosso, shebangs fixati, pango installato)
+
+### Primo avvio locale (2026-03-20)
+
+- Commit `f0b0fbd`: 2 fix, 26/26 route rispondono 200
+- Fix 1: `dashboard.py` — `soggetti.tipo` → `profilo->>'tipo'` (migration 013 non deployata)
+- Fix 2: `documenti.py` — `_table_exists()` guard per `documento_candidatura` (migration 012 non deployata, fallback a lista vuota)
+- Avvio: `venv/bin/uvicorn web.main:app --reload --port 8000`
 
 ---
 
