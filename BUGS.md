@@ -69,6 +69,12 @@
 - **Fix:** aggiunto tipo_investimento al handler; fix default costituita a `Form("")`; aggiunto zone_speciali multi-checkbox + getlist()
 - **Commit:** `d7e7fe6`
 
+### BUG-FIXED-011: Soggetto save non rivaluta hard stops (BUG-LOGIC-001)
+- **Pagina:** `/soggetti/{id}`
+- **Causa:** salvataggio soggetto aggiornava DB ma non ricalcolava hard stops / score sui progetti associati
+- **Fix:** dopo save, query progetti del soggetto + `rivaluta_progetto()` in background thread per ciascuno
+- **Commit:** `85db886`
+
 ## Bug aperti
 
 _Nessuno al momento. 29 smoke test passano._
