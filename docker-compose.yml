@@ -1,16 +1,19 @@
+# tool-bandi — FastAPI web UI
+# NPM target: bandi_ui:8000 (same container name as old Django for NPM compat)
+# DB volume: bandi-ui_pgdata (reused from Django deployment)
+
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: bandi_web
+    container_name: bandi_ui
     restart: unless-stopped
     env_file: .env
     depends_on:
       db:
         condition: service_healthy
     networks: [npm_default, internal]
-    # NPM proxy -> bandi_web:8000
 
   db:
     image: pgvector/pgvector:pg16
@@ -20,7 +23,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-bandi_db}
       POSTGRES_USER: ${DB_USER:-bandi}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-bandi}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD obbligatoria in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./engine/db/migrations:/migrations:ro
@@ -35,6 +38,8 @@ services:
 
 volumes:
   pgdata:
+    external: true
+    name: bandi-ui_pgdata
 
 networks:
   npm_default:
