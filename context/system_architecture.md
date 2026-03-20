@@ -1,8 +1,8 @@
 # System Architecture — Tool Bandi
 
-**Version:** 0.7.1-dev — FastAPI rebuild + riallineamento spec
+**Version:** 0.8.0-dev — hard stops estesi, completezza 3 livelli, qualifica scorer
 **Date:** 2026-03-20
-**Precedente:** 0.6.0 — Soggetti/Progetti split + Django UI (ritirato)
+**Precedente:** 0.7.1-dev — FastAPI rebuild + riallineamento spec
 **Repo:** github.com/LaMonkSansalia/tool-bandi (rinominato da bandiresearcher)
 **Scope:** Multi-project (La Monica Luciano + Paese Delle Stelle + future projects)
 **Deployment:** Local (Docker Compose) — 2 servizi: web (uvicorn) + db (pgvector)
@@ -25,7 +25,7 @@ Engine Python chiamato direttamente dalle route (zero serializzazione).
 **Stack:** FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind CSS (CDN)
 **Spec UI/UX:** `context/spec/tool-bandi-spec (1).md` (autorita')
 **Mockup:** `context/spec/tool-bandi-mockup.jsx` (riferimento design)
-**Requisiti UI (storico):** `context/ui_requirements.md`
+**Requisiti UI (storico):** `context/_archivio/ui_requirements.md (STORICO)`
 
 ### Routing nuovo
 
@@ -468,7 +468,7 @@ pages/
 ```
 
 Sostituito da `tool-bandi-ui/` con routing dedicato per pagina.
-Vedere `context/ui_requirements.md` per i requisiti completi.
+Vedere `context/_archivio/ui_requirements.md (STORICO)` per i requisiti completi.
 
 ---
 

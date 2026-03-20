@@ -60,3 +60,5 @@ service-account*.json
 # AI context
 .ai/
 .claude/
+*.png
+example.txt
