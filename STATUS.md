@@ -1,6 +1,6 @@
 # Tool Bandi — Contesto & Status
 
-**Versione:** 0.7.2-dev
+**Versione:** 0.8.0-dev
 **Ultimo aggiornamento:** 2026-03-20
 **Repo:** GitHub — LaMonkSansalia/tool-bandi (rinominato da bandiresearcher il 2026-03-20)
 **Inizio progetto:** 2026-03-02
@@ -423,6 +423,30 @@ Engine Python chiamato direttamente dalle route FastAPI (zero serializzazione).
 - Fix 1: `dashboard.py` — `soggetti.tipo` → `profilo->>'tipo'` (migration 013 non deployata)
 - Fix 2: `documenti.py` — `_table_exists()` guard per `documento_candidatura` (migration 012 non deployata, fallback a lista vuota)
 - Avvio: `venv/bin/uvicorn web.main:app --reload --port 8000`
+
+---
+
+### v0.7.2-dev — Bug fix UI + Test suite (2026-03-20)
+
+- [x] 6 bug fix UI: sidebar doppia, bandi list rotto, raw HTML nel tab testo, JSON non formattato, hx-boost su link JS, soggetti tipo non propagato
+- [x] Test suite automatica: 29 smoke test (httpx) + 10 browser test (Playwright)
+- [x] Custom Jinja2 filter `clean_html` per strip HTML/script/style
+- [x] `| tojson(indent=2)` per JSON leggibile nei textarea
+- [x] `hx-boost="false"` su link con href modificato da JS
+- [x] BUGS.md tracker (6 bug risolti)
+
+### v0.8.0-dev — Espansione forma giuridica, regimi, qualifiche (2026-03-20)
+
+- [x] Costanti centralizzate in `completezza.py`:
+  - FORME_GIURIDICHE: 16 forme (da 10) — aggiunto libero_professionista, srls, spa, sapa, cooperativa_sociale, aps, odv, rete_impresa
+  - REGIMI_FISCALI: 5 regimi (da 3) — aggiunto agricolo, non_profit
+  - QUALIFICHE_SOGGETTO: 6 qualifiche (NUOVO) — startup_innovativa, pmi_innovativa, impresa_sociale, societa_benefit, impresa_femminile, impresa_giovanile
+  - COFINANZIAMENTO_FONTI: 8 fonti (da 5) — ristrutturato con fonti reali
+  - ZONE_SPECIALI_OPTIONS: 6 zone (da 4) — aggiunto ZES Unica, ZLS, isola_minore, cratere_sismico
+- [x] Engine `_FORMA_GIURIDICA_MAP` espanso (25+ entry con legacy aliases) in `rules.py`
+- [x] Template soggetto (create + edit): dropdown da costanti centralizzate, checkbox qualifiche
+- [x] Route soggetti: async per leggere qualifiche multi-valore, salvate in profilo JSONB
+- [x] 29/29 smoke test verdi post-modifica
 
 ---
 
