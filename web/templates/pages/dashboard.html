@@ -102,4 +102,121 @@
   </div>
   {% endif %}
 </div>
+
+{# ── Row 3: Candidature per stato + Nuovi bandi | Progetti incompleti + Hard stop ─ #}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+  {# Left column #}
+  <div class="space-y-6">
+    {# Candidature per stato #}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <h3 class="text-base font-semibold text-gray-900 mb-4">Candidature per stato</h3>
+      {% if candidature_per_stato %}
+      <div class="flex flex-wrap gap-3">
+        {% set stato_colors = {"idoneo": "blue", "lavorazione": "amber", "pronto": "green", "inviato": "indigo", "rifiutato": "red"} %}
+        {% for stato, n in candidature_per_stato.items() %}
+        {% set color = stato_colors.get(stato, "gray") %}
+        <a href="/candidature?stato={{ stato }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+          <span class="w-2.5 h-2.5 rounded-full bg-{{ color }}-500"></span>
+          <span class="text-sm font-medium text-gray-900">{{ n }}</span>
+          <span class="text-xs text-gray-500">{{ stato|replace('_', ' ')|title }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-400">Nessuna candidatura attiva</p>
+      {% endif %}
+    </div>
+
+    {# Nuovi bandi #}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-semibold text-gray-900">Ultimi bandi trovati</h3>
+        <a href="/bandi" class="text-xs text-blue-600 hover:text-blue-700">Vedi tutti &rarr;</a>
+      </div>
+      {% if nuovi_bandi %}
+      <div class="space-y-2">
+        {% for b in nuovi_bandi[:5] %}
+        <a href="/bandi/{{ b.id }}" class="block p-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors">
+          <p class="text-sm text-gray-900 truncate">{{ b.titolo[:70] }}{% if b.titolo|length > 70 %}...{% endif %}</p>
+          <p class="text-xs text-gray-400 mt-0.5">{{ b.ente_erogatore or '—' }} · {{ b.created_at.strftime('%d/%m') if b.created_at else '' }}</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-400">Nessun bando</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Right column #}
+  <div class="space-y-6">
+    {# Progetti incompleti #}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <h3 class="text-base font-semibold text-gray-900 mb-4">Progetti incompleti</h3>
+      {% if progetti_incompleti %}
+      <div class="space-y-3">
+        {% for p in progetti_incompleti %}
+        <a href="/progetti/{{ p.id }}?tab=profilo" class="block">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-sm text-gray-900">{{ p.nome }}</span>
+            <span class="text-xs font-medium {% if p.completezza_pct >= 40 %}text-yellow-600{% else %}text-red-600{% endif %}">{{ p.completezza_pct }}%</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-1.5">
+            <div class="h-1.5 rounded-full {% if p.completezza_pct >= 40 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
+                 style="width: {{ p.completezza_pct }}%"></div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-400">Tutti i progetti sono completi</p>
+      {% endif %}
+    </div>
+
+    {# Hard stop piu' impattanti #}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <h3 class="text-base font-semibold text-gray-900 mb-4">Hard stop piu' impattanti</h3>
+      {% if hard_stops_top %}
+      <div class="space-y-2">
+        {% for hs in hard_stops_top %}
+        <div class="flex items-center justify-between py-1.5">
+          <span class="text-sm text-gray-700 truncate flex-1 mr-3">{{ hs.label }}</span>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold bg-red-50 text-red-700">{{ hs.bandi_bloccati }}</span>
+            <span class="text-xs text-gray-400">bandi</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-400">Nessun hard stop rilevato</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{# ── Row 4: Timeline attivita' ─────────────────────────────────────────── #}
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm mt-6">
+  <div class="px-5 py-4 border-b border-gray-100">
+    <h3 class="text-base font-semibold text-gray-900">Timeline attivita'</h3>
+    <p class="text-sm text-gray-500">Ultime valutazioni e aggiornamenti</p>
+  </div>
+  {% if timeline %}
+  <div class="px-5 py-4 space-y-3">
+    {% for ev in timeline %}
+    <div class="flex items-start gap-3">
+      <div class="mt-1.5 w-2 h-2 rounded-full shrink-0 {% if 'idoneo' in ev.descrizione %}bg-green-500{% elif 'lavorazione' in ev.descrizione %}bg-amber-500{% elif 'pronto' in ev.descrizione %}bg-blue-500{% else %}bg-gray-400{% endif %}"></div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm text-gray-700">{{ ev.descrizione }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">{{ ev.data }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="px-5 py-8 text-center">
+    <p class="text-sm text-gray-400">Nessuna attivita' registrata</p>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

@@ -42,13 +42,16 @@ def soggetti_list(request: Request, conn=Depends(get_db)):
     nav = get_nav_context(request, conn)
 
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        # All soggetti with project count
+        # All soggetti with project count + hard stop stats
         cur.execute("""
             SELECT s.id, s.slug, s.nome, s.forma_giuridica, s.regime_fiscale,
                    s.profilo, s.attivo,
-                   COUNT(p.id) AS n_progetti
+                   COUNT(DISTINCT p.id) AS n_progetti,
+                   COUNT(DISTINCT CASE WHEN pe.hard_stop_reason IS NOT NULL AND pe.hard_stop_reason != '' THEN pe.id END) AS n_hard_stops,
+                   COUNT(DISTINCT CASE WHEN pe.hard_stop_reason IS NOT NULL AND pe.hard_stop_reason != '' THEN pe.bando_id END) AS n_bandi_bloccati
             FROM soggetti s
             LEFT JOIN projects p ON p.soggetto_id = s.id AND p.attivo = TRUE
+            LEFT JOIN project_evaluations pe ON pe.project_id = p.id
             GROUP BY s.id
             ORDER BY s.nome
         """)

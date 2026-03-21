@@ -21,6 +21,26 @@ from web.services.completezza import (
 
 router = APIRouter(prefix="/progetti")
 
+SCORING_RULES_TEMPLATE = {
+    "rules": [
+        {"name": "Regione target", "type": "region_match", "points": 15, "config": {"regions": ["sicilia"]}},
+        {"name": "ATECO compatibile", "type": "ateco_match", "points": 10, "config": {}},
+        {"name": "Keyword nel titolo", "type": "keyword_in_title", "points": 10, "config": {"keywords": []}},
+        {"name": "Keyword + profilo", "type": "keyword_and_profile", "points": 15, "config": {"keywords": []}},
+        {"name": "Importo minimo", "type": "importo_min", "points": 10, "config": {"min_amount": 10000}},
+        {"name": "Beneficiario match", "type": "beneficiary_match", "points": 15, "config": {}},
+        {"name": "No certificazioni richieste", "type": "no_certifications_required", "points": 5, "config": {}},
+        {"name": "Eta' impresa", "type": "company_age", "points": 10, "config": {"min_years": 0, "max_years": 99}},
+    ]
+}
+
+
+def _scoring_json_for_display(scoring_raw: dict) -> str:
+    """Return scoring JSON for the textarea. Pre-fill with template if empty."""
+    if not scoring_raw or scoring_raw == {}:
+        return json.dumps(SCORING_RULES_TEMPLATE, indent=2, ensure_ascii=False)
+    return json.dumps(scoring_raw, indent=2, ensure_ascii=False)
+
 
 def _load_opportunita(conn, pk: int) -> tuple[list, dict]:
     """Load bandi valutati per un progetto + stats rapide."""
@@ -70,6 +90,36 @@ def _load_project(conn, pk: int) -> dict | None:
     return dict(row)
 
 
+def _load_timeline(conn, pk: int) -> list[dict]:
+    """Load recent evaluation events for a project as timeline entries."""
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute("""
+            SELECT pe.stato, pe.score, pe.updated_at,
+                   b.titolo
+            FROM project_evaluations pe
+            JOIN bandi b ON pe.bando_id = b.id
+            WHERE pe.project_id = %s
+              AND pe.updated_at IS NOT NULL
+            ORDER BY pe.updated_at DESC
+            LIMIT 15
+        """, (pk,))
+        rows = cur.fetchall()
+
+    timeline = []
+    for r in rows:
+        dt = r["updated_at"]
+        data_str = dt.strftime("%d/%m/%Y %H:%M") if dt else ""
+        titolo_short = (r["titolo"] or "")[:50]
+        if len(r["titolo"] or "") > 50:
+            titolo_short += "..."
+        timeline.append({
+            "tipo": "valutazione",
+            "descrizione": f"Valutazione → {r['stato']} (score: {r['score'] or '—'}) — {titolo_short}",
+            "data": data_str,
+        })
+    return timeline
+
+
 @router.get("")
 def progetti_list(request: Request, conn=Depends(get_db)):
     """Lista progetti raggruppata per soggetto."""
@@ -80,7 +130,9 @@ def progetti_list(request: Request, conn=Depends(get_db)):
         cur.execute("""
             SELECT p.id, p.nome, p.slug, p.profilo, p.soggetto_id,
                    s.nome AS soggetto_nome,
-                   COUNT(pe.id) FILTER (WHERE pe.stato NOT IN ('nuovo', 'archiviato')) AS n_candidature
+                   COUNT(pe.id) FILTER (WHERE pe.stato NOT IN ('nuovo', 'archiviato')) AS n_candidature,
+                   ROUND(AVG(pe.score) FILTER (WHERE pe.score IS NOT NULL AND pe.stato NOT IN ('nuovo', 'archiviato')))::int AS score_medio,
+                   COUNT(pe.id) FILTER (WHERE pe.stato = 'idoneo') AS n_bandi_match
             FROM projects p
             LEFT JOIN soggetti s ON s.id = p.soggetto_id
             LEFT JOIN project_evaluations pe ON pe.project_id = p.id
@@ -105,9 +157,11 @@ def progetti_list(request: Request, conn=Depends(get_db)):
             "slug": p["slug"],
             "soggetto_id": p["soggetto_id"],
             "soggetto_nome": p["soggetto_nome"] or "Nessun soggetto",
-            "settore_label": settori_map.get(settore, ""),
+            "settore_label": settori_map.get(settore, settore.replace("_", " ").title() if settore else ""),
             "n_candidature": p["n_candidature"] or 0,
             "completezza_pct": completezza_pct,
+            "score_medio": p["score_medio"],
+            "n_bandi_match": p["n_bandi_match"] or 0,
         })
 
     # Group by soggetto
@@ -176,7 +230,7 @@ def progetto_detail(request: Request, pk: int, conn=Depends(get_db)):
     scoring_raw = proj["scoring_rules"] or {}
     if isinstance(scoring_raw, str):
         scoring_raw = json.loads(scoring_raw)
-    scoring_json = json.dumps(scoring_raw, indent=2, ensure_ascii=False)
+    scoring_json = _scoring_json_for_display(scoring_raw)
 
     # Gap analysis aggregata
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -224,6 +278,9 @@ def progetto_detail(request: Request, pk: int, conn=Depends(get_db)):
         """, (pk,))
         candidature_stats = {r["stato"]: r["n"] for r in cur.fetchall()}
 
+    # Timeline attivita'
+    timeline = _load_timeline(conn, pk)
+
     # Opportunità: bandi valutati per questo progetto (tab default)
     opportunita = []
     opportunita_stats = {}
@@ -249,6 +306,7 @@ def progetto_detail(request: Request, pk: int, conn=Depends(get_db)):
         "scoring_json": scoring_json,
         "gap_rows": gap_rows,
         "candidature_stats": candidature_stats,
+        "timeline": timeline,
         "opportunita": opportunita,
         "opportunita_stats": opportunita_stats,
         "active_tab": active_tab,
@@ -291,7 +349,7 @@ def progetto_tab(request: Request, pk: int, tab_name: str, conn=Depends(get_db))
     scoring_raw = proj["scoring_rules"] or {}
     if isinstance(scoring_raw, str):
         scoring_raw = json.loads(scoring_raw)
-    scoring_json = json.dumps(scoring_raw, indent=2, ensure_ascii=False)
+    scoring_json = _scoring_json_for_display(scoring_raw)
 
     gap_rows = []
     if tab_name == "analisi":
@@ -353,6 +411,7 @@ def progetto_tab(request: Request, pk: int, tab_name: str, conn=Depends(get_db))
         "scoring_json": scoring_json,
         "gap_rows": gap_rows,
         "candidature_stats": candidature_stats,
+        "timeline": _load_timeline(conn, pk) if tab_name == "analisi" else [],
         "SETTORI": SETTORI,
         "COFINANZIAMENTO_FONTI": COFINANZIAMENTO_FONTI,
         "ZONE_SPECIALI_OPTIONS": ZONE_SPECIALI_OPTIONS,

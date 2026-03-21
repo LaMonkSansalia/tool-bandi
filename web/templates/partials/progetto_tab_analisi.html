@@ -67,7 +67,7 @@
     {% endif %}
   </div>
 
-  {# Completezza + Scoring Rules summary #}
+  {# Completezza + Soggetto #}
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-white rounded-xl border border-gray-200 p-5">
       <h3 class="text-sm font-semibold text-gray-900 mb-3">Completezza Profilo</h3>
@@ -99,5 +99,39 @@
       <p class="text-sm text-gray-400">Nessun soggetto associato</p>
       {% endif %}
     </div>
+  </div>
+
+  {# Timeline Attivita' #}
+  <div class="bg-white rounded-xl border border-gray-200 p-5">
+    <h3 class="text-sm font-semibold text-gray-900 mb-1">Timeline Attivita'</h3>
+    <p class="text-xs text-gray-500 mb-4">Ultime attivita' relative a questo progetto.</p>
+    {% if timeline %}
+    <div class="space-y-3">
+      {% for ev in timeline %}
+      <div class="flex items-start gap-3">
+        <div class="mt-1 w-2 h-2 rounded-full shrink-0 {% if ev.tipo == 'valutazione' %}bg-blue-500{% elif ev.tipo == 'stato' %}bg-amber-500{% elif ev.tipo == 'scansione' %}bg-green-500{% else %}bg-gray-400{% endif %}"></div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm text-gray-900">{{ ev.descrizione }}</p>
+          <p class="text-xs text-gray-400 mt-0.5">{{ ev.data }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-400 py-4 text-center">Nessuna attivita' registrata</p>
+    {% endif %}
+  </div>
+
+  {# Note Strategiche #}
+  <div class="bg-white rounded-xl border border-gray-200 p-5">
+    <h3 class="text-sm font-semibold text-gray-900 mb-1">Note Strategiche</h3>
+    <p class="text-xs text-gray-500 mb-4">Annotazioni e considerazioni strategiche per questo progetto.</p>
+    {% if profilo.get('note_strategiche') %}
+    <div class="prose prose-sm max-w-none text-gray-700">
+      {{ profilo.note_strategiche }}
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-400 py-4 text-center">Nessuna nota strategica. Aggiungi note nel tab Profilo.</p>
+    {% endif %}
   </div>
 </div>

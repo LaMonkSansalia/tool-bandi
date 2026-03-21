@@ -66,7 +66,23 @@
           </p>
         </div>
 
-        <div class="flex items-center gap-6 shrink-0 ml-4">
+        <div class="flex items-center gap-5 shrink-0 ml-4">
+          {# Score medio #}
+          <div class="text-center w-14">
+            <p class="text-xs text-gray-400">Score</p>
+            {% if p.score_medio is not none %}
+            <p class="text-sm font-bold {% if p.score_medio >= 70 %}text-green-600{% elif p.score_medio >= 40 %}text-yellow-600{% else %}text-gray-500{% endif %}">{{ p.score_medio }}</p>
+            {% else %}
+            <p class="text-sm text-gray-300">—</p>
+            {% endif %}
+          </div>
+
+          {# Bandi match #}
+          <div class="text-center w-14">
+            <p class="text-xs text-gray-400">Match</p>
+            <p class="text-sm font-semibold {% if p.n_bandi_match > 0 %}text-blue-600{% else %}text-gray-300{% endif %}">{{ p.n_bandi_match }}</p>
+          </div>
+
           {# Completezza bar #}
           <div class="w-32">
             <div class="flex items-center justify-between text-xs mb-1">

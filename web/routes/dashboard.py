@@ -1,13 +1,16 @@
 """
-Dashboard route — 4 stat cards + scadenze imminenti.
+Dashboard route — stat cards + scadenze imminenti + blocchi aggiuntivi §5.1.
 Ported from tool-bandi-ui/apps/core/views.py
 """
+import json
+
 from fastapi import APIRouter, Depends, Request
 from psycopg2.extras import RealDictCursor
 
 from web.deps import get_db, get_nav_context
 from web.main import templates
 from web.services.display import enrich_bando_row
+from web.services.completezza import normalize_profilo, check_completezza
 
 router = APIRouter()
 
@@ -74,6 +77,84 @@ def dashboard(request: Request, conn=Depends(get_db)):
         """)
         count_nuovi_7gg = cur.fetchone()["n"]
 
+        # ── Blocchi aggiuntivi §5.1 ──
+
+        # Candidature per stato (tutti i progetti)
+        cur.execute("""
+            SELECT stato, COUNT(*) AS n
+            FROM project_evaluations
+            WHERE stato NOT IN ('nuovo', 'archiviato')
+            GROUP BY stato
+            ORDER BY n DESC
+        """)
+        candidature_per_stato = {r["stato"]: r["n"] for r in cur.fetchall()}
+
+        # Nuovi bandi (ultimi 10)
+        cur.execute("""
+            SELECT id, titolo, ente_erogatore, created_at
+            FROM bandi
+            ORDER BY created_at DESC
+            LIMIT 10
+        """)
+        nuovi_bandi = [dict(r) for r in cur.fetchall()]
+
+        # Progetti incompleti (completezza < 75%)
+        cur.execute("""
+            SELECT id, nome, profilo FROM projects WHERE attivo = TRUE
+        """)
+        all_projects = [dict(r) for r in cur.fetchall()]
+
+        progetti_incompleti = []
+        for p in all_projects:
+            profilo = normalize_profilo(p.get("profilo"))
+            _, _, pct = check_completezza(profilo)
+            if pct < 75:
+                progetti_incompleti.append({
+                    "id": p["id"], "nome": p["nome"], "completezza_pct": pct,
+                })
+        progetti_incompleti.sort(key=lambda x: x["completezza_pct"])
+
+        # Hard stop piu' impattanti (tutti i soggetti)
+        cur.execute("""
+            SELECT pe.hard_stop_reason AS label,
+                   COUNT(DISTINCT pe.bando_id) AS bandi_bloccati,
+                   COUNT(DISTINCT p.soggetto_id) AS soggetti_impattati
+            FROM project_evaluations pe
+            JOIN projects p ON pe.project_id = p.id
+            WHERE pe.hard_stop_reason IS NOT NULL
+              AND pe.hard_stop_reason != ''
+            GROUP BY pe.hard_stop_reason
+            ORDER BY bandi_bloccati DESC
+            LIMIT 10
+        """)
+        hard_stops_top = [dict(r) for r in cur.fetchall()]
+
+        # Timeline attivita' (ultime 15 valutazioni)
+        cur.execute("""
+            SELECT pe.stato, pe.score, pe.updated_at,
+                   b.titolo, p.nome AS progetto_nome
+            FROM project_evaluations pe
+            JOIN bandi b ON pe.bando_id = b.id
+            JOIN projects p ON pe.project_id = p.id
+            WHERE pe.updated_at IS NOT NULL
+            ORDER BY pe.updated_at DESC
+            LIMIT 15
+        """)
+        timeline_rows = cur.fetchall()
+
+    timeline = []
+    for r in timeline_rows:
+        dt = r["updated_at"]
+        data_str = dt.strftime("%d/%m/%Y %H:%M") if dt else ""
+        titolo_short = (r["titolo"] or "")[:40]
+        if len(r["titolo"] or "") > 40:
+            titolo_short += "..."
+        timeline.append({
+            "tipo": "valutazione",
+            "descrizione": f"{r['progetto_nome']} → {r['stato']} (score: {r['score'] or '—'}) — {titolo_short}",
+            "data": data_str,
+        })
+
     return templates.TemplateResponse("pages/dashboard.html", {
         "request": request,
         **nav,
@@ -87,6 +168,11 @@ def dashboard(request: Request, conn=Depends(get_db)):
         "count_soggetti": count_soggetti,
         "count_nuovi_7gg": count_nuovi_7gg,
         "scadenze": scadenze,
+        "candidature_per_stato": candidature_per_stato,
+        "nuovi_bandi": nuovi_bandi,
+        "progetti_incompleti": progetti_incompleti,
+        "hard_stops_top": hard_stops_top,
+        "timeline": timeline,
     })
 
 
