@@ -13,19 +13,30 @@
 
 ---
 
-## Current Status — 2026-03-20 (v0.8.4-dev)
+## Current Status — 2026-03-20 (v0.8.5-dev)
 
-**Phase:** v0.8.4-dev — Audit staging fix
-**Stato:** 21 bug risolti totali, 7 audit aperti. 29/29 smoke test.
+**Phase:** v0.8.5-dev — Audit staging completo
+**Stato:** 28 bug risolti totali, 0 aperti. Tutti i 13 bug dell'audit manuale fixati e deployati.
 
-[IN CORSO] 2026-03-20 — Audit manuale bandi.sansalia.com:
+[COMPLETATO] 2026-03-20 — Phase 4 audit (B-03, B-04, B-07, B-10, B-11, B-12, B-13):
+  - B-04: soggetti list da card a tabella con hard stop + bandi bloccati (query JOIN pe)
+  - B-07: rimosso slug interno dal tab Progetti soggetto
+  - B-10: score medio e bandi match aggiunti in lista progetti (AVG + COUNT FILTER)
+  - B-11: scoring rules pre-compilate con template 8 regole quando vuote
+  - B-12: fallback label settore per valori non in SETTORI list
+  - B-13: tab Analisi arricchito con Timeline (15 ultime valutazioni) e Note Strategiche
+  - B-03: dashboard completa con 5 blocchi aggiuntivi da spec §5.1 (candidature per stato, nuovi bandi, progetti incompleti, hard stop top, timeline attivita')
+  - Decisione: `_load_timeline()` helper riusato in dashboard e progetto detail
+  - Decisione: `SCORING_RULES_TEMPLATE` con 8 regole default, mostrato SOLO se scoring_rules vuote (non salva automaticamente)
+  - Deploy su staging completato (commit 0ce2f75, container bandi_ui ricreato)
+  - Prossimi passi: test manuale su bandi.sansalia.com, poi D10 (state machine) o nuove feature
+
+[COMPLETATO] 2026-03-20 — Phase 1-3 audit (A-01, B-01, B-02, B-05, B-08, B-09):
   - CRITICO: DB staging era vuoto (bandi, evaluations, pipeline_runs = 0). Dati esistevano SOLO nel DB locale.
   - Decisione: pg_dump locale + restore su staging (non rieseguire scraper — troppo lento)
   - Fix UI: 5 bug UI (tab active, stat card cliccabili, label raw, completezza spacing, vincoli calcolati)
   - Decisione: filtri Jinja2 per traduzione valori DB (forma_label, regime_label, settore_label) — estensibile
   - Decisione: vincoli calcolati aggregati da project_evaluations, mostrati SOPRA vincoli manuali (non sostituiti)
-  - 7 bug audit ancora aperti (B-03, B-04, B-07, B-10, B-11, B-12, B-13) — prossima sessione
-  - Prossimi passi: deploy fix su staging (git pull + rebuild), poi B-04 (lista soggetti tabella)
 
 ## Previous Status — 2026-03-20 (v0.8.3-dev)
 

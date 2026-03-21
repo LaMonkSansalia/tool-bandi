@@ -130,35 +130,48 @@
 - **Causa:** Mostrava solo vincoli manuali dal profilo JSONB, ignorava hard_stop_reason dalle project_evaluations
 - **Fix:** Nuova query _get_vincoli_calcolati() aggrega hard_stop_reason per soggetto, mostra vincoli calcolati sopra quelli manuali con conteggio bandi bloccati
 
-## Bug aperti (audit manuale)
-
-### BUG-AUDIT-B03: Dashboard incompleta — mancano 5 blocchi spec
+### BUG-FIXED-022: Dashboard incompleta — mancano 5 blocchi spec (B-03)
 - **Pagina:** Dashboard /
-- **Spec:** §5.1 richiede candidature per stato, nuovi bandi, progetti incompleti, hard stop impattanti, timeline
-- **Priorita':** Media
+- **Causa:** Dashboard aveva solo stat cards + scadenze imminenti. Spec §5.1 richiede 5 blocchi aggiuntivi.
+- **Fix:** Aggiunti: candidature per stato (badge cliccabili), ultimi bandi trovati, progetti incompleti (progress bar), hard stop piu' impattanti, timeline attivita'. Query aggregate in dashboard.py.
+- **Commit:** `0ce2f75`
 
-### BUG-AUDIT-B04: Lista soggetti — card anziché tabella
+### BUG-FIXED-023: Lista soggetti — card anziche' tabella (B-04)
 - **Pagina:** /soggetti
-- **Spec:** §5.2.1 richiede tabella con hard stop count, bandi bloccati, completezza
-- **Priorita':** Media
+- **Causa:** Vista a card senza metriche operative (hard stop, bandi bloccati)
+- **Fix:** Sostituite card con tabella: colonne Nome, Forma, Sede, Progetti, Hard Stop, Bandi Bloccati. Query JOIN project_evaluations per hard_stop_reason aggregato. Macro `soggetti_table` riusata per reali e simulazioni.
+- **Commit:** `0ce2f75`
 
-### BUG-AUDIT-B07: Slug interno visibile in tab Progetti
+### BUG-FIXED-024: Slug interno visibile in tab Progetti (B-07)
 - **Pagina:** /soggetti/{id} tab Progetti
-- **Priorita':** Bassa
+- **Causa:** `{{ p.slug }}` mostrato sotto il nome progetto
+- **Fix:** Rimossa riga slug dal partial soggetto_tab_progetti.html
+- **Commit:** `0ce2f75`
 
-### BUG-AUDIT-B10: Score medio e bandi match mancanti in lista progetti
+### BUG-FIXED-025: Score medio e bandi match mancanti (B-10)
 - **Pagina:** /progetti
-- **Spec:** §5.3.1 richiede score medio + bandi compatibili
-- **Priorita':** Media
+- **Causa:** Lista progetti mostrava solo completezza e candidature, nessuna metrica scoring
+- **Fix:** Aggiunte colonne Score medio (AVG score) e Match (COUNT idonei) nella lista. Query estesa con AVG/FILTER in progetti.py.
+- **Commit:** `0ce2f75`
 
-### BUG-AUDIT-B11: Scoring rules vuote (non pre-compilate)
-- **Pagina:** /progetti/{id} tab Profilo
-- **Priorita':** Media
+### BUG-FIXED-026: Scoring rules vuote non pre-compilate (B-11)
+- **Pagina:** /progetti/{id} tab Scoring
+- **Causa:** Textarea vuota `{}` senza guida per l'utente
+- **Fix:** Template di default con 8 regole (region_match, ateco_match, keyword_in_title, etc.) pre-compilato quando scoring_rules e' vuoto. Helper `_scoring_json_for_display()`.
+- **Commit:** `0ce2f75`
 
-### BUG-AUDIT-B12: PDS senza settore
+### BUG-FIXED-027: PDS senza settore visibile (B-12)
 - **Pagina:** /progetti
-- **Priorita':** Bassa
+- **Causa:** `settori_map.get(settore, "")` restituiva stringa vuota per settori non in lista SETTORI (es. `ict_freelancer`)
+- **Fix:** Fallback `settore.replace("_", " ").title()` coerente con filtro Jinja `settore_label`
+- **Commit:** `0ce2f75`
 
-### BUG-AUDIT-B13: Tab Analisi — sotto-sezioni spec mancanti
+### BUG-FIXED-028: Tab Analisi sotto-sezioni mancanti (B-13)
 - **Pagina:** /progetti/{id} tab Analisi
-- **Priorita':** Bassa
+- **Causa:** Mancavano timeline attivita' e note strategiche (spec §5.3.3)
+- **Fix:** Aggiunte 2 sezioni: Timeline (ultime 15 valutazioni con data/stato/score) e Note Strategiche (da profilo JSONB). Helper `_load_timeline()` in progetti.py.
+- **Commit:** `0ce2f75`
+
+## Bug aperti
+
+Nessuno.

@@ -1,6 +1,6 @@
 # Tool Bandi — CLAUDE.md
 
-**Versione:** 0.8.4-dev
+**Versione:** 0.8.5-dev
 **Repo:** github.com/LaMonkSansalia/tool-bandi
 **Stack:** FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind CSS — single-process Python, zero build frontend
 **Avvio:** `venv/bin/python -m uvicorn web.main:app --reload --port 8000`

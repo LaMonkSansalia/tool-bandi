@@ -1,6 +1,6 @@
 # Tool Bandi — Contesto & Status
 
-**Versione:** 0.8.4-dev
+**Versione:** 0.8.5-dev
 **Ultimo aggiornamento:** 2026-03-20
 **Repo:** GitHub — LaMonkSansalia/tool-bandi (rinominato da bandiresearcher il 2026-03-20)
 **Inizio progetto:** 2026-03-02
@@ -124,6 +124,27 @@ tool-bandi/
 ---
 
 ## Changelog Completo
+
+### v0.8.5-dev — Audit staging completo (2026-03-20)
+
+- [x] **B-04:** Soggetti list — card sostituite con tabella (Hard Stop, Bandi Bloccati, Progetti) — `0ce2f75`
+- [x] **B-07:** Slug interno rimosso dal tab Progetti soggetto — `0ce2f75`
+- [x] **B-10:** Score medio + bandi match aggiunti in lista progetti (AVG + COUNT FILTER) — `0ce2f75`
+- [x] **B-11:** Scoring rules pre-compilate con template 8 regole default — `0ce2f75`
+- [x] **B-12:** Settore PDS — fallback label per settori non in lista SETTORI — `0ce2f75`
+- [x] **B-13:** Tab Analisi — aggiunte sezioni Timeline attivita' e Note strategiche — `0ce2f75`
+- [x] **B-03:** Dashboard completa §5.1 — +5 blocchi (candidature per stato, nuovi bandi, progetti incompleti, hard stop top, timeline) — `0ce2f75`
+- [x] Deploy su staging: container bandi_ui ricreato con tutti i fix
+
+### v0.8.4-dev — Audit staging Phase 1-3 (2026-03-20)
+
+- [x] **A-01:** DB staging vuoto — pg_dump locale + restore (125 bandi, 250 evaluations, 6 pipeline_runs) — `8538174`
+- [x] **B-01:** Tab active non evidenziato — onclick handler su 3 pagine (soggetto, progetto, workspace) — `8538174`
+- [x] **B-02:** Stat card dashboard non cliccabili — href param nella macro stat_card — `8538174`
+- [x] **B-05:** Vincoli non calcolati dall'engine — aggregazione hard_stop_reason da evaluations — `8538174`
+- [x] **B-08:** Valori DB raw nelle label — filtri Jinja2 forma_label, regime_label, settore_label — `8538174`
+- [x] **B-09:** "Completezza50%" senza spazio — w-24 → w-32 — `8538174`
+- [x] Deploy su staging: container bandi_ui ricreato
 
 ### v0.1.0 — Sprint 0: Fondamenta (2026-03-02)
 
